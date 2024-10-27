@@ -4,13 +4,14 @@ from flask_login import login_user, login_required, logout_user, current_user
 import sys
 from . import socketio
 from .models import User
+from .map import mapSession
 
 main = Blueprint('socket', __name__)
 
 @main.route('/')
 def index():
     print('index', file=sys.stderr)
-    return render_template('index.html')
+    return render_template('index.html', map=mapSession.fromSVG('data/maps/Nederland.svg'))
 
 @main.route('/me')
 @login_required

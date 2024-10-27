@@ -10,5 +10,12 @@
 <body>
     <h1>Flask-SocketIO Example</h1>
     <div id="messages"></div>
+
+    {{map.questions}}
+    <svg>
+        {% for question in map.questions %}
+            {{ question.svg | safe }}
+        {% endfor %}
+    </svg>
 </body>
 </html>
