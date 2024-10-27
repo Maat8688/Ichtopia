@@ -1,0 +1,9 @@
+Flask
+Flask-SocketIO
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Login
+PyMySQL
+python-dotenv
+psycopg2-binary
+werkzeug
