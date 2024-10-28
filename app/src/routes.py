@@ -2,18 +2,16 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_socketio import SocketIO, send, emit
 from flask_login import login_user, login_required, logout_user, current_user
 import sys
-from . import socketio
+from . import sessionManager
 from .models import User
 from .map import mapSession
 
 main = Blueprint('socket', __name__)
 
-currentSession = None
 
 @main.route('/')
 def index():
     print('index', file=sys.stderr)
-    global currentSession
     currentSession = mapSession.fromSVG('data/maps/Nederland.svg')
     return render_template('index.html', map=currentSession)
 
@@ -44,6 +42,18 @@ def logout():
     logout_user()
     return redirect(url_for('main.login'))
 
+@main.route('/learn')
+def learn():
+    sessionToken = request.args.get('sessionToken')
+    if sessionToken == None:
+        newSession = mapSession.fromSVG('data/maps/Nederland.svg')
+        sessionID = sessionManager.createSession(newSession)
+        return redirect(url_for('socket.learn', sessionToken=sessionID))
+    else:
+        session = sessionManager.getSession(sessionToken)
+        return render_template('index.html', map=session)
+    
+
 @main.route('/host')
 def host():
     print('host', file=sys.stderr)
@@ -62,7 +72,7 @@ def setupSockets(socketio: SocketIO):
 
     @socketio.on('answerQuestion')
     def answerQuestion(data):
-        global currentSession
+        currentSession = sessionManager.getSession(data['sessionToken'])
         # emit('updateMap', {'questionId': data['questionId'], 'status': 'correct'})
         if currentSession.awnserQuestion(data['questionId'], True):
             emit('updateMap', {'questionId': data['questionId'], 'status': 'correct'})

@@ -4,6 +4,24 @@ import random
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
+from datetime import datetime
+
+class SessionManager():
+    def __init__(self):
+        self.sessions = {}
+    
+    def createSession(self, session:mapSession):
+        id = werkzeug.security.generate_password_hash(str(datetime.now()))
+        self.sessions[id] = session
+        return id
+    
+    def getSession(self, id:str):
+        print(self.sessions, file=sys.stderr)
+        print(id, file=sys.stderr)
+        return self.sessions[id]
+    
+    def deleteSession(self, id:str):
+        del self.sessions[id]
 
 class mapSession():
     def __init__(self, questions:list[mapQuestion], backgroundElements:list, viewBox:tuple=(0, 0, 1000, 1000)):
@@ -14,6 +32,7 @@ class mapSession():
         self.score = 0
         self.finished = False
         self.antiCheat = True
+        self.startTimestamp = datetime.now()
 
     def getViewBox(self):
         return ' '.join(map(str, self.viewBox))

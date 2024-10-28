@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 import os
+from .map import SessionManager
 
 app = Flask(
     __name__,
@@ -18,6 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 socketio = SocketIO(app)
 migrate = Migrate()
 login_manager = LoginManager(app)
+sessionManager = SessionManager()
 
 with app.app_context():
     from .routes import main, setupSockets

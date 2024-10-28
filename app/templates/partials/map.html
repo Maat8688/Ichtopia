@@ -52,6 +52,8 @@
 </script>
 
 <script>
+  urlParams = new URLSearchParams(window.location.search);
+
   // wait for the DOM to be loaded
   document.addEventListener("DOMContentLoaded", function(event) {
     // get the map element
@@ -64,7 +66,7 @@
       var question = questionElements[i];
       question.addEventListener('click', function(event) {
         var questionId = event.currentTarget.id;
-        socket.emit('answerQuestion', { questionId: questionId, hashed: true });
+        socket.emit('answerQuestion', { questionId: questionId, hashed: true, sessionToken: urlParams.get('sessionToken') });
       });
     }
     
