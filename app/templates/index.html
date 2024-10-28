@@ -11,11 +11,14 @@
     <h1>Flask-SocketIO Example</h1>
     <div id="messages"></div>
 
-    {{map.questions}}
-    <svg>
-        {% for question in map.questions %}
-            {{ question.svg | safe }}
-        {% endfor %}
-    </svg>
+
+    <h1>Click on <span>...</span></h1>
+    <script>
+        socket.on('question', function(data) {
+            var span = document.querySelector('span');
+            span.textContent = data.question;
+        });
+    </script>
+    {% include('partials/map.html') %}
 </body>
 </html>

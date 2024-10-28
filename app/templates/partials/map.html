@@ -1,7 +1,72 @@
-{{/*  Map wiget  */}}
 
-<div id="map" style="height: 100%;">
-    <svg>
-        
-    </svg>
-</div>
+<svg id="map" width="{{map.viewBox[2]}}" aspect-ratio="map.viewBox[2]/map.viewBox[3]" viewBox="{{map.getViewBox()}}" xmlns="http://www.w3.org/2000/svg">
+  <g id="questions">
+    {% for question in map.questions %}
+      <g Id="{{ map.hashAwnser(question.id) }}">
+        {{ question.svg | safe }}
+      </g>
+    {% endfor %}
+  </g>
+  <g id="background">
+    {% for background in map.backgroundElements %}
+      {{ background | safe }}
+    {% endfor %}
+  </g>
+</svg>
+
+<style>
+  #questions > g {
+    cursor: pointer;
+    fill: #fffbdb;
+    transition: all 0.25s ease-in-out;
+  }
+
+  #questions > g:hover{
+    filter: brightness(0.95);
+    z-index: 1;
+  }
+
+  #questions > g:active {
+    filter: brightness(0.9);
+  }
+
+  #questions > g.incorrect {
+    fill: #f3b7b7;
+  }
+
+  #questions > g.correct {
+    fill: #b7f3b7;
+  }
+
+  #questions > g.active {
+    fill: #b7b7f3;
+  }
+</style>
+
+<script>
+  socket.on('updateMap', function(data) {
+    var question = document.getElementById(data.questionId);
+    question.classList.remove('active');
+    question.classList.add(data.status);
+  });
+</script>
+
+<script>
+  // wait for the DOM to be loaded
+  document.addEventListener("DOMContentLoaded", function(event) {
+    // get the map element
+    var map = document.getElementById('map');
+    var questions = map.getElementById('questions');
+    var questionElements = questions.children;
+
+    // add event listeners to each question
+    for (var i = 0; i < questionElements.length; i++) {
+      var question = questionElements[i];
+      question.addEventListener('click', function(event) {
+        var questionId = event.currentTarget.id;
+        socket.emit('answerQuestion', { questionId: questionId, hashed: true });
+      });
+    }
+    
+  });
+</script>

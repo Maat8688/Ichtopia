@@ -8,10 +8,14 @@ from .map import mapSession
 
 main = Blueprint('socket', __name__)
 
+currentSession = None
+
 @main.route('/')
 def index():
     print('index', file=sys.stderr)
-    return render_template('index.html', map=mapSession.fromSVG('data/maps/Nederland.svg'))
+    global currentSession
+    currentSession = mapSession.fromSVG('data/maps/Nederland.svg')
+    return render_template('index.html', map=currentSession)
 
 @main.route('/me')
 @login_required
@@ -55,4 +59,18 @@ def setupSockets(socketio: SocketIO):
     def handle_message(data):
         print('received message: ' + data)
         send(f'You said: {data}')
-    
+
+    @socketio.on('answerQuestion')
+    def answerQuestion(data):
+        global currentSession
+        # emit('updateMap', {'questionId': data['questionId'], 'status': 'correct'})
+        if currentSession.awnserQuestion(data['questionId'], True):
+            emit('updateMap', {'questionId': data['questionId'], 'status': 'correct'})
+            if currentSession.nextQuestion():
+                # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
+                send(f"Finished with a score of {currentSession.score}/{currentSession.totalGuesses}")
+                return
+        else:
+            emit('updateMap', {'questionId': data['questionId'], 'status': 'incorrect'})
+
+        emit('question', {'question': currentSession.questions[currentSession.currentQuestion].id})
