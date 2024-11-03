@@ -4,16 +4,18 @@ from flask_login import login_user, login_required, logout_user, current_user
 import sys
 from . import sessionManager
 from .models import User
-from .map import mapSession
+from .map import mapSession, SessionGamemode, SessionManager
 
 main = Blueprint('socket', __name__)
 
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    print('index', file=sys.stderr)
-    currentSession = mapSession.fromSVG('data/maps/Nederland.svg')
-    return render_template('index.html', map=currentSession)
+    if request.method == 'POST':
+        newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
+        id = sessionManager.createSession(newSession)
+        return redirect(url_for('socket.learn', sessionToken=id))
+    return render_template('index.html')
 
 @main.route('/me')
 @login_required
@@ -51,7 +53,7 @@ def learn():
         return redirect(url_for('socket.learn', sessionToken=sessionID))
     else:
         session = sessionManager.getSession(sessionToken)
-        return render_template('index.html', map=session)
+        return render_template('learn.html', map=session)
     
 
 @main.route('/host')
@@ -71,16 +73,32 @@ def setupSockets(socketio: SocketIO):
         send(f'You said: {data}')
 
     @socketio.on('answerQuestion')
-    def answerQuestion(data):
-        currentSession = sessionManager.getSession(data['sessionToken'])
-        # emit('updateMap', {'questionId': data['questionId'], 'status': 'correct'})
-        if currentSession.awnserQuestion(data['questionId'], True):
-            emit('updateMap', {'questionId': data['questionId'], 'status': 'correct'})
-            if currentSession.nextQuestion():
+    def answerQuestion(data): # expects {'awnser': str, 'hashed': bool, 'sessionToken': str}
+        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        questionId = session.hash(session.currentQuestion.id) 
+
+        if session.awnserQuestion(data['awnser'], data['hashed']):
+            emit('updateMap', {'questionId': questionId, 'status': 'correct'})
+            if session.nextQuestion():
                 # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
-                send(f"Finished with a score of {currentSession.score}/{currentSession.totalGuesses}")
+                send(f"Finished with a score of {session.score}/{session.totalGuesses}")
                 return
         else:
-            emit('updateMap', {'questionId': data['questionId'], 'status': 'incorrect'})
+            emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
 
-        emit('question', {'question': currentSession.questions[currentSession.currentQuestion].id})
+        if session.sessionMode == SessionGamemode.MULTIPLECHOICE:
+            emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
+        elif session.sessionMode == SessionGamemode.FILLINTHEBLANK:
+            emit('question', {'question': session.currentQuestion.id, 'fillInTheBlank': True})
+        elif session.sessionMode == SessionGamemode.CLICKTHECOUNTRY:
+            emit('question', {'question': session.currentQuestion.id})
+
+    @socketio.on('getQuestion')
+    def getQuestion(data): # expects {'sessionToken': str}
+        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        if session.sessionMode == SessionGamemode.MULTIPLECHOICE:
+            emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
+        elif session.sessionMode == SessionGamemode.FILLINTHEBLANK:
+            emit('question', {'question': session.currentQuestion.id, 'fillInTheBlank': True})
+        elif session.sessionMode == SessionGamemode.CLICKTHECOUNTRY:
+            emit('question', {'question': session.currentQuestion.id})

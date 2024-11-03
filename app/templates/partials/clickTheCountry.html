@@ -1,0 +1,27 @@
+<h1>Click on <span>...</span></h1>
+<script>
+    socket.on('question', function(data) {
+        var span = document.querySelector('span');
+        span.textContent = data.question;
+    });
+</script>
+
+<script>
+    // wait for the DOM to be loaded
+    document.addEventListener("DOMContentLoaded", function(event) {
+      // get the map element
+      var map = document.getElementById('map');
+      var questions = map.getElementById('questions');
+      var questionElements = questions.children;
+  
+      // add event listeners to each question
+      for (var i = 0; i < questionElements.length; i++) {
+        var question = questionElements[i];
+        question.addEventListener('click', function(event) {
+          var questionId = event.currentTarget.id;
+          socket.emit('answerQuestion', { awnser: questionId, hashed: true, sessionToken: urlParams.get('sessionToken') });
+        });
+      }
+      
+    });
+</script>

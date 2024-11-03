@@ -1,38 +1,43 @@
 from __future__ import annotations
 import werkzeug.security
+import hashlib
 import random
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
 from datetime import datetime
 
+class SessionGamemode(Enum):
+    MULTIPLECHOICE = 1
+    FILLINTHEBLANK = 2
+    CLICKTHECOUNTRY = 3
+
 class SessionManager():
     def __init__(self):
         self.sessions = {}
     
-    def createSession(self, session:mapSession):
+    def createSession(self, session:mapSession) -> str:
         id = werkzeug.security.generate_password_hash(str(datetime.now()))
         self.sessions[id] = session
         return id
     
-    def getSession(self, id:str):
-        print(self.sessions, file=sys.stderr)
-        print(id, file=sys.stderr)
+    def getSession(self, id:str) -> mapSession:
         return self.sessions[id]
     
     def deleteSession(self, id:str):
         del self.sessions[id]
 
 class mapSession():
-    def __init__(self, questions:list[mapQuestion], backgroundElements:list, viewBox:tuple=(0, 0, 1000, 1000)):
+    def __init__(self, questions:list[mapQuestion], backgroundElements:list, viewBox:tuple=(0, 0, 1000, 1000), sessionMode:SessionGamemode=SessionGamemode.MULTIPLECHOICE):
         self.questions = questions
         self.backgroundElements = backgroundElements
         self.viewBox = viewBox
-        self.currentQuestion = 0
+        self.currentQuestionIndex = 0
         self.score = 0
         self.finished = False
         self.antiCheat = True
         self.startTimestamp = datetime.now()
+        self.sessionMode = sessionMode
 
     def getViewBox(self):
         return ' '.join(map(str, self.viewBox))
@@ -41,29 +46,46 @@ class mapSession():
     def totalGuesses(self):
         return sum([question.tries for question in self.questions])
     
-    def hashAwnser(self, awnser:str):
+    @property
+    def currentQuestion(self) -> mapQuestion:
+        return self.questions[self.currentQuestionIndex]
+    
+    @property
+    def mcAwnsers(self, length:int=4):
+        awnsers = []
+        awnsers.append(self.currentQuestion.allAnswers[0]) # add correct awnser
+        
+        # choose length - 1 random awnsers
+        while len(awnsers) < length:
+            awnser = random.choice(self.questions).allAnswers[0]
+            if awnser not in awnsers:
+                awnsers.append(awnser)
+            
+        random.shuffle(awnsers)
+        return awnsers
+
+
+    def hash(self, awnser:str):
         if self.antiCheat:
-            awnser = werkzeug.security.generate_password_hash(awnser)
+            awnser = hashlib.sha256(str(awnser).encode('utf-8')).hexdigest()
         return awnser
     
     def awnserQuestion(self, awnser:int, hashed:bool):
-        possibleAwnsers = self.questions[self.currentQuestion].answers + [self.questions[self.currentQuestion].id]
+        possibleAwnsers = self.currentQuestion.allAnswers
         
-        self.questions[self.currentQuestion].tries += 1
-
-        awnserCorrect = False
+        self.currentQuestion.tries += 1
 
         if hashed:
-            for possibleAwnser in possibleAwnsers:
-                if werkzeug.security.check_password_hash(awnser, possibleAwnser):
-                    awnserCorrect = True
+            possibleAwnsers = [self.hash(awnser) for awnser in possibleAwnsers]
         else:
-            if awnser in possibleAwnsers:
-                awnserCorrect = True
+            awnser = awnser.upper()
+            possibleAwnsers = [awnser.upper() for awnser in possibleAwnsers]
         
-        if awnserCorrect:
+        print(awnser, file=sys.stderr)
+        print(possibleAwnsers, file=sys.stderr)
+        if awnser in possibleAwnsers:
             self.score += 1
-            self.questions[self.currentQuestion].timesCorrect += 1
+            self.currentQuestion.timesCorrect += 1
             return True
         else:
             return False
@@ -76,10 +98,11 @@ class mapSession():
         if len(possibleQuestions) == 0:
             self.finished = True
             return True
-        self.currentQuestion = random.choice(possibleQuestions)
+        self.currentQuestionIndex = random.choice(possibleQuestions)
+        
 
     @staticmethod
-    def fromSVG(file:str):
+    def fromSVG(file:str, sessionMode:SessionGamemode|str=SessionGamemode.MULTIPLECHOICE, includeQuestions:list[str]=[]) -> mapSession:
         with open(file, 'r') as f:
             svg = f.read()
         
@@ -88,13 +111,16 @@ class mapSession():
         questions = []
         backgroundElements = []
         #loop trough all g in map
+        print(includeQuestions, file=sys.stderr)
         for g in mapElement.find_all('g'):
             if g.get('class') == None:
                 backgroundElements.append(str(g))
             elif "question" in g.get('class'):
+                if g.get('category') != None and g.get('category') not in includeQuestions:
+                    continue
                 answers = []
-                for text in g.find_all('text'):
-                    answers.append(text.get_text())
+                for awnser in g.find_all('awnser'):
+                    answers.append(awnser.get_text())
                 paths = g.find_all('path')
 
                 for path in paths:
@@ -102,7 +128,7 @@ class mapSession():
 
                 id = g.get('id')
 
-                questions.append(mapQuestion(id, answers, str(paths)))
+                questions.append(mapQuestion(id, answers, str(paths), g.get('category')))
             else:
                 backgroundElements.append(str(g))
 
@@ -113,12 +139,24 @@ class mapSession():
         else:
             viewBox = (0, 0, 1000, 1000)
 
-        return mapSession(questions, backgroundElements, viewBox)
+        if sessionMode == 'multipleChoice':
+            sessionMode = SessionGamemode.MULTIPLECHOICE
+        elif sessionMode == 'fillInTheBlank':
+            sessionMode = SessionGamemode.FILLINTHEBLANK
+        elif sessionMode == 'clickTheCountry':
+            sessionMode = SessionGamemode.CLICKTHECOUNTRY
+
+        return mapSession(questions, backgroundElements, viewBox, sessionMode)
     
 class mapQuestion():
-    def __init__(self, id:str, answers:list, svg:str):
+    def __init__(self, id:str, answers:list, svg:str, category:str=None):
         self.id = id
         self.answers = answers
         self.svg = svg
         self.tries = 0
         self.timesCorrect = 0
+        self.category = category
+
+    @property
+    def allAnswers(self):
+        return self.answers + [self.id]

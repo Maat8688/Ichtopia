@@ -1,0 +1,80 @@
+
+main {
+    margin: 0 5%;
+    width: 90%;
+    margin-bottom: 10%;
+}
+
+main > img {
+  width: 10%;
+  margin: 0 45%;
+}
+
+#kaarten {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    grid-gap: 15px;
+    width: 100%;
+}
+
+.kaart {
+    background-color: #f6f7ec;
+    border-radius: 10px;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #422800;
+    border-radius: 30px;
+    box-shadow: #422800 4px 4px 0 0;
+    color: #422800;
+    padding: 10px 10px;
+    padding-top: 5px;
+}
+
+.kaart > img {
+    width: 75%;
+    height: auto;
+    margin: 7%;
+    border: 0;
+
+    border: 2px solid #422800;
+    border-radius: 10px;
+    margin-bottom: 3%;
+    filter: contrast(0.8), brightness(1.2), saturate(1.4);
+}
+
+button {
+  background-color: #fbeee0;
+  border: 2px solid #422800;
+  border-radius: 30px;
+  box-shadow: #422800 4px 4px 0 0;
+  color: #422800;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 2px 18px;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  margin: 0 10%;
+}
+
+button:hover {
+  background-color: #fff;
+}
+
+button:active {
+  box-shadow: #422800 2px 2px 0 0;
+  transform: translate(2px, 2px);
+}
+
+@media (min-width: 768px) {
+  .kaart > button {
+    min-width: 120px;
+    padding: 2px 25px;
+  }
+}

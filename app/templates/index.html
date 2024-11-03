@@ -1,24 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask-SocketIO Example</title>
+    <title>Topo IchthusLyceum</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}">
 </head>
 <body>
-    <h1>Flask-SocketIO Example</h1>
-    <div id="messages"></div>
+    <header>
+        <p>Ga leren</p>
+    </header>
+    <main>
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" >
+        <h1 id="Title">Ichtopia</h1>
+        <hr>
+        <p id="SubTitle">Topo leren op het Ichthus Lyceum</p>
 
+        <div id="kaarten">
+            <div class="kaart">
+                <img src="{{ url_for('static', filename='img/Nederland.svg') }}" alt="Nederland">
+                <button id="Nederland">Nederland</button>
+            </div>
+            <div class="kaart">
+                <img src="{{ url_for('static', filename='img/Nederland.svg') }}" alt="Nederland">
+                <button id="Nederland">Nederland1</button>
+            </div>
+            <div class="kaart">
+                <img src="{{ url_for('static', filename='img/Nederland.svg') }}" alt="Nederland">
+                <button id="Nederland">Nederland2</button>
+            </div>
+            <div class="kaart">
+                <img src="{{ url_for('static', filename='img/Nederland.svg') }}" alt="Nederland">
+                <button id="Nederland">Nederland3</button>
+            </div>
+            <div class="kaart">
+                <img src="{{ url_for('static', filename='img/Nederland.svg') }}" alt="Nederland">
+                <button id="Nederland">Nederland4</button>
+            </div>
+            <div class="kaart">
+                <img src="{{ url_for('static', filename='img/Nederland.svg') }}" alt="Nederland">
+                <button id="Nederland">Nederland5</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2024 Ichthus Lyceum | Floris Joël Luuk Liam Sami</p>
+    </footer>
 
-    <h1>Click on <span>...</span></h1>
     <script>
-        socket.on('question', function(data) {
-            var span = document.querySelector('span');
-            span.textContent = data.question;
-        });
+        function validateForm() {
+            const checkboxes = document.querySelectorAll('input[name="questions"]:checked');
+            if (checkboxes.length === 0) {
+                alert("Please select at least one question type.");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
     </script>
-    {% include('partials/map.html') %}
+
+    <div class="overlay">
+        <div class="popup">
+            <h2 id="KaartTitel">Nederland</h2>
+            <form method="POST" onsubmit="return validateForm()">
+                <input id="Kaart" type="hidden" name="kaart" value="Nederland">
+                
+                <div id="typeSelect">
+                    <input type="radio" id="Singleplayer" name="type" value="Singleplayer">
+                    <label for="Singleplayer">Singleplayer</label>
+                    <input type="radio" id="Multiplayer" name="type" value="Multiplayer" disabled title="Comming soon"> 
+                    <label for="Multiplayer" title="Comming soon">Multiplayer</label>
+                </div>
+                <div id="ModeSelect">
+                    <input type="radio" id="MultipleChoise" name="mode" value="multipleChoice">
+                    <label for="MultipleChoise">Multiple Choise</label>
+                    <input type="radio" id="FillInTheBlank" name="mode" value="fillInTheBlank">
+                    <label for="FillInTheBlank">Fill in the blank</label>
+                    <input type="radio" id="ClickTheCountry" name="mode" value="clickTheCountry">
+                    <label for="ClickTheCountry">Click the country</label>
+                </div>
+                <div id="questionsSelect">
+                    <input type="checkbox" name="questions" value="Steden">
+                    <label for="Steden">Steden</label>
+                    <input type="checkbox" name="questions" value="Provincies">
+                    <label for="Provincies">Provincies</label>
+                    <input type="checkbox" name="questions" value="Wateren">
+                    <label for="Wateren">Wateren</label>
+                    <input type="checkbox" name="questions" value="Gebieden">
+                    <label for="Gebieden">Gebieden</label>
+                </div>
+                <hr>
+                <button type="submit">Start</button>
+            </form>
+
+        </div>
+    </div>
 </body>
+
+<script>
+    const overlay = document.querySelector('.overlay');
+    const kaarten = document.querySelectorAll('.kaart');
+    const popup = document.querySelector('.popup');
+    const kaartInput = document.querySelector('#Kaart');
+    const KaartTitel = document.querySelector('#KaartTitel');
+
+    kaarten.forEach(kaart => {
+        kaart.addEventListener('click', () => {
+            overlay.classList.add('show');
+            kaartInput.value = kaart.querySelector('button').textContent;
+            KaartTitel.textContent = kaart.querySelector('button').textContent;
+        });
+    });
+
+    overlay.addEventListener('click', () => {
+        overlay.classList.remove('show');
+    });
+
+    popup.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+</script>
+
 </html>
