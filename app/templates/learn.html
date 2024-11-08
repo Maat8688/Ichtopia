@@ -10,8 +10,15 @@
 <body>
     <h1>Flask-SocketIO Example</h1>
     <div id="messages"></div>
-
-    {% include('partials/multipleChoise.html') %}
+    {% if map.sessionMode == 1 %}
+        {% include('partials/multipleChoise.html') %}
+    {% endif %}
+    {% if map.sessionMode == 2 %}
+        {% include('partials/shortAnswer.html') %}
+    {% endif %}
+    {% if map.sessionMode == 3 %}
+        {% include('partials/clickTheCountry.html') %}
+    {% endif %}
     {% include('partials/map.html') %}
 </body>
 </html>

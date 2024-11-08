@@ -1,5 +1,10 @@
 
 <svg id="map" width="{{map.viewBox[2]}}" aspect-ratio="map.viewBox[2]/map.viewBox[3]" viewBox="{{map.getViewBox()}}" xmlns="http://www.w3.org/2000/svg">
+  <g id="background">
+    {% for background in map.backgroundElements %}
+      {{ background | safe }}
+    {% endfor %}
+  </g>
   <g id="questions">
     {% for question in map.questions %}
       <g Id="{{ map.hash(question.id) }}" class="{{ question.category }}">
@@ -7,9 +12,9 @@
       </g>
     {% endfor %}
   </g>
-  <g id="background">
-    {% for background in map.backgroundElements %}
-      {{ background | safe }}
+  <g id="foreground">
+    {% for foreground in map.foregroundElements %}
+      {{ foreground | safe }}
     {% endfor %}
   </g>
 </svg>
@@ -27,9 +32,19 @@
     transition: all 0.25s ease-in-out;
   }
 
+  #questions > g.Gebieden {
+    cursor: pointer;
+    fill: #b3a86423;
+    transition: all 0.25s ease-in-out;
+  }
+
   #questions > g:hover{
     filter: brightness(0.95);
     z-index: 1;
+  }
+  
+  #questions > g.Gebieden:hover {
+    fill: #00000023;
   }
 
   #questions > g:active {
@@ -44,12 +59,20 @@
     fill: #b37b7b;
   }
 
+  #questions > g.Gebieden.correct {
+    fill: #e0a4a4;
+  }
+
   #questions > g.correct {
     fill: #b7f3b7;
   }
 
   #questions > g.Steden.correct {
     fill: #6ca56c;
+  }
+
+  #questions > g.Gebieden.correct {
+    fill: #94d39480;
   }
 
   #questions > g.active {

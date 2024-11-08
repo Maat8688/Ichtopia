@@ -28,9 +28,10 @@ class SessionManager():
         del self.sessions[id]
 
 class mapSession():
-    def __init__(self, questions:list[mapQuestion], backgroundElements:list, viewBox:tuple=(0, 0, 1000, 1000), sessionMode:SessionGamemode=SessionGamemode.MULTIPLECHOICE):
+    def __init__(self, questions:list[mapQuestion], backgroundElements:list, foregroundElements:list, viewBox:tuple=(0, 0, 1000, 1000), sessionMode:SessionGamemode=SessionGamemode.MULTIPLECHOICE):
         self.questions = questions
         self.backgroundElements = backgroundElements
+        self.foregroundElements = foregroundElements
         self.viewBox = viewBox
         self.currentQuestionIndex = 0
         self.score = 0
@@ -110,6 +111,7 @@ class mapSession():
         mapElement = data.find('g', id='map')
         questions = []
         backgroundElements = []
+        foregroundElements = []
         #loop trough all g in map
         print(includeQuestions, file=sys.stderr)
         for g in mapElement.find_all('g'):
@@ -129,7 +131,9 @@ class mapSession():
                 id = g.get('id')
 
                 questions.append(mapQuestion(id, answers, str(paths), g.get('category')))
-            else:
+            elif "foreground" in g.get('class'):
+                foregroundElements.append(str(g))
+            elif "background" in g.get('class'):
                 backgroundElements.append(str(g))
 
         svgElement = data.find('svg')
@@ -146,7 +150,7 @@ class mapSession():
         elif sessionMode == 'clickTheCountry':
             sessionMode = SessionGamemode.CLICKTHECOUNTRY
 
-        return mapSession(questions, backgroundElements, viewBox, sessionMode)
+        return mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
     
 class mapQuestion():
     def __init__(self, id:str, answers:list, svg:str, category:str=None):
