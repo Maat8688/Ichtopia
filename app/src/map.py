@@ -39,6 +39,7 @@ class mapSession():
         self.antiCheat = True
         self.startTimestamp = datetime.now()
         self.sessionMode = sessionMode
+        self.correctThreshold = 0.5
 
     def getViewBox(self):
         return ' '.join(map(str, self.viewBox))
@@ -64,6 +65,29 @@ class mapSession():
             
         random.shuffle(awnsers)
         return awnsers
+    
+    def getMapState(self):
+        mapstate = {}
+
+        for question in self.questions:
+            mapElementId = self.hash(question.id) if self.antiCheat else question.id
+            
+            mapstate[mapElementId] = self.getQuestionState(question)
+
+        return mapstate
+    
+    def getQuestionState(self, question):
+        if question.tries == 0 or (question.timesCorrect / question.tries) == self.correctThreshold:
+            state = "Normal"
+        elif (question.timesCorrect / question.tries) > self.correctThreshold:
+            state = "Correct"
+        elif (question.timesCorrect / question.tries) < self.correctThreshold:
+            state = "Incorrect"
+
+        return state
+
+    def getProgresBar(self):
+        pass
 
 
     def hash(self, awnser:str):
@@ -144,11 +168,11 @@ class mapSession():
             viewBox = (0, 0, 1000, 1000)
 
         if sessionMode == 'multipleChoice':
-            sessionMode = SessionGamemode.MULTIPLECHOICE
+            sessionMode = 1 #SessionGamemode.MULTIPLECHOICE
         elif sessionMode == 'fillInTheBlank':
-            sessionMode = SessionGamemode.FILLINTHEBLANK
+            sessionMode = 2 #SessionGamemode.FILLINTHEBLANK
         elif sessionMode == 'clickTheCountry':
-            sessionMode = SessionGamemode.CLICKTHECOUNTRY
+            sessionMode = 3 #SessionGamemode.CLICKTHECOUNTRY
 
         return mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
     

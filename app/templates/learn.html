@@ -10,6 +10,7 @@
 <body>
     <h1>Flask-SocketIO Example</h1>
     <div id="messages"></div>
+    {{ map.sessionMode }}
     {% if map.sessionMode == 1 %}
         {% include('partials/multipleChoise.html') %}
     {% endif %}

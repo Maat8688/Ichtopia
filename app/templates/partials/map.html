@@ -7,7 +7,7 @@
   </g>
   <g id="questions">
     {% for question in map.questions %}
-      <g Id="{{ map.hash(question.id) }}" class="{{ question.category }}">
+      <g Id="{{ map.hash(question.id) }}" class="{{ question.category }}" state="{{ map.getQuestionState(question) }}">
         {{ question.svg | safe }}
       </g>
     {% endfor %}
@@ -38,41 +38,54 @@
     transition: all 0.25s ease-in-out;
   }
 
-  #questions > g:hover{
-    filter: brightness(0.95);
+  #questions > g:hover:not(.active)[state="Normal"] {
+    filter: brightness(0.9);
     z-index: 1;
   }
   
-  #questions > g.Gebieden:hover {
+  #questions > g.Gebieden:hover:not(.active)[state="Normal"] {
     fill: #00000023;
+    stroke-width: 2px;
+    stroke:#421b1b;
   }
 
   #questions > g:active {
-    filter: brightness(0.9);
+    filter: brightness(0.85);
   }
 
-  #questions > g.incorrect {
+  #questions > g.Gebieden:active {
+    stroke-width: 2px;
+    stroke:#421b1b;
+  }
+
+  #questions > g[state="Incorrect"] {
     fill: #f3b7b7;
   }
 
-  #questions > g.Steden.incorrect {
+  #questions > g.Steden[state="Incorrect"] {
     fill: #b37b7b;
   }
 
-  #questions > g.Gebieden.correct {
+  #questions > g.Gebieden[state="Correct"] {
     fill: #e0a4a4;
   }
 
-  #questions > g.correct {
+  #questions > g[state="Correct"] {
     fill: #b7f3b7;
   }
 
-  #questions > g.Steden.correct {
+  #questions > g.Steden[state="Correct"] {
     fill: #6ca56c;
   }
 
-  #questions > g.Gebieden.correct {
+  #questions > g.Gebieden[state="Correct"] {
     fill: #94d39480;
+  }
+
+  @keyframes upDown {
+    0% { transform: translateY(0);}
+    50% { transform: translateY(-4px); } /* Move up */
+    100% { transform: translateY(0); } /* Return to starting position */
   }
 
   #questions > g.active {
@@ -80,7 +93,9 @@
   }
 
   #questions > g.Steden.active {
-    fill: #7878b1;
+    fill: #c848ff;
+    animation: upDown 2s ease-in-out infinite;
+    box-shadow: 0px 20px 15px rgba(0, 0, 0, 0.3); 
   }
 </style>
 
@@ -95,5 +110,12 @@
 
   socket.on('connect', function(data) {
     socket.emit('getQuestion', {'sessionToken': urlParams.get('sessionToken')});
+  });
+
+  socket.on('setMapState', function(data) { // Data is a dict {questionID: State}
+    for (const [questionId, state] of Object.entries(data)) {
+    var question = document.getElementById(questionId);
+    question.setAttribute('state', state);
+  }
   });
 </script>

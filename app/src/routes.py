@@ -78,27 +78,29 @@ def setupSockets(socketio: SocketIO):
         questionId = session.hash(session.currentQuestion.id) 
 
         if session.awnserQuestion(data['awnser'], data['hashed']):
-            emit('updateMap', {'questionId': questionId, 'status': 'correct'})
+            # emit('updateMap', {'questionId': questionId, 'status': 'correct'})
+            emit('setMapState', session.getMapState())
             if session.nextQuestion():
                 # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
                 send(f"Finished with a score of {session.score}/{session.totalGuesses}")
                 return
         else:
-            emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
+            # emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
+            emit('setMapState', session.getMapState())
 
-        if session.sessionMode == SessionGamemode.MULTIPLECHOICE:
+        if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
-        elif session.sessionMode == SessionGamemode.FILLINTHEBLANK:
+        elif session.sessionMode == 2:
             emit('question', {'question': session.currentQuestion.id, 'fillInTheBlank': True})
-        elif session.sessionMode == SessionGamemode.CLICKTHECOUNTRY:
+        elif session.sessionMode == 3:
             emit('question', {'question': session.currentQuestion.id})
 
     @socketio.on('getQuestion')
     def getQuestion(data): # expects {'sessionToken': str}
         session:mapSession = sessionManager.getSession(data['sessionToken'])
-        if session.sessionMode == SessionGamemode.MULTIPLECHOICE:
+        if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
-        elif session.sessionMode == SessionGamemode.FILLINTHEBLANK:
+        elif session.sessionMode == 2:
             emit('question', {'question': session.currentQuestion.id, 'fillInTheBlank': True})
-        elif session.sessionMode == SessionGamemode.CLICKTHECOUNTRY:
+        elif session.sessionMode == 3:
             emit('question', {'question': session.currentQuestion.id})
