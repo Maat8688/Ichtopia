@@ -87,7 +87,22 @@ class mapSession():
         return state
 
     def getProgresBar(self):
-        pass
+        totalCorrect = 0
+        totalTried = 0
+        for question in self.questions:
+            if self.getQuestionState(question) == "Correct":
+                totalCorrect += 1
+            if question.tries > 0:
+                totalTried += 1
+        
+        totalIncorrect = totalTried - totalCorrect
+
+        return {
+            "totalTried": totalTried,
+            "totalCorrect": totalCorrect,
+            "totalIncorrect": totalIncorrect,
+            "totalQuestions": len(self.questions)
+        }
 
 
     def hash(self, awnser:str):

@@ -38,12 +38,12 @@
     transition: all 0.25s ease-in-out;
   }
 
-  #questions > g:hover:not(.active)[state="Normal"] {
+  #questions > g:hover:not(.active):not([state="Correct"]) {
     filter: brightness(0.9);
     z-index: 1;
   }
   
-  #questions > g.Gebieden:hover:not(.active)[state="Normal"] {
+  #questions > g.Gebieden:hover:not(.active):not([state="Correct"]) {
     fill: #00000023;
     stroke-width: 2px;
     stroke:#421b1b;
@@ -97,6 +97,12 @@
     animation: upDown 2s ease-in-out infinite;
     box-shadow: 0px 20px 15px rgba(0, 0, 0, 0.3); 
   }
+
+  #questions > g.Gebieden.active {
+    fill: #c848ff;
+    stroke-width: 2px;
+    stroke:#421b1b;
+  }
 </style>
 
 <script>
@@ -110,6 +116,7 @@
 
   socket.on('connect', function(data) {
     socket.emit('getQuestion', {'sessionToken': urlParams.get('sessionToken')});
+    socket.emit('getProgressbar', {'sessionToken': urlParams.get('sessionToken')})
   });
 
   socket.on('setMapState', function(data) { // Data is a dict {questionID: State}

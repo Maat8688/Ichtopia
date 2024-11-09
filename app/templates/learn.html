@@ -16,6 +16,14 @@
             <div id="questionsCorrect"></div>
             <div id="questionsIncorrect"></div>
         </div>
+        <script>
+            socket.on("setProgressBar", function(data) {
+                var greenBar = document.getElementById("questionsCorrect");
+                var redBar = document.getElementById("questionsIncorrect")
+                greenBar.style.width = `${data['totalCorrect'] * (100 / data['totalQuestions'])}%`
+                redBar.style.width = `${data['totalIncorrect'] * (100 / data['totalQuestions'])}%`
+            });
+        </script>
     </div>
     <div id="mapContainer">
         {% include('partials/map.html') %}
@@ -31,5 +39,36 @@
             {% include('partials/clickTheCountry.html') %}
         {% endif %}
     </div>
+
+    <div id="finishedOverlay" class="overlay">
+        <div class="popup">
+            <h2>Finished</h2>
+            <p>Total questions: <span id="T-Questions">?</span></p>
+            <p>Total tries: <span id="T-Tries">?</span></p>
+            <p>Correct tries: <span id="T-Correct">?</span></p>
+            <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
+
+            <div id="QuestionBreakdown">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        socket.on('finished', function(data) {
+            var overlay = document.getElementById("finishedOverlay")
+            overlay.classList.add('show');
+
+            var questionsSpan = document.getElementById("T-Questions");
+            var triesSpan = document.getElementById('T-Tries');
+            var correctSpan = document.getElementById('T-Correct');
+            var incorrectSpan = document.getElementById('T-Incorrect');
+        
+            questionsSpan.textContent = data["Overvieuw"]["totalQuestions"]
+            triesSpan.textContent = data["Overvieuw"]["totalTried"]
+            correctSpan.textContent = data["Overvieuw"]["totalCorrect"]
+            incorrectSpan.textContent = data["Overvieuw"]["totalIncorrect"]
+        });
+    </script>
 </body>
 </html>

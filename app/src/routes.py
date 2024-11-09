@@ -6,7 +6,7 @@ from . import sessionManager
 from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
 
-main = Blueprint('socket', __name__)
+main = Blueprint('main', __name__)
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -14,7 +14,7 @@ def index():
     if request.method == 'POST':
         newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
         id = sessionManager.createSession(newSession)
-        return redirect(url_for('socket.learn', sessionToken=id))
+        return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
 
 @main.route('/me')
@@ -47,13 +47,11 @@ def logout():
 @main.route('/learn')
 def learn():
     sessionToken = request.args.get('sessionToken')
-    if sessionToken == None:
-        newSession = mapSession.fromSVG('data/maps/Nederland.svg')
-        sessionID = sessionManager.createSession(newSession)
-        return redirect(url_for('socket.learn', sessionToken=sessionID))
-    else:
+    if sessionToken in sessionManager.sessions.keys():
         session = sessionManager.getSession(sessionToken)
         return render_template('learn.html', map=session)
+    else:
+        return redirect(url_for('main.index'))
     
 
 @main.route('/host')
@@ -84,9 +82,12 @@ def setupSockets(socketio: SocketIO):
             # emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
             emit('setMapState', session.getMapState())
 
+        emit('setProgressBar', session.getProgresBar())
+
         if session.nextQuestion():
             # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
             send(f"Finished with a score of {session.score}/{session.totalGuesses}")
+            emit('finished', {"Overvieuw": session.getProgresBar()})
             return
 
         if session.sessionMode == 1:
@@ -105,3 +106,8 @@ def setupSockets(socketio: SocketIO):
             emit('question', {'question': session.currentQuestion.id, 'fillInTheBlank': True})
         elif session.sessionMode == 3:
             emit('question', {'question': session.currentQuestion.id})
+
+    @socketio.on('getProgressbar')
+    def getProgressbar(data):
+        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        emit('setProgressBar', session.getProgresBar())

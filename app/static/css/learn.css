@@ -95,12 +95,24 @@ body {
     display: flex;
 }
 
+#progressBar > #bar {
+    width: 90vw;
+    display: flex;
+    background-color: #F0F0F1;
+}
+
 #questionsCorrect {
     background-color: #00FF00;
-    width: 5%;
+    height: 100%;
+    transition: width 0.5s ease;
 }
 
 #questionsIncorrect {
     background-color: #FF0000;
-    width: 10%;
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+#QuestionBreakdown {
+    overflow: scroll;
 }
