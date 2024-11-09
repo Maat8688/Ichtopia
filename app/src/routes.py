@@ -80,13 +80,14 @@ def setupSockets(socketio: SocketIO):
         if session.awnserQuestion(data['awnser'], data['hashed']):
             # emit('updateMap', {'questionId': questionId, 'status': 'correct'})
             emit('setMapState', session.getMapState())
-            if session.nextQuestion():
-                # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
-                send(f"Finished with a score of {session.score}/{session.totalGuesses}")
-                return
         else:
             # emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
             emit('setMapState', session.getMapState())
+
+        if session.nextQuestion():
+            # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
+            send(f"Finished with a score of {session.score}/{session.totalGuesses}")
+            return
 
         if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})

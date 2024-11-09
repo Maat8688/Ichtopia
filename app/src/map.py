@@ -118,7 +118,7 @@ class mapSession():
     def nextQuestion(self):
         possibleQuestions = []
         for i, question in enumerate(self.questions):
-            if question.timesCorrect == 0:
+            if self.getQuestionState(question) != "Correct":
                 possibleQuestions.append(i)
         if len(possibleQuestions) == 0:
             self.finished = True

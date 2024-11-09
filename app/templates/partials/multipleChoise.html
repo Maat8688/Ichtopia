@@ -5,11 +5,18 @@
 
 <script>
     socket.on('question', function(data) {
-        console.log(data);
         var multipleChoise = document.getElementById('multipleChoise');
         var mapElement = document.getElementById(data.question);
         var possibleAnswers = data.mcAwnsers;
         var question = data.question;
+
+        // Remove the active element from all mapelements
+        var questionsElement = document.getElementById("questions");
+        var questionElements = questionsElement.getElementsByTagName('g');
+        console.log(questionElements);
+        Array.from(questionElements).forEach(function(element) {
+            element.classList.remove('active');
+        });
 
         if (mapElement) {
             mapElement.classList.add('active');
