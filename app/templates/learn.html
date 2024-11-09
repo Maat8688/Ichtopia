@@ -6,20 +6,26 @@
     <title>Flask-SocketIO Example</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/learn.css') }}">
 </head>
 <body>
-    <h1>Flask-SocketIO Example</h1>
-    <div id="messages"></div>
-    {{ map.sessionMode }}
-    {% if map.sessionMode == 1 %}
-        {% include('partials/multipleChoise.html') %}
-    {% endif %}
-    {% if map.sessionMode == 2 %}
-        {% include('partials/shortAnswer.html') %}
-    {% endif %}
-    {% if map.sessionMode == 3 %}
-        {% include('partials/clickTheCountry.html') %}
-    {% endif %}
-    {% include('partials/map.html') %}
+    <div id="progressBar">
+        <div id="messages"></div>
+    </div>
+    <div id="mapContainer">
+        {% include('partials/map.html') %}
+    </div>
+    <div id="gamemodeContainer">
+        {% if map.sessionMode == 1 %}
+            {% include('partials/multipleChoise.html') %}
+        {% endif %}
+        {% if map.sessionMode == 2 %}
+            {% include('partials/shortAnswer.html') %}
+        {% endif %}
+        {% if map.sessionMode == 3 %}
+            {% include('partials/clickTheCountry.html') %}
+        {% endif %}
+    </div>
 </body>
 </html>
