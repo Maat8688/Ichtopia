@@ -79,7 +79,6 @@ body {
   transform: translateY(0);
 }
 
-
 #mapContainer {
     padding: 2%;
     width: 96%;
@@ -90,4 +89,18 @@ body {
 
 #mapContainer > svg {
     height: 100%;
+}
+
+#progressBar {
+    display: flex;
+}
+
+#questionsCorrect {
+    background-color: #00FF00;
+    width: 5%;
+}
+
+#questionsIncorrect {
+    background-color: #FF0000;
+    width: 10%;
 }
