@@ -25,7 +25,6 @@
       <img
         id="logo_loading"
         src="{{ url_for('static', filename='img/logo.png') }}"
-        
       />
       <p>Loading...</p>
     </div>
@@ -320,10 +319,11 @@
     const KaartTitel = document.querySelector("#KaartTitel");
     const loadingScreen = document.querySelector(".loadingScreen");
     const logo = document.querySelector("#logo");
+
     window.addEventListener("load", function () {
-      const loadingScreen = document.querySelector(".loadingScreen");
       loadingScreen.style.display = "none";
     });
+
     kaarten.forEach((kaart) => {
       kaart.addEventListener("click", () => {
         overlay.classList.add("show");
