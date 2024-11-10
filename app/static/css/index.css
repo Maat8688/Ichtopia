@@ -90,7 +90,7 @@ button:active {
 
 /* Overlay */
 .overlay {
-  background: rgba(0, 0, 0, 0.6); /* Darker overlay for focus */
+  background: rgba(0, 0, 0, 0.7); /* Darker, more focused overlay */
   position: fixed;
   top: 0;
   left: 0;
@@ -100,7 +100,8 @@ button:active {
   display: none;
   justify-content: center;
   align-items: center;
-  transition: opacity 0.3s ease;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
 
 /* Show overlay */
@@ -112,60 +113,106 @@ button:active {
 /* Popup box */
 .popup {
   background-color: #ffffff;
-  border-radius: 15px; /* Rounded corners for a softer look */
+  border-radius: 20px; /* Slightly softer corners */
   text-align: center;
   border: 3px solid #422800;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
-  padding: 25px 35px;
-  max-width: 500px; /* Maximum width of popup */
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3); /* Deeper shadow for more depth */
+  padding: 30px 40px;
+  max-width: 600px; /* Increased width */
   width: 90%;
-  transition: transform 0.3s ease-in-out; /* Smooth animation */
+  transform: scale(0.9);
+  opacity: 0;
+  animation: popupIn 0.5s forwards; /* Animation when popup appears */
+}
+
+/* Title animation */
+@keyframes popupIn {
+  0% {
+      transform: scale(0.9);
+      opacity: 0;
+  }
+  100% {
+      transform: scale(1);
+      opacity: 1;
+  }
 }
 
 /* Popup title */
 .popup h2 {
-  margin-bottom: 15px;
-  font-size: 1.8em;
+  margin-bottom: 20px;
+  font-size: 2em;
   color: #422800;
   font-weight: bold;
-  text-transform: uppercase; /* To give a bold and professional feel */
-  letter-spacing: 1px; /* Space between letters */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
 }
 
-/* Form input elements */
-.popup form input[type="radio"], .popup form input[type="checkbox"] {
-  margin: 10px 0;
-  width: auto;
+/* Title icon */
+.popup h2::before {
+  content: url('https://img.icons8.com/ios-filled/50/000000/map.png'); /* Icon before title */
+  position: absolute;
+  left: -35px;
+  top: -2px;
+  font-size: 1.5em;
 }
 
-/* Improve form layout */
+/* Form styling */
 .popup form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  align-items: flex-start; /* Align inputs to the left */
+  gap: 20px;
+  align-items: flex-start;
 }
 
-/* Submit button styling */
+/* Radio and checkbox inputs */
+.popup form input[type="radio"], .popup form input[type="checkbox"] {
+  margin: 10px 0;
+  width: auto;
+  transition: transform 0.2s ease-in-out;
+}
+
+.popup form input[type="radio"]:hover, .popup form input[type="checkbox"]:hover {
+  transform: scale(1.1); /* Slight scaling effect on hover */
+}
+
+/* Button styling */
 .popup form button {
   background-color: #136d15;
   color: #ffffff;
   border: none;
   padding: 12px 30px;
-  font-size: 1.1em;
+  font-size: 1.2em;
   font-weight: bold;
   border-radius: 30px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+  margin-top: 20px;
 }
 
-/* Hover and active button states */
 .popup form button:hover {
   background-color: #117c13;
+  transform: scale(1.05); /* Slight scale-up on hover */
 }
 
 .popup form button:active {
   background-color: #0d5b0a;
+  transform: scale(1); /* Reset scale on click */
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .popup {
+      padding: 20px 25px;
+  }
+
+  .popup h2 {
+      font-size: 1.6em;
+  }
+
+  .popup form {
+      gap: 15px;
+  }
 }
 
 footer {
