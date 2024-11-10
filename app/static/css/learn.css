@@ -23,15 +23,15 @@ body {
 */
 
 #progressBar {
-    width: 90%; /* Slightly smaller width to ensure it's visible */
-    max-width: 900px; /* Set a max width to prevent it from stretching too far */
-    margin: 0 auto; /* Centers the progress bar container */
-    height: 5vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #e0e0e0; /* Add background color for visibility */
-  }
+  width: 90%; /* Slightly smaller width to ensure it's visible */
+  max-width: 900px; /* Set a max width to prevent it from stretching too far */
+  margin: 0 auto; /* Centers the progress bar container */
+  height: 5vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e0e0e0; /* Add background color for visibility */
+}
 
 #gamemodeContainer {
   width: fit-content;
@@ -41,48 +41,21 @@ body {
 }
 
 #gamemodeContainer > #multipleChoise {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 2px;
-  max-height: 25vh;
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  max-width: 30vw;
 }
 
 #gamemodeContainer > #multipleChoise > button {
-  width: 100%;
-
-  align-items: center;
-  background-color: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.25rem;
-  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
-  box-sizing: border-box;
-  color: rgba(0, 0, 0, 0.85);
+  width: 12vw;
+  padding: 15px 0;
+  color: black;
+  border-radius: 6px;
+  border: 1px solid black;
+  font-size: clamp(10px, 2vw, 20px);
   cursor: pointer;
-  display: inline-flex;
-  font-family: system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica,
-    Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  justify-content: center;
-  line-height: 1.25;
-  margin: 0;
-  min-height: 3rem;
-  padding: calc(0.875rem - 1px) calc(1.5rem - 1px);
-  position: relative;
-  text-decoration: none;
-  transition: all 250ms;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  vertical-align: baseline;
-}
-
-#gamemodeContainer > #multipleChoise > button:hover,
-#gamemodeContainer > #multipleChoise > button:focus {
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
-  color: rgba(0, 0, 0, 0.65);
+  background-color: ;
 }
 
 #gamemodeContainer > #multipleChoise > button:hover {
@@ -103,30 +76,29 @@ body {
   display: flex;
   justify-content: center;
   width: 50%;
-  height:70vh;
+  height: 70vh;
 }
 
 #mapContainer > svg {
   height: 100%;
 }
 
-
 #progressBar > #bar {
-    width: 100%;
-    display: flex;
-    background-color: #f0f0f1;
-  }
-  
+  width: 100%;
+  display: flex;
+  background-color: #f0f0f1;
+}
+
 #questionsCorrect {
-background-color: #00ff00;
-height: 100%;
-transition: width 0.5s ease;
+  background-color: #00ff00;
+  height: 100%;
+  transition: width 0.5s ease;
 }
 #questionsIncorrect {
-    background-color: #ff0000;
-    height: 100%;
-    transition: width 0.5s ease;
-  }
+  background-color: #ff0000;
+  height: 100%;
+  transition: width 0.5s ease;
+}
 
 #finishedContainer {
   position: fixed;
@@ -178,10 +150,9 @@ transition: width 0.5s ease;
 
 #mainContent {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
-  width: 100%;
+  width: 100vw;
   padding: 1vw;
   box-sizing: border-box;
   flex: 1;
@@ -196,8 +167,13 @@ transition: width 0.5s ease;
 }
 
 .overlay {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  z-index: 99;
+  display: none;
 }

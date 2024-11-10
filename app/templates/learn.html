@@ -35,36 +35,27 @@
       </script>
     </div>
 
-    
-
+    <div class="overlay">
+      <div class="popup">
+        <h2>Finished</h2>
+        <p>Total questions: <span id="T-Questions">?</span></p>
+        <p>Total tries: <span id="T-Tries">?</span></p>
+        <p>Correct tries: <span id="T-Correct">?</span></p>
+        <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
+        <div id="QuestionBreakdown"></div>
+      </div>
+    </div>
 
     <div id="mainContent">
-      <div id="mapContainer">{% include('partials/map.html') %}
-        <div class="popup">
-          <h2>Finished</h2>
-          <p>Total questions: <span id="T-Questions">?</span></p>
-          <p>Total tries: <span id="T-Tries">?</span></p>
-          <p>Correct tries: <span id="T-Correct">?</span></p>
-          <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
-          <div id="QuestionBreakdown"></div>
-        </div>
-      </div>
+      <div id="mapContainer">{% include('partials/map.html') %}</div>
 
       <div id="gamemodeContainer">
-        {% if map.sessionMode == 1 %} 
-          {% include('partials/multipleChoise.html') %} 
-        {% endif %} 
-        {% if map.sessionMode == 2 %} 
-          {% include('partials/typeAwnser.html') %} 
-        {% endif %} 
-        {% if map.sessionMode == 3 %} 
-          {% include('partials/clickTheCountry.html') %} 
-        {% endif %}
+        {% if map.sessionMode == 1 %} {% include('partials/multipleChoise.html')
+        %} {% endif %} {% if map.sessionMode == 2 %} {%
+        include('partials/typeAwnser.html') %} {% endif %} {% if map.sessionMode
+        == 3 %} {% include('partials/clickTheCountry.html') %} {% endif %}
       </div>
-    
-      
     </div>
-    
 
     <script>
       socket.on("finished", function (data) {
