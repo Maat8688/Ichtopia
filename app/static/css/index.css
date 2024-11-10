@@ -29,9 +29,9 @@ main > img {
 
 #kaarten {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   flex-wrap: wrap;
-  max-width: 50vw;
+  width: clamp(200px, 80vw, 800px);
   justify-content: center;
 }
 
@@ -229,6 +229,7 @@ footer {
     width: 20vw; /* Expanded width */
   }
 }
+
 .loadingScreen {
   position: fixed;
   top: 0;
@@ -242,6 +243,7 @@ footer {
   align-items: center;
   z-index: 9999;
 }
+
 .spinner {
   border: 8px solid #f3f3f3; /* Light gray */
   border-top: 8px solid #3498db; /* Blue color */
