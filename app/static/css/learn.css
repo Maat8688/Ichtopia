@@ -14,7 +14,7 @@ body {
     Body
     - Progress bar
     - #mapContianer
-    - #gamemodeContainesr
+    - #gamemodeContainer
 
     #gamemodeContainer should be small but still readable
     #mapContianer should be as big as possible
@@ -26,9 +26,11 @@ body {
 }
 
 #gamemodeContainer {
+  width: fit-content;
+  height: fit-content;
   margin: 1vw;
   font-size: 1rem;
-  width: 98vw;
+  min-height: 70vh;
 }
 
 #gamemodeContainer > #multipleChoise {
@@ -94,6 +96,7 @@ body {
   max-height: 70vh;
   display: flex;
   justify-content: center;
+  width: 50%;
 }
 
 #mapContainer > svg {
@@ -122,9 +125,71 @@ body {
   transition: width 0.5s ease;
 }
 
-#QuestionBreakdown {
-  overflow: scroll;
+/* Center the finished overlay container */
+#finishedContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Adds a dim background */
+  visibility: hidden; /* Hide by default */
+  opacity: 0;
+  transition: visibility 0s, opacity 0.5s;
 }
-.messages {
+
+#finishedContainer.show {
+  visibility: visible;
   opacity: 1;
+}
+
+/* Style the popup */
+.popup {
+  width: 40%;
+  max-width: 400px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.popup h2 {
+  margin: 0 0 10px;
+}
+
+.popup p {
+  margin: 5px 0;
+}
+
+#QuestionBreakdown {
+  max-height: 150px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+#mainContent {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1vw;
+  box-sizing: border-box;
+}
+#finishedOverlay {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
