@@ -12,7 +12,11 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
+        print(request.form, file=sys.stderr)
+        if request.form.get('KaartInput') == 'Nederland':
+            newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
+        elif request.form.get('KaartInput') == 'Europa':
+            newSession = mapSession.fromSVG('data/maps/Europa.svg', request.form.get('mode'), request.form.getlist('questions'))
         id = sessionManager.createSession(newSession)
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
