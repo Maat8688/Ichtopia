@@ -66,10 +66,10 @@ main > img {
 /* Button styling */
 button {
   background-color: #fbeee0;
-  border: 2px solid #422800;
+  border: 2px solid #000000;
   border-radius: 30px;
-  box-shadow: #422800 4px 4px 0 0;
-  color: #422800;
+  box-shadow: #000000 4px 4px 0 0;
+  color: #000000;
   cursor: pointer;
   font-weight: 600;
   font-size: 18px;
@@ -126,12 +126,13 @@ button:active {
   margin-bottom: 20px;
 }
 
-/* Form Section Styling */
 #typeSelect,
 #ModeSelect,
 #questionsSelect {
   margin-bottom: 20px;
   text-align: left;
+  border-radius: 10px;
+  border: 2px solid black;
 }
 
 label {
@@ -163,7 +164,7 @@ button[type="submit"]:hover {
 
 /* Close button styling */
 button.close {
-  background-color: transparent;
+  background-image: linear-gradient(to right, #f7f7f7, #ffffff);
   border: none;
   font-size: 1.5em;
   color: #333;
@@ -202,4 +203,19 @@ footer {
   position: fixed;
   bottom: 0;
   left: 0;
+}
+
+.expanding {
+  background-color: #002244;
+  animation: pulse 4s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    width: 19vw; /* Original width */
+  }
+  40% {
+    width: 20vw; /* Expanded width */
+  }
 }
