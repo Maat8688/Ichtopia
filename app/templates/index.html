@@ -86,19 +86,6 @@
       <p>© 2024 Ichthus Lyceum | Floris Joël Luuk Liam Sami</p>
     </footer>
 
-    <script>
-      function validateForm() {
-        const checkboxes = document.querySelectorAll(
-          'input[name="questions"]:checked'
-        );
-        if (checkboxes.length === 0) {
-          alert("Please select at least one question type.");
-          return false; // Prevent form submission
-        }
-        return true; // Allow form submission
-      }
-    </script>
-
     <div class="overlay">
       <div class="popup">
         <!-- Close Button -->
@@ -307,13 +294,26 @@
   </body>
 
   <script>
+    function validateForm() {
+      const checkboxes = document.querySelectorAll(
+        'input[name="questions"]:checked'
+      );
+      if (checkboxes.length === 0) {
+        alert("Please select at least one question type.");
+        return false;
+      }
+      return true;
+    }
+  </script>
+
+  <script>
     const overlay = document.querySelector(".overlay");
     const closeButton = document.querySelector(".popup .close");
     const kaarten = document.querySelectorAll(".kaart");
     const popup = document.querySelector(".popup");
     const kaartInput = document.querySelector("#Kaart");
     const KaartTitel = document.querySelector("#KaartTitel");
-    var loadingScreen = document.querySelector(".loadingScreen");
+    const loadingScreen = document.querySelector(".loadingScreen");
     const logo = document.querySelector("#logo");
     window.addEventListener("load", function () {
       const loadingScreen = document.querySelector(".loadingScreen");

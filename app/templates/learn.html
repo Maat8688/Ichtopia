@@ -1,74 +1,75 @@
 <!DOCTYPE html>
 <html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flask-SocketIO Example</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/learn.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/learn.css') }}"
+    />
+  </head>
+  <body>
     <div id="progressBar">
-        <div id="messages"></div>
-        <div id="bar">
-            <div id="questionsCorrect"></div>
-            <div id="questionsIncorrect"></div>
-        </div>
-        <script>
-            socket.on("setProgressBar", function(data) {
-                var greenBar = document.getElementById("questionsCorrect");
-                var redBar = document.getElementById("questionsIncorrect")
-                greenBar.style.width = `${data['totalCorrect'] * (100 / data['totalQuestions'])}%`
-                redBar.style.width = `${data['totalIncorrect'] * (100 / data['totalQuestions'])}%`
-            });
-        </script>
+      <div id="messages"></div>
+      <div id="bar">
+        <div id="questionsCorrect"></div>
+        <div id="questionsIncorrect"></div>
+      </div>
+      <script>
+        socket.on("setProgressBar", function (data) {
+          var greenBar = document.getElementById("questionsCorrect");
+          var redBar = document.getElementById("questionsIncorrect");
+          greenBar.style.width = `${
+            data["totalCorrect"] * (100 / data["totalQuestions"])
+          }%`;
+          redBar.style.width = `${
+            data["totalIncorrect"] * (100 / data["totalQuestions"])
+          }%`;
+        });
+      </script>
     </div>
-    <div id="mapContainer">
-        {% include('partials/map.html') %}
-    </div>
+    <div id="mapContainer">{% include('partials/map.html') %}</div>
     <div id="gamemodeContainer">
-        {% if map.sessionMode == 1 %}
-            {% include('partials/multipleChoise.html') %}
-        {% endif %}
-        {% if map.sessionMode == 2 %}
-            {% include('partials/typeAwnser.html') %}
-        {% endif %}
-        {% if map.sessionMode == 3 %}
-            {% include('partials/clickTheCountry.html') %}
-        {% endif %}
+      {% if map.sessionMode == 1 %} {% include('partials/multipleChoise.html')
+      %} {% endif %} {% if map.sessionMode == 2 %} {%
+      include('partials/typeAwnser.html') %} {% endif %} {% if map.sessionMode
+      == 3 %} {% include('partials/clickTheCountry.html') %} {% endif %}
     </div>
 
     <div id="finishedOverlay" class="overlay">
-        <div class="popup">
-            <h2>Finished</h2>
-            <p>Total questions: <span id="T-Questions">?</span></p>
-            <p>Total tries: <span id="T-Tries">?</span></p>
-            <p>Correct tries: <span id="T-Correct">?</span></p>
-            <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
+      <div class="popup">
+        <h2>Finished</h2>
+        <p>Total questions: <span id="T-Questions">?</span></p>
+        <p>Total tries: <span id="T-Tries">?</span></p>
+        <p>Correct tries: <span id="T-Correct">?</span></p>
+        <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
 
-            <div id="QuestionBreakdown">
-
-            </div>
-        </div>
+        <div id="QuestionBreakdown"></div>
+      </div>
     </div>
 
     <script>
-        socket.on('finished', function(data) {
-            var overlay = document.getElementById("finishedOverlay")
-            overlay.classList.add('show');
+      socket.on("finished", function (data) {
+        var overlay = document.getElementById("finishedOverlay");
+        overlay.classList.add("show");
 
-            var questionsSpan = document.getElementById("T-Questions");
-            var triesSpan = document.getElementById('T-Tries');
-            var correctSpan = document.getElementById('T-Correct');
-            var incorrectSpan = document.getElementById('T-Incorrect');
-        
-            questionsSpan.textContent = data["Overvieuw"]["totalQuestions"]
-            triesSpan.textContent = data["Overvieuw"]["totalTried"]
-            correctSpan.textContent = data["Overvieuw"]["totalCorrect"]
-            incorrectSpan.textContent = data["Overvieuw"]["totalIncorrect"]
-        });
+        var questionsSpan = document.getElementById("T-Questions");
+        var triesSpan = document.getElementById("T-Tries");
+        var correctSpan = document.getElementById("T-Correct");
+        var incorrectSpan = document.getElementById("T-Incorrect");
+
+        questionsSpan.textContent = data["Overvieuw"]["totalQuestions"];
+        triesSpan.textContent = data["Overvieuw"]["totalTried"];
+        correctSpan.textContent = data["Overvieuw"]["totalCorrect"];
+        incorrectSpan.textContent = data["Overvieuw"]["totalIncorrect"];
+      });
     </script>
-</body>
+  </body>
 </html>
