@@ -149,7 +149,7 @@ input[type="checkbox"] {
 
 /* Submit Button Styling */
 button[type="submit"] {
-  background-color: #5cb85c;
+  background-color: #a19485;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -160,7 +160,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-  background-color: #4cae4c;
+  background-color: #fbeee0;
 }
 
 /* Close button styling */
