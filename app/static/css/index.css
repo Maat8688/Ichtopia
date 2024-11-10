@@ -107,22 +107,23 @@ button:active {
 
 /* Popup Styling */
 .popup {
-  background-color: #fff;
+  background-color: #6a7f8b;
   border-radius: 15px;
   text-align: center;
-  border: 2px solid #ddd;
+  border: 2px solid #000000;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Softer shadow for depth */
   padding: 30px;
   width: 90%;
   max-width: 500px; /* Max width for larger screens */
   transform: scale(0.8); /* Initial smaller size */
   animation: popupEnter 0.3s forwards; /* Pop-up effect */
+  box-shadow: #2c3532 4px 4px 0 0;
 }
 
 /* Popup title styling */
 .popup h2 {
   font-size: 1.5em;
-  color: #333;
+  color: #000000;
   margin-bottom: 20px;
 }
 
