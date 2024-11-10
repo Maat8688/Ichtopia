@@ -175,6 +175,10 @@ button.close {
   right: 10px;
 }
 
+button.close:hover {
+  filter: brightness(0.8);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
