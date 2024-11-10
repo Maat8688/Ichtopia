@@ -26,7 +26,7 @@
     </div>
     <header></header>
     <main>
-      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" />
+      <img id="logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" />
       <h1 id="Title">IchTopia</h1>
       <hr class="expanding" />
       <p id="SubTitle">Topo leren op het Ichthus Lyceum</p>
@@ -168,6 +168,7 @@
     const kaartInput = document.querySelector("#Kaart");
     const KaartTitel = document.querySelector("#KaartTitel");
     var loadingScreen = document.querySelector(".loadingScreen");
+    const logo = document.querySelector("#logo");
     window.addEventListener('load', function() {
         const loadingScreen = document.querySelector(".loadingScreen");
         loadingScreen.style.display = 'none';
@@ -190,6 +191,15 @@
 
     popup.addEventListener("click", (e) => {
       e.stopPropagation(); // Prevent click on popup from closing
+    });
+    logo.addEventListener("click", function() {
+        // Add the spin animation class
+        logo.style.animation = "spin 2s"; // 2s duration for the spin
+        
+        // Optional: reset the animation after it's done, so it can spin again on next click
+        logo.addEventListener("animationend", function() {
+            logo.style.animation = ""; // Reset the animation
+        });
     });
   </script>
 </html>
