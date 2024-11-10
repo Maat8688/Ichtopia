@@ -1,8 +1,6 @@
-/* Main layout adjustments */
 main {
   margin: 0 5%;
   width: 90%;
-  margin-bottom: 5%; /* Reduce to fit footer on screen */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,34 +8,31 @@ main {
 }
 
 main > img {
-  width: 10%;
+  width: clamp(130px, 10vw, 200px);
   margin: 0 auto;
 }
 
-/* Title contrast adjustment */
 #Title {
-  color: #002244; /* Even darker shade for better contrast */
-  font-size: 2.5em;
+  color: #ffffff;
+  font-size: clamp(10px, 2.5vw, 40px);
   text-align: center;
   font-weight: bold;
+  margin: 0px;
 }
 
-/* Center subtitle text and keep it close to the title */
 #SubTitle {
-  color: #002244;
+  color: #ffffff;
   font-size: 1.2em;
   text-align: center;
-  margin: 10px 0 20px 0;
+  margin: 0px 0 30px 0;
 }
-/* Exercise boxes container adjustments */
+
 #kaarten {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Three columns */
-  gap: 15px; /* Smaller gap between boxes */
-  max-width: 800px; /* Limit container width */
-  margin: 0 auto; /* Center the container on the page */
-  padding: 20px; /* Add padding to sides */
-  justify-items: center; /* Keep items centered */
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  max-width: 50vw;
+  justify-content: center;
 }
 
 .kaart {
@@ -51,7 +46,8 @@ main > img {
   color: #422800;
   padding: 10px;
   width: 100%;
-  max-width: 200px; /* Control maximum width */
+  margin-bottom: 23px;
+  max-width: 200px;
 }
 .kaart > img {
   width: 75%;
@@ -209,6 +205,7 @@ footer {
 .expanding {
   background-color: #002244;
   animation: pulse 4s infinite;
+  min-width: 170px;
 }
 
 @keyframes pulse {
