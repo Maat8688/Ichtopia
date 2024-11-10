@@ -40,14 +40,13 @@ main > img {
   justify-items: center; /* Keep items centered */
 }
 
-
 /* .kaart styling (no changes needed here, but this ensures it remains consistent) */
 .kaart {
   background-color: #f6f7ec;
   border-radius: 10px;
-  text-align: center;
   display: flex;
   flex-direction: column;
+  align-items: center;
   border: 2px solid #422800;
   box-shadow: #422800 4px 4px 0 0;
   color: #422800;
@@ -148,13 +147,11 @@ button:active {
   position: relative;
 }
 
-/* Title icon */
-.popup h2::before {
-  content: url('https://img.icons8.com/ios-filled/50/000000/map.png'); /* Icon before title */
-  position: absolute;
-  left: -35px;
-  top: -2px;
-  font-size: 1.5em;
+/* Form input elements */
+.popup form input[type="radio"],
+.popup form input[type="checkbox"] {
+  margin: 10px 0;
+  width: auto;
 }
 
 /* Form styling */
