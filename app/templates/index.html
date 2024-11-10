@@ -336,15 +336,13 @@
     });
 
     popup.addEventListener("click", (e) => {
-      e.stopPropagation(); // Prevent click on popup from closing
+      e.stopPropagation();
     });
     logo.addEventListener("click", function () {
-      // Add the spin animation class
-      logo.style.animation = "spin 2s"; // 2s duration for the spin
+      logo.style.animation = "spin 2s";
 
-      // Optional: reset the animation after it's done, so it can spin again on next click
       logo.addEventListener("animationend", function () {
-        logo.style.animation = ""; // Reset the animation
+        logo.style.animation = "";
       });
     });
   </script>
