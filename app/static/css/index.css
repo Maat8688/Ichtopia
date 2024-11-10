@@ -86,130 +86,110 @@ button:active {
   transform: translate(2px, 2px);
 }
 
-/* Overlay */
+/* Overlay styling to darken the background */
 .overlay {
-  background: rgba(0, 0, 0, 0.7); /* Darker, more focused overlay */
+  background: rgba(0, 0, 0, 0.5); /* Darker overlay */
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 100;
   display: none;
   justify-content: center;
   align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  z-index: 100;
+  animation: fadeIn 0.3s ease; /* Fade-in animation */
 }
 
-/* Show overlay */
 .overlay.show {
   display: flex;
-  opacity: 1;
 }
 
-/* Popup box */
+/* Popup Styling */
 .popup {
-  background-color: #ffffff;
-  border-radius: 20px; /* Slightly softer corners */
+  background-color: #fff;
+  border-radius: 15px;
   text-align: center;
-  border: 3px solid #422800;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3); /* Deeper shadow for more depth */
-  padding: 30px 40px;
-  max-width: 600px; /* Increased width */
+  border: 2px solid #ddd;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Softer shadow for depth */
+  padding: 30px;
   width: 90%;
-  transform: scale(0.9);
-  opacity: 0;
-  animation: popupIn 0.5s forwards; /* Animation when popup appears */
+  max-width: 500px; /* Max width for larger screens */
+  transform: scale(0.8); /* Initial smaller size */
+  animation: popupEnter 0.3s forwards; /* Pop-up effect */
 }
 
-/* Title animation */
-@keyframes popupIn {
-  0% {
-    transform: scale(0.9);
+/* Popup title styling */
+.popup h2 {
+  font-size: 1.5em;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Form Section Styling */
+#typeSelect,
+#ModeSelect,
+#questionsSelect {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+label {
+  margin-right: 10px;
+}
+
+/* Input styling for better appearance */
+input[type="radio"],
+input[type="checkbox"] {
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+/* Submit Button Styling */
+button[type="submit"] {
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #4cae4c;
+}
+
+/* Close button styling */
+button.close {
+  background-color: transparent;
+  border: none;
+  font-size: 1.5em;
+  color: #333;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+@keyframes fadeIn {
+  from {
     opacity: 0;
   }
-  100% {
-    transform: scale(1);
+  to {
     opacity: 1;
   }
 }
 
-/* Popup title */
-.popup h2 {
-  margin-bottom: 20px;
-  font-size: 2em;
-  color: #422800;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  position: relative;
-}
-
-/* Form input elements */
-.popup form input[type="radio"],
-.popup form input[type="checkbox"] {
-  margin: 10px 0;
-  width: auto;
-}
-
-/* Form styling */
-.popup form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-/* Radio and checkbox inputs */
-.popup form input[type="radio"],
-.popup form input[type="checkbox"] {
-  margin: 10px 0;
-  width: auto;
-  transition: transform 0.2s ease-in-out;
-}
-
-.popup form input[type="radio"]:hover,
-.popup form input[type="checkbox"]:hover {
-  transform: scale(1.1); /* Slight scaling effect on hover */
-}
-
-/* Button styling */
-.popup form button {
-  background-color: #136d15;
-  color: #ffffff;
-  border: none;
-  padding: 12px 30px;
-  font-size: 1.2em;
-  font-weight: bold;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease-in-out;
-  margin-top: 20px;
-}
-
-.popup form button:hover {
-  background-color: #117c13;
-  transform: scale(1.05); /* Slight scale-up on hover */
-}
-
-.popup form button:active {
-  background-color: #0d5b0a;
-  transform: scale(1); /* Reset scale on click */
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-  .popup {
-    padding: 20px 25px;
+@keyframes popupEnter {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
   }
-
-  .popup h2 {
-    font-size: 1.6em;
-  }
-
-  .popup form {
-    gap: 15px;
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 

@@ -64,6 +64,8 @@
 
     <div class="overlay">
         <div class="popup">
+            <!-- Close Button -->
+            <button class="close">&times;</button>
             <h2 id="KaartTitel">Nederland</h2>
             <form method="POST" onsubmit="return validateForm()">
                 <input id="Kaart" type="hidden" name="kaart" value="Nederland">
@@ -99,10 +101,12 @@
     </div>
 
 
+
 </body>
 
 <script>
     const overlay = document.querySelector('.overlay');
+    const closeButton = document.querySelector('.popup .close');
     const kaarten = document.querySelectorAll('.kaart');
     const popup = document.querySelector('.popup');
     const kaartInput = document.querySelector('#Kaart');
@@ -116,14 +120,17 @@
         });
     });
 
+    closeButton.addEventListener('click', () => {
+        overlay.classList.remove('show');
+    });
+
     overlay.addEventListener('click', () => {
         overlay.classList.remove('show');
     });
 
     popup.addEventListener('click', (e) => {
-        e.stopPropagation();
+        e.stopPropagation();  // Prevent click on popup from closing
     });
-
 </script>
 
 </html>
