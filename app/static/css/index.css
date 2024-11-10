@@ -259,3 +259,6 @@ footer {
     transform: rotate(360deg);
   }
 }
+#logo {
+  transition: transform 2s; /* Smooth transition for the spin */
+}
