@@ -37,10 +37,15 @@
     </div>
     <div id="mapContainer">{% include('partials/map.html') %}</div>
     <div id="gamemodeContainer">
-      {% if map.sessionMode == 1 %} {% include('partials/multipleChoise.html')
-      %} {% endif %} {% if map.sessionMode == 2 %} {%
-      include('partials/typeAwnser.html') %} {% endif %} {% if map.sessionMode
-      == 3 %} {% include('partials/clickTheCountry.html') %} {% endif %}
+      {% if map.sessionMode == 1 %} 
+        {% include('partials/multipleChoise.html') %} 
+    {% endif %} 
+    {% if map.sessionMode == 2 %} 
+        {% include('partials/typeAwnser.html') %} 
+    {% endif %} 
+    {% if map.sessionMode == 3 %} 
+        {% include('partials/clickTheCountry.html') %} 
+    {% endif %}
     </div>
 
     <div id="finishedOverlay" class="overlay">
