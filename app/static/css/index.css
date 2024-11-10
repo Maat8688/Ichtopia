@@ -40,15 +40,14 @@ main > img {
   justify-items: center; /* Keep items centered */
 }
 
-/* .kaart styling (no changes needed here, but this ensures it remains consistent) */
 .kaart {
-  background-color: #f6f7ec;
+  background-color: #6a7f8b;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 2px solid #422800;
-  box-shadow: #422800 4px 4px 0 0;
+  border: 2px solid #000000;
+  box-shadow: #2c3532 4px 4px 0 0;
   color: #422800;
   padding: 10px;
   width: 100%;
@@ -127,12 +126,12 @@ button:active {
 /* Title animation */
 @keyframes popupIn {
   0% {
-      transform: scale(0.9);
-      opacity: 0;
+    transform: scale(0.9);
+    opacity: 0;
   }
   100% {
-      transform: scale(1);
-      opacity: 1;
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -163,13 +162,15 @@ button:active {
 }
 
 /* Radio and checkbox inputs */
-.popup form input[type="radio"], .popup form input[type="checkbox"] {
+.popup form input[type="radio"],
+.popup form input[type="checkbox"] {
   margin: 10px 0;
   width: auto;
   transition: transform 0.2s ease-in-out;
 }
 
-.popup form input[type="radio"]:hover, .popup form input[type="checkbox"]:hover {
+.popup form input[type="radio"]:hover,
+.popup form input[type="checkbox"]:hover {
   transform: scale(1.1); /* Slight scaling effect on hover */
 }
 
@@ -200,15 +201,15 @@ button:active {
 /* Responsive Design */
 @media (max-width: 600px) {
   .popup {
-      padding: 20px 25px;
+    padding: 20px 25px;
   }
 
   .popup h2 {
-      font-size: 1.6em;
+    font-size: 1.6em;
   }
 
   .popup form {
-      gap: 15px;
+    gap: 15px;
   }
 }
 
