@@ -30,7 +30,6 @@ body {
   height: fit-content;
   margin: 1vw;
   font-size: 1rem;
-  min-height: 70vh;
 }
 
 #gamemodeContainer > #multipleChoise {
@@ -91,9 +90,8 @@ body {
 }
 
 #mapContainer {
-  padding: 2%;
-  width: 96%;
-  max-height: 70vh;
+  margin-top: 30px;
+  max-width: 43vw;
   display: flex;
   justify-content: center;
   width: 50%;
@@ -125,7 +123,6 @@ body {
   transition: width 0.5s ease;
 }
 
-/* Center the finished overlay container */
 #finishedContainer {
   position: fixed;
   top: 0;
@@ -146,8 +143,8 @@ body {
   opacity: 1;
 }
 
-/* Style the popup */
 .popup {
+  position: fixed;
   width: 40%;
   max-width: 400px;
   background-color: #fff;
@@ -173,20 +170,24 @@ body {
   background-color: #f9f9f9;
   border-radius: 4px;
 }
+
 #mainContent {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
   padding: 1vw;
   box-sizing: border-box;
 }
+
 #finishedOverlay {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .overlay {
   display: flex;
   align-items: center;
