@@ -161,6 +161,7 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
   background-color: #fbeee0;
+  color: black;
 }
 
 /* Close button styling */
