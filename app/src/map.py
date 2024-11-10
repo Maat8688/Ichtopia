@@ -182,11 +182,11 @@ class mapSession():
         else:
             viewBox = (0, 0, 1000, 1000)
 
-        if sessionMode == 'multipleChoice':
+        if sessionMode == 'MultipleChoise':
             sessionMode = 1 #SessionGamemode.MULTIPLECHOICE
-        elif sessionMode == 'fillInTheBlank':
+        elif sessionMode == 'FillInTheBlank':
             sessionMode = 2 #SessionGamemode.FILLINTHEBLANK
-        elif sessionMode == 'clickTheCountry':
+        elif sessionMode == 'ClickTheCountry':
             sessionMode = 3 #SessionGamemode.CLICKTHECOUNTRY
 
         return mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
