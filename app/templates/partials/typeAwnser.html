@@ -1,0 +1,34 @@
+<input type="text" name="textInput" placeholder="...">
+
+<script>
+    socket.on('question', function(data) {
+        var mapElement = document.getElementById(data.question);
+        var question = data.question;
+        var textInput = document.querySelector('input[name="textInput"]');
+
+        // Remove the active element from all mapelements
+        var questionsElement = document.getElementById("questions");
+        var questionElements = questionsElement.getElementsByTagName('g');
+        console.log(questionElements);
+        console.log(question);
+        console.log(mapElement);
+        Array.from(questionElements).forEach(function(element) {
+            element.classList.remove('active');
+        });
+
+        if (mapElement) {
+            mapElement.classList.add('active');
+        }
+
+        textInput.value = '';
+    });
+
+    document.querySelector('input[name="textInput"]').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            const inputValue = event.target.value;
+            socket.emit('answerQuestion', {'awnser': inputValue, 'hashed':false, 'sessionToken': urlParams.get('sessionToken')});
+        }
+    });
+
+
+</script>

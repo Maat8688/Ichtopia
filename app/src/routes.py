@@ -93,7 +93,7 @@ def setupSockets(socketio: SocketIO):
         if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
         elif session.sessionMode == 2:
-            emit('question', {'question': session.currentQuestion.id, 'fillInTheBlank': True})
+            emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
             emit('question', {'question': session.currentQuestion.id})
 
@@ -103,7 +103,7 @@ def setupSockets(socketio: SocketIO):
         if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
         elif session.sessionMode == 2:
-            emit('question', {'question': session.currentQuestion.id, 'fillInTheBlank': True})
+            emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
             emit('question', {'question': session.currentQuestion.id})
 
