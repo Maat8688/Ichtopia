@@ -14,7 +14,7 @@ main > img {
 
 #Title {
   color: #ffffff;
-  font-size: clamp(10px, 2.5vw, 40px);
+  font-size: clamp(30px, 2.5vw, 60px);
   text-align: center;
   font-weight: bold;
   margin: 0px;
@@ -49,7 +49,14 @@ main > img {
   margin-bottom: 23px;
   max-width: 200px;
 }
-.kaart > img {
+
+.kaart > div {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.kaart img {
   width: 75%;
   height: auto;
   margin: 7%;
@@ -245,6 +252,10 @@ footer {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

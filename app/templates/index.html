@@ -21,8 +21,8 @@
   </head>
   <body>
     <div class="loadingScreen">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
     <header></header>
     <main>
@@ -40,10 +40,12 @@
           <button id="Nederland">Nederland</button>
         </div>
         <div class="kaart">
-          <img
-            src="{{ url_for('static', filename='img/Europa.svg') }}"
-            alt="Nederland"
-          />
+          <div>
+            <img
+              src="{{ url_for('static', filename='img/Europa.svg') }}"
+              alt="Nederland"
+            />
+          </div>
           <button id="Nederland">Europa</button>
         </div>
         <div class="kaart">
@@ -157,7 +159,6 @@
         </form>
       </div>
     </div>
-    
   </body>
 
   <script>
@@ -168,10 +169,10 @@
     const kaartInput = document.querySelector("#Kaart");
     const KaartTitel = document.querySelector("#KaartTitel");
     var loadingScreen = document.querySelector(".loadingScreen");
-    window.addEventListener('load', function() {
-        const loadingScreen = document.querySelector(".loadingScreen");
-        loadingScreen.style.display = 'none';
-    })
+    window.addEventListener("load", function () {
+      const loadingScreen = document.querySelector(".loadingScreen");
+      loadingScreen.style.display = "none";
+    });
     kaarten.forEach((kaart) => {
       kaart.addEventListener("click", () => {
         overlay.classList.add("show");
