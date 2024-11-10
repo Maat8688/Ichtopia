@@ -20,6 +20,10 @@
     />
   </head>
   <body>
+    <div class="loadingScreen">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
     <header></header>
     <main>
       <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" />
@@ -153,6 +157,7 @@
         </form>
       </div>
     </div>
+    
   </body>
 
   <script>
@@ -162,7 +167,11 @@
     const popup = document.querySelector(".popup");
     const kaartInput = document.querySelector("#Kaart");
     const KaartTitel = document.querySelector("#KaartTitel");
-
+    var loadingScreen = document.querySelector(".loadingScreen");
+    window.addEventListener('load', function() {
+        const loadingScreen = document.querySelector(".loadingScreen");
+        loadingScreen.style.display = 'none';
+    })
     kaarten.forEach((kaart) => {
       kaart.addEventListener("click", () => {
         overlay.classList.add("show");
