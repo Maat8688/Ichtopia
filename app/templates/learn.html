@@ -35,7 +35,7 @@
       </script>
     </div>
 
-    <div class="overlay">
+    <div id="finishedOverlay" class="overlay">
       <div class="popup">
         <h2>Finished</h2>
         <p>Total questions: <span id="T-Questions">?</span></p>
@@ -71,6 +71,12 @@
         triesSpan.textContent = data["Overvieuw"]["totalTried"];
         correctSpan.textContent = data["Overvieuw"]["totalCorrect"];
         incorrectSpan.textContent = data["Overvieuw"]["totalIncorrect"];
+
+        var questionsElement = document.getElementById("questions");
+        var questionElements = questionsElement.getElementsByTagName('g');
+        Array.from(questionElements).forEach(function(element) {
+          element.classList.remove('active');
+        });
       });
     </script>
   </body>
