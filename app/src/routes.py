@@ -17,6 +17,8 @@ def index():
             newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
         elif request.form.get('KaartInput') == 'Europa':
             newSession = mapSession.fromSVG('data/maps/Europa.svg', request.form.get('mode'), request.form.getlist('questions'))
+        elif request.form.get('KaartInput') == 'Wereld':
+            newSession = mapSession.fromSVG('data/maps/Wereld.svg', request.form.get('mode'), request.form.getlist('questions'))
         id = sessionManager.createSession(newSession)
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')

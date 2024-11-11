@@ -51,17 +51,17 @@
           <div>
             <img
               src="{{ url_for('static', filename='img/Europa.svg') }}"
-              alt="Nederland"
+              alt="Europa"
             />
           </div>
           <button id="Europa">Europa</button>
         </div>
         <div class="kaart">
           <img
-            src="{{ url_for('static', filename='img/Nederland.svg') }}"
-            alt="Nederland"
+            src="{{ url_for('static', filename='img/Wereld.svg') }}"
+            alt="Wereld"
           />
-          <button id="Nederland">Nederland2</button>
+          <button id="Wereld">Wereld</button>
         </div>
         <div class="kaart">
           <img
@@ -268,6 +268,10 @@
 
         var category = [];
         if (kaart.querySelector("button").textContent === "Europa") {
+          category = ["Landen"];
+        } else if (kaart.querySelector("button").textContent === "Nederland") {
+          category = ["Steden", "Provincies", "Wateren", "Gebieden"];
+        } else if (kaart.querySelector("button").textContent === "Wereld") {
           category = ["Landen"];
         } else {
           category = ["Steden", "Provincies", "Wateren", "Gebieden"];
