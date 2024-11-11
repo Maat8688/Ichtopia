@@ -339,7 +339,8 @@ body {
 
   #mapContainer {
     height: 70vh;
-    max-width: 600px;
+    max-height: 500px;
+
   }
 
   #mapContainer > svg {
