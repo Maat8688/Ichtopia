@@ -17,12 +17,17 @@
   </head>
   <body>
     <div id="finishedOverlay" class="overlay">
+      
       <div class="popup">
         <h2>Finished</h2>
         <p>Total questions: <span id="T-Questions">?</span></p>
         <p>Total tries: <span id="T-Tries">?</span></p>
         <p>Correct tries: <span id="T-Correct">?</span></p>
         <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
+   
+        <a href="/" class="button-56" role="button">Home</a>
+
+        
         <div id="QuestionBreakdown"></div>
       </div>
     </div>
@@ -62,7 +67,6 @@
       socket.on("finished", function (data) {
         var overlay = document.getElementById("finishedOverlay");
         overlay.classList.add("show");
-
         var questionsSpan = document.getElementById("T-Questions");
         var triesSpan = document.getElementById("T-Tries");
         var correctSpan = document.getElementById("T-Correct");
