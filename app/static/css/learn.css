@@ -234,7 +234,7 @@ body {
 
 #mainContent {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   align-items: center;
   width: 100vw;
   padding: 1vw;
@@ -282,9 +282,10 @@ body {
   }
 
   #mapContainer {
-    max-width: 350px;
-    height: 40vh;
-    width: 70vw;
+    max-width: 400px;
+    max-height: 400px;
+    height: 50vh;
+    width: 90vw;
   }
 
   #mapContainer > svg {
@@ -310,6 +311,7 @@ body {
   #gamemodeContainer {
     display: flex;
     justify-content: center;
+    margin-top: -30px;
   }
 
   #gamemodeContainer > #multipleChoise > button {
@@ -340,7 +342,6 @@ body {
   #mapContainer {
     height: 70vh;
     max-height: 500px;
-
   }
 
   #mapContainer > svg {
