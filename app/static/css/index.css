@@ -60,7 +60,7 @@ main > img {
   width: 75%;
   height: auto;
   margin: 7%;
-  border: 2px solid #422800;
+  border: 2px solid #000000;
   border-radius: 10px;
   margin-bottom: 3%;
   filter: contrast(0.8) brightness(1.2) saturate(1.4);
@@ -85,7 +85,7 @@ button:hover {
 }
 
 button:active {
-  box-shadow: #422800 2px 2px 0 0;
+  box-shadow: #000000 2px 2px 0 0;
   transform: translate(2px, 2px);
 }
 

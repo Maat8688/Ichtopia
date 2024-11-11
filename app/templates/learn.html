@@ -16,25 +16,6 @@
     />
   </head>
   <body>
-    <div id="progressBar">
-      <div id="bar">
-        <div id="questionsCorrect"></div>
-        <div id="questionsIncorrect"></div>
-      </div>
-      <script>
-        socket.on("setProgressBar", function (data) {
-          var greenBar = document.getElementById("questionsCorrect");
-          var redBar = document.getElementById("questionsIncorrect");
-          greenBar.style.width = `${
-            data["totalCorrect"] * (100 / data["totalQuestions"])
-          }%`;
-          redBar.style.width = `${
-            data["totalIncorrect"] * (100 / data["totalQuestions"])
-          }%`;
-        });
-      </script>
-    </div>
-
     <div class="overlay">
       <div class="popup">
         <h2>Finished</h2>
@@ -47,7 +28,27 @@
     </div>
 
     <div id="mainContent">
-      <div id="mapContainer">{% include('partials/map.html') %}</div>
+      <div id="mapContainer">
+        {% include('partials/map.html') %}
+        <div id="progressBar">
+          <div id="bar">
+            <div id="questionsCorrect"></div>
+            <div id="questionsIncorrect"></div>
+          </div>
+          <script>
+            socket.on("setProgressBar", function (data) {
+              var greenBar = document.getElementById("questionsCorrect");
+              var redBar = document.getElementById("questionsIncorrect");
+              greenBar.style.width = `${
+                data["totalCorrect"] * (100 / data["totalQuestions"])
+              }%`;
+              redBar.style.width = `${
+                data["totalIncorrect"] * (100 / data["totalQuestions"])
+              }%`;
+            });
+          </script>
+        </div>
+      </div>
 
       <div id="gamemodeContainer">
         {% if map.sessionMode == 1 %} {% include('partials/multipleChoise.html')
