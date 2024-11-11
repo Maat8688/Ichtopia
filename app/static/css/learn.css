@@ -23,20 +23,6 @@ body {
   background-color: #e0e0e0;
 }
 
-#gamemodeContainer {
-  width: fit-content;
-  height: fit-content;
-  margin: 1vw;
-  font-size: 1rem;
-}
-
-#gamemodeContainer > #multipleChoise {
-  display: flex;
-  gap: 30px;
-  flex-wrap: wrap;
-  max-width: 30vw;
-}
-
 #gamemodeContainer > #multipleChoise > button {
   width: 12vw;
   padding: 15px 0;
@@ -57,26 +43,6 @@ body {
   box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
   color: rgba(0, 0, 0, 0.65);
   transform: translateY(0);
-}
-
-#mapContainer {
-  max-width: 43vw;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 50%;
-  height: 70vh;
-  border: 2px solid black;
-  background-color: #6a7f8b;
-  padding: 20px 0;
-  border-radius: 10px;
-}
-
-#mapContainer > svg {
-  height: 100%;
-  border-radius: 5px;
-  border: 1px solid black;
 }
 
 #progressBar,
@@ -212,17 +178,6 @@ body {
   border-radius: 4px;
 }
 
-#mainContent {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 100vw;
-  padding: 1vw;
-  box-sizing: border-box;
-  flex: 1;
-  overflow: hidden;
-}
-
 .overlay {
   background: rgba(0, 0, 0, 0.5); /* Darker overlay */
   position: fixed;
@@ -253,4 +208,119 @@ body {
   transform: scale(0.8);
   animation: popupEnter 0.3s forwards;
   box-shadow: #2c3532 4px 4px 0 0;
+}
+
+#mainContent {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100vw;
+  padding: 1vw;
+  box-sizing: border-box;
+  flex: 1;
+  overflow: hidden;
+}
+
+#gamemodeContainer {
+  width: fit-content;
+  height: fit-content;
+  margin: 1vw;
+  font-size: 1rem;
+}
+
+#gamemodeContainer > #multipleChoise {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  max-width: 30vw;
+}
+
+#mapContainer {
+  max-width: 43vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 50%;
+  height: clamp(30vh, 40vw, 70vh);
+  border: 2px solid black;
+  background-color: #6a7f8b;
+  padding: 20px 0;
+  border-radius: 10px;
+}
+
+#mapContainer > svg {
+  width: 70%;
+  min-height: 65%;
+}
+
+@media (max-width: 799px) {
+  #mainContent {
+    flex-direction: column;
+  }
+
+  #mapContainer {
+    max-width: 350px;
+    height: 40vh;
+    width: 70vw;
+  }
+
+  #mapContainer > svg {
+    width: 90%;
+  }
+
+  #gamemodeContainer > #multipleChoise {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    row-gap: 20px;
+    column-gap: 15px;
+    align-items: center;
+    justify-items: center;
+  }
+
+  #gamemodeContainer > #multipleChoise,
+  #gamemodeContainer {
+    max-width: 80vw;
+    width: fit-content;
+  }
+
+  #gamemodeContainer {
+    display: flex;
+    justify-content: center;
+  }
+
+  #gamemodeContainer > #multipleChoise > button {
+    width: 30vw;
+    max-width: 180px;
+    height: 70px;
+    font-size: 100%;
+  }
+}
+
+@media (min-width: 800px) and (max-width: 1100px) {
+  #multipleChoise {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    row-gap: 20px;
+    column-gap: 15px;
+    align-items: center;
+    justify-items: center;
+  }
+
+  #gamemodeContainer > #multipleChoise > button {
+    height: 65px;
+    width: 105px;
+    font-size: 16px;
+  }
+
+  #mapContainer {
+    height: 70vh;
+  }
+
+  #mapContainer > svg {
+    height: 80%;
+    width: 90%;
+  }
 }
