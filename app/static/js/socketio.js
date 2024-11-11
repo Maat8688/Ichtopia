@@ -5,9 +5,3 @@ socket.on("connect", () => {
   socket.send("Hello, Server!");
 });
 
-socket.on("message", (data) => {
-  console.log(data);
-  const messageElement = document.createElement("div");
-  messageElement.textContent = data;
-  document.getElementById("messages").appendChild(messageElement);
-});
