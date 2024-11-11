@@ -45,7 +45,6 @@ body {
   border: 1px solid black;
   font-size: clamp(10px, 2vw, 20px);
   cursor: pointer;
-  background-color: ;
 }
 
 #gamemodeContainer > #multipleChoise > button:hover {
@@ -94,12 +93,12 @@ body {
 }
 
 #questionsCorrect {
-  background-color: #00ff00;
+  background-color: #3b9e3b;
   height: 100%;
   transition: width 0.5s ease;
 }
 #questionsIncorrect {
-  background-color: #ff0000;
+  background-color: #b43f3f;
   height: 100%;
   transition: width 0.5s ease;
 }
@@ -163,21 +162,34 @@ body {
   overflow: hidden;
 }
 
-#finishedOverlay {
+.overlay {
+  background: rgba(0, 0, 0, 0.5); /* Darker overlay */
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  display: flex;
-  align-items: center;
+  height: 100%;
+  display: none;
   justify-content: center;
+  align-items: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease; /* Fade-in animation */
 }
 
-.overlay {
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
+.overlay.show {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  z-index: 99;
-  display: none;
+}
+
+.popup {
+  background-color: #6a7f8b;
+  border-radius: 15px;
+  text-align: center;
+  border: 2px solid #000000;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  transform: scale(0.8);
+  animation: popupEnter 0.3s forwards;
+  box-shadow: #2c3532 4px 4px 0 0;
 }

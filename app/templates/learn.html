@@ -72,6 +72,12 @@
         triesSpan.textContent = data["Overvieuw"]["totalTried"];
         correctSpan.textContent = data["Overvieuw"]["totalCorrect"];
         incorrectSpan.textContent = data["Overvieuw"]["totalIncorrect"];
+
+        var questionsElement = document.getElementById("questions");
+        var questionElements = questionsElement.getElementsByTagName("g");
+        Array.from(questionElements).forEach(function (element) {
+          element.classList.remove("active");
+        });
       });
     </script>
   </body>
