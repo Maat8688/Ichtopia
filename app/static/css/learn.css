@@ -1,5 +1,4 @@
 body {
-  display: flex;
   flex-direction: column;
 }
 
@@ -12,25 +11,16 @@ body {
   display: flex;
 }
 
-/* 
-    Body
-    - Progress bar
-    - #mapContianer
-    - #gamemodeContainer
-
-    #gamemodeContainer should be small but still readable
-    #mapContianer should be as big as possible
-*/
-
 #progressBar {
-  width: 90%; /* Slightly smaller width to ensure it's visible */
-  max-width: 900px; /* Set a max width to prevent it from stretching too far */
-  margin: 0 auto; /* Centers the progress bar container */
+  width: 90%;
+  max-width: 900px;
+  margin: 0;
+  margin-top: 40px;
   height: 5vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #e0e0e0; /* Add background color for visibility */
+  background-color: #e0e0e0;
 }
 
 #gamemodeContainer {
@@ -70,16 +60,29 @@ body {
 }
 
 #mapContainer {
-  margin-top: 30px;
   max-width: 43vw;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   width: 50%;
   height: 70vh;
+  border: 2px solid black;
+  background-color: #6a7f8b;
+  padding: 20px 0;
+  border-radius: 10px;
 }
 
 #mapContainer > svg {
   height: 100%;
+  border-radius: 5px;
+  border: 1px solid black;
+}
+
+#progressBar,
+#progressBar > #bar {
+  border-radius: 20px;
+  overflow: hidden;
 }
 
 #progressBar > #bar {
@@ -87,7 +90,6 @@ body {
   display: flex;
   background-color: #f0f0f1;
   height: 100%;
-  border-radius: 5px;
 }
 
 #questionsCorrect {
@@ -110,8 +112,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5); /* Adds a dim background */
-  visibility: hidden; /* Hide by default */
+  background-color: rgba(0, 0, 0, 0.5);
+  visibility: hidden;
   opacity: 0;
   transition: visibility 0s, opacity 0.5s;
 }
