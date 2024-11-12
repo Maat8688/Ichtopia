@@ -272,7 +272,7 @@ body {
 }
 
 #mapContainer > svg {
-  width: 70%;
+  max-width: 70%;
   min-height: 65%;
 }
 
