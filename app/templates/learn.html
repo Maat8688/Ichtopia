@@ -20,6 +20,7 @@
     />
   </head>
   <body>
+    
     <a href="/" class="button-56" role="button">Home</a>
     <div id="finishedOverlay" class="overlay">
       
@@ -76,7 +77,10 @@
         var triesSpan = document.getElementById("T-Tries");
         var correctSpan = document.getElementById("T-Correct");
         var incorrectSpan = document.getElementById("T-Incorrect");
-
+        // const loadingScreen = document.querySelector(".loadingScreen");
+        // window.addEventListener("load", function () {
+        //   loadingScreen.style.display = "none";
+        // });
         questionsSpan.textContent = data["Overvieuw"]["totalQuestions"];
         triesSpan.textContent = data["Overvieuw"]["totalTried"];
         correctSpan.textContent = data["Overvieuw"]["totalCorrect"];
