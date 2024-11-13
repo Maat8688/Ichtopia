@@ -386,3 +386,11 @@ body {
   color: white;
 }
 
+#QuestionBreakdown {
+  display: none;
+  padding: 20px;
+  background-color: white;
+  margin-top: 10px;
+  pointer-events: none; /* Prevent interactions initially */
+  opacity: 0.5; /* Make it look visually disabled */
+}

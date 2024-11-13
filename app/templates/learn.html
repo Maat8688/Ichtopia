@@ -113,16 +113,13 @@
         
       });
 
+      
       function showBreakdown() {
-            var div = document.getElementById("QuestionBreakdown");
-            // Toggle between showing and hiding the div
-            if (div.style.display === "none") {
-                div.style.display = "block";
-            } else {
-                div.style.display = "none";
-            }
-        }
-        
+          var div = document.getElementById("QuestionBreakdown");
+          div.style.display = "block"; // Show the div
+          div.style.pointerEvents = "auto"; // Enable interactions
+          div.style.opacity = "1"; // Make it fully visible
+      }
     </script>
   </body>
 </html>
