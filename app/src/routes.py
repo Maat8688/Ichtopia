@@ -82,9 +82,11 @@ def setupSockets(socketio: SocketIO):
         questionId = session.hash(session.currentQuestion.id) 
 
         if session.awnserQuestion(data['awnser'], data['hashed']):
+            emit('questionCorrect')
             # emit('updateMap', {'questionId': questionId, 'status': 'correct'})
             emit('setMapState', session.getMapState())
         else:
+            emit('questionIncorrect')
             # emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
             emit('setMapState', session.getMapState())
 
