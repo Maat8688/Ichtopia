@@ -33,7 +33,7 @@ class mapSession():
         self.backgroundElements = backgroundElements
         self.foregroundElements = foregroundElements
         self.viewBox = viewBox
-        self.currentQuestionIndex = 0
+        self.currentQuestionIndex = random.range(len(questions)-1)
         self.score = 0
         self.finished = False
         self.antiCheat = True
