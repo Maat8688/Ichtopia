@@ -33,7 +33,7 @@
    
         <a href="/" class="button-56" role="button">Home</a>
 
-        
+        <button onclick="showBreakdown()">Overzicht</button>
         <div id="QuestionBreakdown"></div>
       </div>
     </div>
@@ -112,6 +112,17 @@
       socket.on("questionIncorrect", function (data) {
         
       });
+
+      function showBreakdown() {
+            var div = document.getElementById("QuestionBreakdown");
+            // Toggle between showing and hiding the div
+            if (div.style.display === "none") {
+                div.style.display = "block";
+            } else {
+                div.style.display = "none";
+            }
+        }
+        
     </script>
   </body>
 </html>
