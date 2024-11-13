@@ -26,10 +26,10 @@
       
       <div class="popup">
         <h2>Finished</h2>
-        <p>Total questions: <span id="T-Questions">?</span></p>
+        <p>Score: <span id="T-Score">?</span></p>
         <p>Total tries: <span id="T-Tries">?</span></p>
-        <p>Correct tries: <span id="T-Correct">?</span></p>
         <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
+        <p>Time: <span id="T-Time">?</span> sec</p>
    
         <a href="/" class="button-56" role="button">Home</a>
 
@@ -73,18 +73,30 @@
       socket.on("finished", function (data) {
         var overlay = document.getElementById("finishedOverlay");
         overlay.classList.add("show");
-        var questionsSpan = document.getElementById("T-Questions");
+        var scoreSpan = document.getElementById("T-Score");
         var triesSpan = document.getElementById("T-Tries");
-        var correctSpan = document.getElementById("T-Correct");
         var incorrectSpan = document.getElementById("T-Incorrect");
+        var timeSpan = document.getElementById("T-Time");
+        var QuestionBreakdown = document.getElementById("QuestionBreakdown");
         // const loadingScreen = document.querySelector(".loadingScreen");
         // window.addEventListener("load", function () {
         //   loadingScreen.style.display = "none";
         // });
-        questionsSpan.textContent = data["Overvieuw"]["totalQuestions"];
-        triesSpan.textContent = data["Overvieuw"]["totalTried"];
-        correctSpan.textContent = data["Overvieuw"]["totalCorrect"];
-        incorrectSpan.textContent = data["Overvieuw"]["totalIncorrect"];
+        scoreSpan.textContent = data["Overvieuw"]["score"];
+        triesSpan.textContent = data["Overvieuw"]["totalGuesses"];
+        incorrectSpan.textContent = data["Overvieuw"]["totalErrors"];
+        timeSpan.textContent = data["Overvieuw"]["time"];
+
+        data["Overvieuw"]["questionBreakdown"].forEach(function (question) {
+          var questionElement = document.createElement("div");
+          questionElement.classList.add("question");
+          questionElement.innerHTML = `
+            <h3>${question["name"]}</h3>
+            <p>Tries: ${question["tries"]}</p>
+            <p>Correct: ${question["timesCorrect"]}</p>
+          `;
+          QuestionBreakdown.appendChild(questionElement);
+        });
 
         var questionsElement = document.getElementById("questions");
         var questionElements = questionsElement.getElementsByTagName("g");

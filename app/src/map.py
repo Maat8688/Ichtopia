@@ -103,6 +103,23 @@ class mapSession():
             "totalIncorrect": totalIncorrect,
             "totalQuestions": len(self.questions)
         }
+    
+    def getFinishedData(self):
+        questionBreakdown = []
+        for question in self.questions:
+            questionBreakdown.append( {
+                "name": question.id,
+                "tries": question.tries,
+                "timesCorrect": question.timesCorrect
+            })
+
+        return {
+            "score": self.score,
+            "totalGuesses": self.totalGuesses,
+            "totalErrors": self.totalGuesses - len(self.questions),
+            "time": (datetime.now() - self.startTimestamp).seconds,
+            "questionBreakdown": questionBreakdown
+        }
 
 
     def hash(self, awnser:str):

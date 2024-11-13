@@ -95,7 +95,8 @@ def setupSockets(socketio: SocketIO):
         if session.nextQuestion():
             # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
             send(f"Finished with a score of {session.score}/{session.totalGuesses}")
-            emit('finished', {"Overvieuw": session.getProgresBar()})
+            print(session.getFinishedData(), file=sys.stderr)
+            emit('finished', {"Overvieuw": session.getFinishedData()})
             return
 
         if session.sessionMode == 1:
