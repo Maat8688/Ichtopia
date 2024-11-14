@@ -29,4 +29,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
+  - ./data:/data
+  - ./letsencrypt:/etc/letsencrypt  
   postgres_data:
