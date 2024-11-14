@@ -68,7 +68,7 @@
         == 3 %} {% include('partials/clickTheCountry.html') %} {% endif %}
       </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
     <script>
       socket.on("finished", function (data) {
         var overlay = document.getElementById("finishedOverlay");
@@ -78,6 +78,8 @@
         var incorrectSpan = document.getElementById("T-Incorrect");
         var timeSpan = document.getElementById("T-Time");
         var QuestionBreakdown = document.getElementById("QuestionBreakdown");
+       
+
         // const loadingScreen = document.querySelector(".loadingScreen");
         // window.addEventListener("load", function () {
         //   loadingScreen.style.display = "none";
@@ -105,21 +107,43 @@
         });
       });
 
-      socket.on("questionCorrect", function (data) {
-        
+      const correctSound = new Audio('/static/sounds/correct.mp3');
+      const incorrectSound = new Audio('/static/sounds/incorrect.mp3');
+
+      correctSound.onerror = () => console.log('Correct sound file could not be loaded.');
+      incorrectSound.onerror = () => console.log('Incorrect sound file could not be loaded.');
+
+      socket.on("questionCorrect", function(data) {
+        const mapContainer = document.getElementById("mapContainer");
+        mapContainer.classList.add("correct-answer");
+        setTimeout(() => mapContainer.classList.remove("correct-answer"), 1000);
+
+        // Play correct sound and trigger confetti
+        correctSound.play().catch(error => console.log("Error playing sound:", error));
+        console.log("Correct answer received! Triggering confetti...");
+        confetti({
+          particleCount: 100,
+          spread: 60,
+          origin: { x: 0.5, y: 0.5 },
+          angle: 60,
+          startVelocity: 50,
+          ticks: 200
+        });
       });
 
-      socket.on("questionIncorrect", function (data) {
-        
-      });
+      socket.on("questionIncorrect", function(data) {
+        const mapContainer = document.getElementById("mapContainer");
+        mapContainer.classList.add("incorrect-answer");
+        setTimeout(() => mapContainer.classList.remove("incorrect-answer"), 1000);
 
-      
-      function showBreakdown() {
-          var div = document.getElementById("QuestionBreakdown");
-          div.style.display = "block"; // Show the div
-          div.style.pointerEvents = "auto"; // Enable interactions
-          div.style.opacity = "1"; // Make it fully visible
-      }
+        // Play incorrect sound
+        incorrectSound.play().catch(error => console.log("Error playing sound:", error));
+
+        // Shake effect
+        const mainContent = document.getElementById("mainContent");
+        mainContent.classList.add("shake");
+        setTimeout(() => mainContent.classList.remove("shake"), 500);
+      });
     </script>
   </body>
 </html>

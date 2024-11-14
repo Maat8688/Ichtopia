@@ -393,4 +393,31 @@ body {
   margin-top: 10px;
   pointer-events: none; /* Prevent interactions initially */
   opacity: 0.5; /* Make it look visually disabled */
+  
+}
+.correct-answer {
+  animation: correctFlash 0.5s ease-in-out;
+}
+.incorrect-answer {
+  animation: incorrectFlash 0.5s ease-in-out;
+}
+
+@keyframes correctFlash {
+  from { background-color: #d4edda; }
+  to { background-color: transparent; }
+}
+
+@keyframes incorrectFlash {
+  from { background-color: #f8d7da; }
+  to { background-color: transparent; }
+}
+.shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
 }
