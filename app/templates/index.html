@@ -40,29 +40,37 @@
       <p id="SubTitle">Topo leren op het Ichthus Lyceum</p>
 
       <div id="kaarten">
-        <div class="kaart">
-          <img
-            src="{{ url_for('static', filename='img/Nederland.svg') }}"
-            alt="Nederland"
-          />
-          <button id="Nederland">Nederland</button>
-        </div>
-        <div class="kaart">
-          <div>
+        <div class="vertical-nesting">
+          <div class="kaart">
             <img
-              src="{{ url_for('static', filename='img/Europa.svg') }}"
-              alt="Europa"
+              src="{{ url_for('static', filename='img/Nederland.svg') }}"
+              alt="Nederland"
             />
+            <button id="Nederland">Nederland</button>
           </div>
-          <button id="Europa">Europa</button>
+          <div class="kaart">
+            <div class="margin-bottom">
+              <img
+                src="{{ url_for('static', filename='img/Europa.svg') }}"
+                alt="Europa"
+              />
+            </div>
+            <button id="Europa">Europa</button>
+          </div>
         </div>
-        <div class="kaart">
-          <img
-            src="{{ url_for('static', filename='img/Wereld.svg') }}"
-            alt="Wereld"
-          />
-          <button id="Wereld">Wereld</button>
+        <hr />
+        <div class="horizontal-single">
+          <div class="kaart wide-kaart">
+            <div>
+              <img
+                src="{{ url_for('static', filename='img/Wereld.svg') }}"
+                alt="Wereld"
+              />
+            </div>
+            <button id="Wereld">Wereld</button>
+          </div>
         </div>
+
         <!--  <div class="kaart">
           <img
             src="{{ url_for('static', filename='img/Nederland.svg') }}"
@@ -222,9 +230,7 @@
             </div>
             <label for="ClickTheCountry">Click the country</label>
           </div>
-          <div id="questionsSelect">
-            
-          </div>
+          <div id="questionsSelect"></div>
           <hr />
           <button type="submit">Start</button>
         </form>
