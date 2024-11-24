@@ -312,8 +312,11 @@ footer {
     transform: rotate(360deg);
   }
 }
+
+
 #logo {
   transition: transform 2s;
+  width: 200px;
 }
 
 .checkbox-wrapper-30 {
