@@ -70,6 +70,47 @@ def join():
     print('join', file=sys.stderr)
     return 'join'
 
+
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         password = request.form.get('password')
+
+#         if not username or not password:
+#             flash('Username and password are required.', 'error')
+#             return render_template('register.html')
+
+#         db = SQLDatabase()
+#         try:
+#             # Check if the username already exists in the database
+#             if db.execute("SELECT id FROM users WHERE username = %s", (username,)):
+#                 print("username alr exist")
+#                 flash('Username is already in use. Please choose a different one.', 'error')
+#                 return render_template('register.html')
+
+#             # If username is not in use, proceed with registration
+#             password_hash = generate_password_hash(password)
+#             db.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)", (username, password_hash))
+#             flash('Your account has been created! You can now login.', 'success')
+#             return redirect(url_for('login'))
+#         except IntegrityError:
+#             flash('Username is already in use. Please choose a different one.', 'error')
+#             return render_template('register.html')
+#         except Exception as e:
+#             flash('An error occurred during registration. Please try again.', 'error')
+#             print(e)  # For debugging purposes, it might help to log or print the exception
+#         finally:
+#             db.close()
+
+#     return render_template('pages/register.html')
+
+
+
+
+
+
+
 def setupSockets(socketio: SocketIO):
     @socketio.on('message')
     def handle_message(data):

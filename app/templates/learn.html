@@ -114,9 +114,9 @@
       incorrectSound.onerror = () => console.log('Incorrect sound file could not be loaded.');
 
       socket.on("questionCorrect", function(data) {
-        const mapContainer = document.getElementById("mapContainer");
-        mapContainer.classList.add("correct-answer");
-        setTimeout(() => mapContainer.classList.remove("correct-answer"), 1000);
+        // const mapContainer = document.getElementById("mapContainer");
+        // mapContainer.classList.add("correct-answer");
+        // setTimeout(() => mapContainer.classList.remove("correct-answer"), 1000);
 
         // Play correct sound and trigger confetti
         correctSound.play().catch(error => console.log("Error playing sound:", error));
