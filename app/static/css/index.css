@@ -425,3 +425,29 @@ footer {
     max-width: 100vw;
   }
 }
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade-out animation */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Common styles for the new image */
+.fade-in-out {
+  opacity: 0; /* Start hidden */
+  animation-duration: 2s; /* Adjust duration */
+  animation-fill-mode: forwards;
+}
