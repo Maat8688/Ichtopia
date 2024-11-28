@@ -336,16 +336,7 @@
       // Check if it's the third click
       if (clickCount === 10) {
         // Perform a special action
-        console.log("Logo clicked 3 times in a row!");
-        const newImage = document.createElement("img");
-        newImage.src = "{{ url_for('static', filename='img/kevin.jpg') }}"; // Replace with the path to your different image
-        newImage.alt = "Special Image";
-        newImage.style.width = "200px";
-        newImage.style.marginTop = "10px";
-        newImage.className = "fade-in-out"; // Add the fade-in-out class
-
-        // Append the new image to the container
-        container.appendChild(newImage);
+   
         confetti({
           particleCount: 100,
           spread: 60,
@@ -354,11 +345,7 @@
           startVelocity: 50,
           ticks: 200
         });
-        newImage.style.animation = "fadeIn 1s, fadeOut 1s 2s"; // Adjust timing as needed
-        setTimeout(() => {
-            newImage.remove();
-          }, 3000); // Match the total animation duration
-        // Reset click count
+       
         clickCount = 0;
         clearTimeout(clickTimeout);
       }
