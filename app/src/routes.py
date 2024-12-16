@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_socketio import SocketIO, send, emit
+from flask_socketio import SocketIO, send, emit, join_room, leave_room
 from flask_login import login_user, login_required, logout_user, current_user
 import sys
 from . import sessionManager
@@ -7,6 +7,7 @@ from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
 
 main = Blueprint('main', __name__)
+rooms = {}
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -59,17 +60,16 @@ def learn():
     else:
         return redirect(url_for('main.index'))
     
-
 @main.route('/host')
 def host():
-    print('host', file=sys.stderr)
-    return 'host'
+    room_code = "12345"  
+    rooms[room_code] = []
+    return render_template('host.html', room_code=room_code)
+
 
 @main.route('/join')
 def join():
-    print('join', file=sys.stderr)
-    return 'join'
-
+    return render_template('join.html')
 
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
@@ -112,10 +112,7 @@ def join():
 
 
 def setupSockets(socketio: SocketIO):
-    @socketio.on('message')
-    def handle_message(data):
-        print('received message: ' + data)
-        send(f'You said: {data}')
+
 
     @socketio.on('answerQuestion')
     def answerQuestion(data): # expects {'awnser': str, 'hashed': bool, 'sessionToken': str}
@@ -161,3 +158,22 @@ def setupSockets(socketio: SocketIO):
     def getProgressbar(data):
         session:mapSession = sessionManager.getSession(data['sessionToken'])
         emit('setProgressBar', session.getProgresBar())
+    
+    @socketio.on('join')
+    def on_join(data):
+        username = data['username']
+        room = data['room']
+        join_room(room)
+        send(username + ' has entered the room.', to=room)
+
+    @socketio.on('leave')
+    def on_leave(data):
+        username = data['username']
+        room = data['room']
+        leave_room(room)
+        send(username + ' has left the room.', to=room)
+    @socketio.on('send_message')
+    def handle_message(data):
+        room = data['room']
+        message = data['message']
+        send(message, room=room)

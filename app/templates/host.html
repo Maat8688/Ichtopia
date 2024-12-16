@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SocketIO Room Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <script type="text/javascript">
+        var socket = io.connect('http://localhost:5000');
+
+        io.on("connection", socket => {
+            socket.join("some room");
+        });
+
+        // Sending a message to a room
+        function sendMessage() {
+            var message = document.getElementById('message').value;
+            io.to("lol").emit('message', {room: room, message: message});
+        }
+
+        // Listening for messages from the room
+        socket.on('message', function(msg) {
+            document.getElementById('messages').innerHTML += msg + "<br>";
+        });
+    </script>
+</head>
+<body>
+    <h1>SocketIO Rooms</h1>
+   
+    <input type="text" id="message" placeholder="Enter message">
+    <button onclick="sendMessage()">Send Message</button><br><br>
+
+    <div id="messages"></div>
+</body>
+</html>

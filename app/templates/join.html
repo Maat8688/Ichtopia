@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Join Game | Topo IchthusLyceum</title>
+        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+        <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
+        <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/main.css') }}"
+        />
+        <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/index.css') }}"
+        />
+        <link
+        rel="icon"
+        href="{{ url_for('static', filename='img/logo_small.png') }}"
+        />
+    </head>
+    <body>
+        <main>
+            <div id="container">
+                <img
+                    id="logo"
+                    src="{{ url_for('static', filename='img/logo.png') }}"
+                    alt="Logo"
+                />
+                <h1>Join Game</h1>
+                <form id="join-form">
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                    <input type="text" id="room-code" placeholder="Enter room code" required>
+                    <button type="submit">Join</button>
+                </form>
+            </div>
+        </main>
+        <footer>
+            <p>© 2024 Ichthus Lyceum | Floris Joël Luuk Liam Sami</p>
+        </footer>
+
+        <script>
+            
+
+        </script>
+    </body>
+</html>
