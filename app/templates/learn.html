@@ -107,8 +107,6 @@
         });
       });
 
-      const correctSound = new Audio('/static/sounds/correct.mp3');
-      const incorrectSound = new Audio('/static/sounds/incorrect.mp3');
 
       correctSound.onerror = () => console.log('Correct sound file could not be loaded.');
       incorrectSound.onerror = () => console.log('Incorrect sound file could not be loaded.');
@@ -136,8 +134,6 @@
         mapContainer.classList.add("incorrect-answer");
         setTimeout(() => mapContainer.classList.remove("incorrect-answer"), 1000);
 
-        // Play incorrect sound
-        incorrectSound.play().catch(error => console.log("Error playing sound:", error));
 
         // Shake effect
         const mainContent = document.getElementById("mainContent");
