@@ -9,3 +9,4 @@ psycopg2-binary
 werkzeug
 beautifulsoup4
 lxml
+gunicorn
