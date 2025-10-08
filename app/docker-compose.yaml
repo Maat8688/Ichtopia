@@ -19,7 +19,7 @@ services:
       - FLASK_APP=src.__init__:app
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/main
     restart: always
-    # command: flask run --host=0.0.0.0 --port=443 --certfile=/certs/fullchain.pem --keyfile=/certs/privkey.pem
+    command: flask run --host=0.0.0.0 --port=443 --certfile=/certs/fullchain.pem --keyfile=/certs/privkey.pem
   db:
     image: postgres:latest
     container_name: postgres_db
