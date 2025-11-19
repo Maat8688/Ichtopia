@@ -14,7 +14,7 @@ import urllib.request
 # =========================
 
 # Path to your Flask / Werkzeug access log
-LOG_PATH = Path("/var/log/flask_app/access.log")  # <-- change this
+LOG_PATH = Path("/app/logs/access.log")  # <-- change this
 
 # Time window for analysis (seconds)
 WINDOW_SECONDS = 300  # 5 minutes

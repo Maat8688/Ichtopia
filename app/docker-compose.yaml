@@ -9,6 +9,7 @@ services:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt 
       - ./certs:/certs:ro 
+      - ./logs:/app/logs
 
     ports:
       - "443:443"
