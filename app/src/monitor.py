@@ -270,6 +270,7 @@ def send_ntfy_alert(ip: str, score: int, stats: Dict[str, Any]):
     """
     Send a concise alert to ntfy (phone/app/browser).
     """
+    print("sending message")
     if not NTFY_TOPIC:
         return
 
