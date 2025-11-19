@@ -8,13 +8,52 @@ from typing import List, Dict, Any
 import threading
 import json
 import urllib.request
+import os
 
 # =========================
 # CONFIG
 # =========================
 
 # Path to your Flask / Werkzeug access log
-LOG_PATH = Path("/app/logs/access.log")  # <-- change this
+# LOG_PATH = Path("/app/logs/access.log")  # <-- change this
+
+def resolve_log_path() -> Path:
+    here = Path(__file__).resolve().parents[1]  # app/src -> app
+    env = os.getenv("ACCESS_LOG_PATH") or os.getenv("LOG_PATH")
+    candidates = []
+    if env:
+        candidates.append(Path(env))
+
+    # project-relative (when running on host)
+    candidates += [
+        here / "log" / "access.log",
+        here / "logs" / "access.log",
+    ]
+
+    # common container paths
+    candidates += [
+        Path("/app/log/access.log"),
+        Path("/app/logs/access.log"),
+        Path("/var/log/flask_app/access.log"),
+    ]
+
+    for p in candidates:
+        try:
+            if p.exists():
+                return p
+        except Exception:
+            continue
+
+    # fallback — create project-relative log file
+    fallback = here / "log" / "access.log"
+    try:
+        fallback.parent.mkdir(parents=True, exist_ok=True)
+        fallback.touch(exist_ok=True)
+    except Exception:
+        pass
+    return fallback
+
+LOG_PATH = resolve_log_path()
 
 # Time window for analysis (seconds)
 WINDOW_SECONDS = 300  # 5 minutes
