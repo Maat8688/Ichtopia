@@ -128,6 +128,10 @@ ENV/
 env.bak/
 venv.bak/
 
+# TLS certs / private keys - provide these on the server, never commit them
+app/certs/*
+!app/certs/.gitkeep
+
 # Spyder project settings
 .spyderproject
 .spyproject
