@@ -78,12 +78,7 @@
         var incorrectSpan = document.getElementById("T-Incorrect");
         var timeSpan = document.getElementById("T-Time");
         var QuestionBreakdown = document.getElementById("QuestionBreakdown");
-       
 
-        // const loadingScreen = document.querySelector(".loadingScreen");
-        // window.addEventListener("load", function () {
-        //   loadingScreen.style.display = "none";
-        // });
         scoreSpan.textContent = data["Overvieuw"]["score"];
         triesSpan.textContent = data["Overvieuw"]["totalGuesses"];
         incorrectSpan.textContent = data["Overvieuw"]["totalErrors"];

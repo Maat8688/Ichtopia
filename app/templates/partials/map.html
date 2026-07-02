@@ -351,12 +351,6 @@
 <script>
   urlParams = new URLSearchParams(window.location.search);
   
-  socket.on('updateMap', function(data) {
-    var question = document.getElementById(data.questionId);
-    question.classList.remove('active');
-    question.classList.add(data.status);
-  });
-
   socket.on('connect', function(data) {
     socket.emit('getQuestion', {'sessionToken': urlParams.get('sessionToken')});
     socket.emit('getProgressbar', {'sessionToken': urlParams.get('sessionToken')})

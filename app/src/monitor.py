@@ -74,8 +74,8 @@ MANY_PATHS_THRESHOLD = 20
 DISCORD_WEBHOOK_URL = ""  # e.g. "https://discord.com/api/webhooks/...."
 
 # Optional: ntfy for alerts (leave NTFY_TOPIC empty to disable)
-NTFY_SERVER = "https://ntfy.sh"
-NTFY_TOPIC = "AK-Leer-129845"  # e.g. "xxxxxxxxx"
+NTFY_SERVER = os.getenv("NTFY_SERVER", "https://ntfy.sh")
+NTFY_TOPIC = os.getenv("NTFY_TOPIC", "AK-Leer-129845")
 
 # Suspicious path patterns (regex)
 SUSPICIOUS_PATTERNS = [

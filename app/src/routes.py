@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_socketio import SocketIO, send, emit
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 import sys
 from . import sessionManager
 from .models import User
@@ -71,46 +71,6 @@ def join():
     return 'join'
 
 
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         password = request.form.get('password')
-
-#         if not username or not password:
-#             flash('Username and password are required.', 'error')
-#             return render_template('register.html')
-
-#         db = SQLDatabase()
-#         try:
-#             # Check if the username already exists in the database
-#             if db.execute("SELECT id FROM users WHERE username = %s", (username,)):
-#                 print("username alr exist")
-#                 flash('Username is already in use. Please choose a different one.', 'error')
-#                 return render_template('register.html')
-
-#             # If username is not in use, proceed with registration
-#             password_hash = generate_password_hash(password)
-#             db.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)", (username, password_hash))
-#             flash('Your account has been created! You can now login.', 'success')
-#             return redirect(url_for('login'))
-#         except IntegrityError:
-#             flash('Username is already in use. Please choose a different one.', 'error')
-#             return render_template('register.html')
-#         except Exception as e:
-#             flash('An error occurred during registration. Please try again.', 'error')
-#             print(e)  # For debugging purposes, it might help to log or print the exception
-#         finally:
-#             db.close()
-
-#     return render_template('pages/register.html')
-
-
-
-
-
-
-
 def setupSockets(socketio: SocketIO):
     @socketio.on('message')
     def handle_message(data):
@@ -120,21 +80,17 @@ def setupSockets(socketio: SocketIO):
     @socketio.on('answerQuestion')
     def answerQuestion(data): # expects {'awnser': str, 'hashed': bool, 'sessionToken': str}
         session:mapSession = sessionManager.getSession(data['sessionToken'])
-        questionId = session.hash(session.currentQuestion.id) 
 
         if session.awnserQuestion(data['awnser'], data['hashed']):
             emit('questionCorrect')
-            # emit('updateMap', {'questionId': questionId, 'status': 'correct'})
             emit('setMapState', session.getMapState())
         else:
             emit('questionIncorrect')
-            # emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
             emit('setMapState', session.getMapState())
 
         emit('setProgressBar', session.getProgresBar())
 
         if session.nextQuestion():
-            # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
             send(f"Finished with a score of {session.score}/{session.totalGuesses}")
             print(session.getFinishedData(), file=sys.stderr)
             emit('finished', {"Overvieuw": session.getFinishedData()})

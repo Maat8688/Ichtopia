@@ -68,6 +68,6 @@ with app.app_context():
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    login_manager.login_view = 'socket.login'
+    login_manager.login_view = 'main.login'
     login_manager.login_message_category = 'info'
     login_manager.login_message = 'Please log in to access this page.'
