@@ -1,11 +1,12 @@
 Flask
 Flask-SocketIO
-Flask-SQLAlchemy
-Flask-Migrate
-Flask-Login
-PyMySQL
+# Database/accounts uitgeschakeld - zie src/__init__.py
+# Flask-SQLAlchemy
+# Flask-Migrate
+# Flask-Login
+# PyMySQL
 python-dotenv
-psycopg2-binary
+# psycopg2-binary
 werkzeug
 beautifulsoup4
 lxml

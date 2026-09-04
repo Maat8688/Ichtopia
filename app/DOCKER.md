@@ -6,6 +6,12 @@ cp .env.example .env      # first time only, then fill it in
 docker compose up --build
 ```
 
+> **De database staat uit.** De app draait zonder Postgres: het spel houdt
+> zijn state in het geheugen en niets raakt nog een database aan. De
+> `db`-service is uit `docker-compose.yaml` verwijderd en de code staat
+> uitgecommentarieerd in `src/__init__.py` en `src/routes.py`.
+> Alles hieronder geldt alleen als je de database weer aanzet.
+
 ## The two things that bite
 
 The `postgres_data` volume outlives the config that created it. Two settings

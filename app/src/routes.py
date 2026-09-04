@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_socketio import SocketIO, send, emit
-from flask_login import login_user, login_required, logout_user, current_user
 import sys
 from . import sessionManager
-from .models import User
+
+# Database/accounts uitgeschakeld - zie src/__init__.py
+# from flask_login import login_user, login_required, logout_user, current_user
+# from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
 
 main = Blueprint('main', __name__)
@@ -23,32 +25,40 @@ def index():
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
 
-@main.route('/me')
-@login_required
-def me():
-    print('me', file=sys.stderr)
-    return 'me'
-
-@main.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = User.query.filter_by(email=email).first()
-        
-        if user and user.check_password(password):
-            login_user(user)
-            flash('Logged in successfully!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.index'))
-        flash('Invalid email or password', 'danger')
-    return render_template('login.html')
-
-@main.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('main.login'))
+# ---------------- ACCOUNT-ROUTES UITGESCHAKELD ----------------
+# Dit waren de enige plekken in de app die de database gebruikten.
+# Weer aanzetten? Haal dit commentaar weg, samen met de imports hierboven en
+# het blok in src/__init__.py. Let op: login.html post naar
+# url_for('socket.login') terwijl deze blueprint 'main' heet, dus die actie
+# moet naar url_for('main.login') voordat het formulier werkt.
+#
+# @main.route('/me')
+# @login_required
+# def me():
+#     print('me', file=sys.stderr)
+#     return 'me'
+#
+# @main.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         email = request.form.get('email')
+#         password = request.form.get('password')
+#         user = User.query.filter_by(email=email).first()
+#
+#         if user and user.check_password(password):
+#             login_user(user)
+#             flash('Logged in successfully!', 'success')
+#             next_page = request.args.get('next')
+#             return redirect(next_page or url_for('main.index'))
+#         flash('Invalid email or password', 'danger')
+#     return render_template('login.html')
+#
+# @main.route('/logout')
+# @login_required
+# def logout():
+#     logout_user()
+#     return redirect(url_for('main.login'))
+# --------------------------------------------------------------
 
 @main.route('/learn')
 def learn():

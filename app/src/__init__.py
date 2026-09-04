@@ -1,13 +1,26 @@
 import os
-import time
 import logging
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
+
+# ---------------- DATABASE / ACCOUNTS UITGESCHAKELD ----------------
+# De site draait volledig zonder database. Het spel houdt zijn state in het
+# geheugen (SessionManager in map.py), en de publieke routes /, /learn, /host
+# en /join raakten Postgres sowieso nooit aan. Alleen inloggen gebruikte de
+# database, en die routes waren al stuk: login.html post naar
+# url_for('socket.login') terwijl de blueprint 'main' heet.
+#
+# Weer aanzetten? Haal het commentaar hier en in routes.py weg, zet de
+# pakketten terug in requirements.txt en de db-service terug in
+# docker-compose.yaml. De login_view hieronder is meteen gecorrigeerd naar
+# 'main.login', dus die bug komt niet terug.
+#
+# from flask_sqlalchemy import SQLAlchemy
+# from flask_migrate import Migrate
+# from flask_login import LoginManager
+# -------------------------------------------------------------------
 
 from .map import SessionManager
 
@@ -47,12 +60,12 @@ werkzeug_logger.addHandler(file_handler)
 # ------------------------------------------------
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 socketio = SocketIO(app)
-migrate = Migrate()
-login_manager = LoginManager(app)
+# migrate = Migrate()
+# login_manager = LoginManager(app)
 sessionManager = SessionManager()
 
 with app.app_context():
@@ -60,59 +73,15 @@ with app.app_context():
     app.register_blueprint(main)
     setupSockets(socketio)
 
-    from .models import db, User
-    db.init_app(app)
-
-    # The database container may still be starting (or its DNS alias may not
-    # resolve yet) when this module is imported. Retry rather than crash the
-    # whole app, which `restart: always` would otherwise turn into a loop.
-    _DB_CONNECT_ATTEMPTS = 10
-    _DB_CONNECT_DELAY_SECONDS = 3
-
-    def _is_retryable(exc):
-        """True for "not up yet" errors, False for ones that will never fix themselves.
-
-        SQLSTATE class 28 is "invalid authorization specification": a wrong
-        password, or a role that does not exist in the cluster. Retrying that
-        just delays a clear error message by half a minute.
-        """
-        pgcode = getattr(getattr(exc, "orig", exc), "pgcode", None)
-        return not (pgcode and str(pgcode).startswith("28"))
-
-    for _attempt in range(1, _DB_CONNECT_ATTEMPTS + 1):
-        try:
-            db.create_all()
-            break
-        except Exception as exc:  # noqa: BLE001 - driver/DNS errors are retryable here
-            if not _is_retryable(exc):
-                app.logger.error(
-                    "Database rejected our credentials, not retrying. Check that "
-                    "POSTGRES_USER/POSTGRES_PASSWORD match the role stored in the "
-                    "postgres_data volume: %s",
-                    exc,
-                )
-                raise
-            if _attempt == _DB_CONNECT_ATTEMPTS:
-                app.logger.error(
-                    "Database unreachable after %s attempts: %s",
-                    _DB_CONNECT_ATTEMPTS,
-                    exc,
-                )
-                raise
-            app.logger.warning(
-                "Database not ready (attempt %s/%s): %s",
-                _attempt,
-                _DB_CONNECT_ATTEMPTS,
-                exc,
-            )
-            time.sleep(_DB_CONNECT_DELAY_SECONDS)
-
-    migrate.init_app(app, db)
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
-    
-    login_manager.login_view = 'socket.login'
-    login_manager.login_message_category = 'info'
-    login_manager.login_message = 'Please log in to access this page.'
+    # from .models import db, User
+    # db.init_app(app)
+    # db.create_all()
+    # migrate.init_app(app, db)
+    #
+    # @login_manager.user_loader
+    # def load_user(user_id):
+    #     return User.query.get(int(user_id))
+    #
+    # login_manager.login_view = 'main.login'
+    # login_manager.login_message_category = 'info'
+    # login_manager.login_message = 'Please log in to access this page.'

@@ -1,4 +1,8 @@
-# Flask app with SQL database
+# Flask app - draait zonder database.
+#
+# De db-service (Postgres) is verwijderd omdat niets in de app hem nog
+# gebruikt; zie het commentaarblok in src/__init__.py. De oude versie met
+# Postgres staat in de git-historie en in DOCKER.md.
 services:
   web:
     build:
@@ -12,42 +16,9 @@ services:
     ports:
       - "443:443"
       - "80:80"
-    depends_on:
-      db:
-        condition: service_healthy
     env_file:
       - .env
     environment:
       - FLASK_APP=src.__init__:app
-      # NOTE: POSTGRES_USER/POSTGRES_PASSWORD below only take effect when the
-      # postgres_data volume is EMPTY. On an existing volume the role and
-      # password already stored in the cluster win, and these must match them.
-      - DATABASE_URL=postgresql://${POSTGRES_USER:?set POSTGRES_USER in app/.env}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in app/.env}@db:5432/main
     restart: always
     command: flask run --host=0.0.0.0 --port=80
-
-  db:
-    # Must match the major version that initialised the postgres_data volume.
-    # Postgres refuses to start on a data directory written by a newer major.
-    image: postgres:17
-    container_name: postgres_db
-    environment:
-      # Only used to initialise a brand-new data directory; ignored once
-      # postgres_data contains a cluster.
-      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in app/.env}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in app/.env}
-      POSTGRES_DB: main
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d main"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    restart: always
-
-volumes:
-  postgres_data:
