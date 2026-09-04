@@ -68,11 +68,30 @@ with app.app_context():
     # whole app, which `restart: always` would otherwise turn into a loop.
     _DB_CONNECT_ATTEMPTS = 10
     _DB_CONNECT_DELAY_SECONDS = 3
+
+    def _is_retryable(exc):
+        """True for "not up yet" errors, False for ones that will never fix themselves.
+
+        SQLSTATE class 28 is "invalid authorization specification": a wrong
+        password, or a role that does not exist in the cluster. Retrying that
+        just delays a clear error message by half a minute.
+        """
+        pgcode = getattr(getattr(exc, "orig", exc), "pgcode", None)
+        return not (pgcode and str(pgcode).startswith("28"))
+
     for _attempt in range(1, _DB_CONNECT_ATTEMPTS + 1):
         try:
             db.create_all()
             break
-        except Exception as exc:  # noqa: BLE001 - any driver/DNS error is retryable here
+        except Exception as exc:  # noqa: BLE001 - driver/DNS errors are retryable here
+            if not _is_retryable(exc):
+                app.logger.error(
+                    "Database rejected our credentials, not retrying. Check that "
+                    "POSTGRES_USER/POSTGRES_PASSWORD match the role stored in the "
+                    "postgres_data volume: %s",
+                    exc,
+                )
+                raise
             if _attempt == _DB_CONNECT_ATTEMPTS:
                 app.logger.error(
                     "Database unreachable after %s attempts: %s",
