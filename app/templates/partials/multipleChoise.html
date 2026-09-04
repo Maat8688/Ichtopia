@@ -1,19 +1,14 @@
-
-<div id="multipleChoise">
-
-</div>
+<div id="multipleChoise"></div>
 
 <script>
     socket.on('question', function(data) {
         var multipleChoise = document.getElementById('multipleChoise');
         var mapElement = document.getElementById(data.question);
         var possibleAnswers = data.mcAwnsers;
-        var question = data.question;
 
         // Remove the active element from all mapelements
         var questionsElement = document.getElementById("questions");
         var questionElements = questionsElement.getElementsByTagName('g');
-        console.log(questionElements);
         Array.from(questionElements).forEach(function(element) {
             element.classList.remove('active');
         });
@@ -26,15 +21,17 @@
 
         for (var i = 0; i < possibleAnswers.length; i++) {
             var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn';
             button.textContent = possibleAnswers[i];
             button.setAttribute('data-answer', possibleAnswers[i]);
 
             button.addEventListener('click', function() {
                 var answer = this.getAttribute('data-answer');
+                lastAnswer = answer;
                 socket.emit('answerQuestion', {'awnser': answer, 'hashed':false, 'sessionToken': urlParams.get('sessionToken')});
             });
             multipleChoise.appendChild(button);
         }
-
     });
 </script>

@@ -1,60 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Inloggen · Topo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}">
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f8f9fa;
+        .login {
+            max-width: 400px;
+            margin-top: 24px;
         }
-        .login-container {
-            width: 400px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        .login form {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            margin-top: 24px;
+        }
+        .login label {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .login .feedback {
+            margin: 18px 0 0;
         }
     </style>
 </head>
 <body>
 
-<div class="login-container">
-    <h2 class="text-center">Login</h2>
+<header class="page topbar">
+    <h1>Topo</h1>
+    <span class="muted">Ichthus · 2025–26</span>
+</header>
 
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+<main class="page">
+    <div class="login">
+        <h2>Inloggen</h2>
 
-    <form method="POST" action="{{ url_for('socket.login') }}">
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password" required>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Login</button>
-    </form>
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="feedback{% if category == 'success' %} ok{% endif %}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-    <div class="text-center mt-3">
-        <p>Don't have an account? <a>Register here</a></p>
+        <form method="POST" action="{{ url_for('main.login') }}">
+            <div>
+                <label for="email">E-mail</label>
+                <input type="email" class="field" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="password">Wachtwoord</label>
+                <input type="password" class="field" id="password" name="password" required>
+            </div>
+            <div class="actions actions-end">
+                <button type="submit" class="btn btn-primary">Inloggen</button>
+            </div>
+        </form>
+
+        <p class="muted" style="margin-top: 24px;">Nog geen account? Registreren is nog niet mogelijk.</p>
     </div>
-</div>
+</main>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<footer>
+    <div class="page">
+        <p>Gemaakt door Floris, Joël, Luuk, Liam en Sami · geen account nodig</p>
+    </div>
+</footer>
+
 </body>
 </html>

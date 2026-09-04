@@ -1,5 +1,5 @@
 
-<svg id="map" aspect-ratio="map.viewBox[2]/map.viewBox[3]" viewBox="{{map.getViewBox()}}" xmlns="http://www.w3.org/2000/svg" style="background-color:#fffbdb">
+<svg id="map" viewBox="{{map.getViewBox()}}" xmlns="http://www.w3.org/2000/svg" style="aspect-ratio: {{ map.viewBox[2] }} / {{ map.viewBox[3] }}">
   <defs xmlns="http://www.w3.org/2000/svg" id="defs1">
     <clipPath clipPathUnits="userSpaceOnUse" id="clipPath1401">
       <path d="m 396.944,518.685 c 0,-25.379 20.574,-45.953 45.952,-45.953 v 0 c 25.38,0 45.953,20.574 45.953,45.953 v 0 c 0,25.38 -20.573,45.953 -45.953,45.953 v 0 c -25.378,0 -45.952,-20.573 -45.952,-45.953" id="path1401"/>
@@ -260,91 +260,94 @@
       {{ foreground | safe }}
     {% endfor %}
   </g>
+  <circle id="marker" class="marker" r="0" visibility="hidden" vector-effect="non-scaling-stroke"/>
 </svg>
 
 <style>
+  /* Kaartdata naar het palet. De inline kleuren uit de SVG-bestanden
+     worden hier overschreven, de bestanden zelf blijven ongewijzigd. */
+  #map [style*="fill:#d4edfc"] { fill: var(--paper-2) !important; }
+  #map [style*="fill:#fffbdb"],
+  #map [style*="fill:#ecf3da"],
+  #map [style*="fill:#e4eab9"],
+  #map [style*="fill:#ffffff"] { fill: var(--paper) !important; }
+  #map [style*="fill:#1a1a18"] { fill: var(--ink) !important; }
+  #map [style*="fill:#9c9c9c"] { fill: var(--rule) !important; }
+  #map [style*="stroke:#009ee3"] { stroke: var(--atlas) !important; }
+  #map [style*="stroke:#d2050c"],
+  #map [style*="stroke:#1a1a18"] { stroke: var(--ink) !important; }
+  #map [style*="stroke:#575656"] { stroke: var(--rule) !important; }
+
+  /* Vraagelementen */
   #questions > g {
     cursor: pointer;
-    fill: #fffbdb;
-    transition: all 0.25s ease-in-out;
+    fill: var(--paper);
+    transition: fill 0.2s ease, fill-opacity 0.2s ease;
   }
 
   #questions > g.Steden {
-    cursor: pointer;
-    fill: #c7bd74;
-    transition: all 0.25s ease-in-out;
+    fill: var(--ink);
+  }
+
+  #questions > g.Wateren {
+    fill: var(--paper-2);
   }
 
   #questions > g.Gebieden {
-    cursor: pointer;
-    fill: #b3a86423;
-    transition: all 0.25s ease-in-out;
+    fill: var(--ink);
+    fill-opacity: 0.06;
   }
 
-  #questions > g:hover:not(.active):not([state="Correct"]) {
-    filter: brightness(0.9);
-    z-index: 1;
-  }
-  
-  #questions > g.Gebieden:hover:not(.active):not([state="Correct"]) {
-    fill: #00000023;
-    stroke-width: 2px;
-    stroke:#421b1b;
+  #questions > g:hover:not(.active) {
+    fill: var(--track);
   }
 
-  #questions > g:active {
-    filter: brightness(0.85);
+  #questions > g.Steden:hover:not(.active) {
+    fill: var(--atlas);
   }
 
-  #questions > g.Gebieden:active {
-    stroke-width: 2px;
-    stroke:#421b1b;
+  #questions > g.Gebieden:hover:not(.active) {
+    fill: var(--ink);
+    fill-opacity: 0.16;
   }
 
-  #questions > g[state="Incorrect"] {
-    fill: #f3b7b7;
-  }
-
-  #questions > g.Steden[state="Incorrect"] {
-    fill: #b37b7b;
-  }
-
-  #questions > g.Gebieden[state="Correct"] {
-    fill: #e0a4a4;
-  }
-
+  /* Stand: gekend in atlasblauwgroen, fout in rode pen */
   #questions > g[state="Correct"] {
-    fill: #b7f3b7;
+    fill: var(--atlas);
+    fill-opacity: 0.28;
   }
 
   #questions > g.Steden[state="Correct"] {
-    fill: #6ca56c;
+    fill: var(--atlas);
+    fill-opacity: 1;
   }
 
-  #questions > g.Gebieden[state="Correct"] {
-    fill: #94d39480;
+  #questions > g[state="Incorrect"] {
+    fill: var(--pen);
+    fill-opacity: 0.28;
   }
 
-  @keyframes upDown {
-    0% { transform: translateY(0);}
-    50% { transform: translateY(-4px); } /* Move up */
-    100% { transform: translateY(0); } /* Return to starting position */
+  #questions > g.Steden[state="Incorrect"] {
+    fill: var(--pen);
+    fill-opacity: 1;
   }
 
+  /* Huidige vraag: rode pen */
   #questions > g.active {
-    fill: #b7b7f3;
+    fill: var(--pen);
+    fill-opacity: 0.2;
+    stroke: var(--pen);
+    stroke-width: 2;
+  }
+
+  #questions > g.active > path {
+    vector-effect: non-scaling-stroke;
   }
 
   #questions > g.Steden.active {
-    fill: #c848ff;
-    animation: upDown 2s ease-in-out infinite;
-    box-shadow: 0px 20px 15px rgba(0, 0, 0, 0.3); 
-  }
-
-  #questions > g.Gebieden.active {
-    fill: #c848ff;
-    stroke-width: 2px;
-    stroke:#421b1b;
+    fill: var(--pen);
+    fill-opacity: 1;
+    stroke: none;
   }
 </style>
 
@@ -367,5 +370,23 @@
     var question = document.getElementById(questionId);
     question.setAttribute('state', state);
   }
+  });
+
+  // Ringmarker om de gevraagde stad. Voor landen en gebieden wordt de
+  // omtrek zelf in rode pen getekend (zie .active hierboven).
+  socket.on('question', function(data) {
+    var marker = document.getElementById('marker');
+    var element = document.getElementById(data.question);
+    if (element && element.classList.contains('Steden')) {
+      var box = element.getBBox();
+      var viewBox = document.getElementById('map').viewBox.baseVal;
+      var padding = Math.max(viewBox.width, viewBox.height) * 0.012;
+      marker.setAttribute('cx', box.x + box.width / 2);
+      marker.setAttribute('cy', box.y + box.height / 2);
+      marker.setAttribute('r', Math.max(box.width, box.height) / 2 + padding);
+      marker.setAttribute('visibility', 'visible');
+    } else {
+      marker.setAttribute('visibility', 'hidden');
+    }
   });
 </script>

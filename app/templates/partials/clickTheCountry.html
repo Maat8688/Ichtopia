@@ -1,8 +1,8 @@
-<h1 class="Klikhetland">Klik op <span id="countryText">...</span></h1>
+<p class="question">Waar ligt <span id="countryText">…</span>?</p>
 <script>
     socket.on('question', function(data) {
         var span = document.getElementById('countryText');
-        span.textContent = data.question;
+        span.textContent = String(data.question).replace(/[_]/g, ' ');
     });
 </script>
 
