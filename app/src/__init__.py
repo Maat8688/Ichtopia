@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -17,7 +18,7 @@ app = Flask(
 )
 
 # ---------------- LOGGING SETUP ----------------
-LOG_DIR = "/app/log"  # matches Docker volume: -v ./logs:/app/logs
+LOG_DIR = "/app/log"  # provided by the `.:/app` bind mount in docker-compose.yaml
 os.makedirs(LOG_DIR, exist_ok=True)
 
 log_path = os.path.join(LOG_DIR, "access.log")
@@ -61,7 +62,32 @@ with app.app_context():
 
     from .models import db, User
     db.init_app(app)
-    db.create_all()
+
+    # The database container may still be starting (or its DNS alias may not
+    # resolve yet) when this module is imported. Retry rather than crash the
+    # whole app, which `restart: always` would otherwise turn into a loop.
+    _DB_CONNECT_ATTEMPTS = 10
+    _DB_CONNECT_DELAY_SECONDS = 3
+    for _attempt in range(1, _DB_CONNECT_ATTEMPTS + 1):
+        try:
+            db.create_all()
+            break
+        except Exception as exc:  # noqa: BLE001 - any driver/DNS error is retryable here
+            if _attempt == _DB_CONNECT_ATTEMPTS:
+                app.logger.error(
+                    "Database unreachable after %s attempts: %s",
+                    _DB_CONNECT_ATTEMPTS,
+                    exc,
+                )
+                raise
+            app.logger.warning(
+                "Database not ready (attempt %s/%s): %s",
+                _attempt,
+                _DB_CONNECT_ATTEMPTS,
+                exc,
+            )
+            time.sleep(_DB_CONNECT_DELAY_SECONDS)
+
     migrate.init_app(app, db)
 
     @login_manager.user_loader
