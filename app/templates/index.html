@@ -98,6 +98,18 @@
           <button id="Nederland">Nederland5</button>
         </div>  -->
       </div>
+
+      <div id="klassikaal">
+        <h2>Klassikale quiz</h2>
+        <p>
+          Speel als klas tegen elkaar: de docent zet de quiz op het bord,
+          leerlingen doen mee op hun eigen laptop met een pincode.
+        </p>
+        <div class="klassikaal-knoppen">
+          <a class="klassikaal-knop" href="{{ url_for('kahoot.join') }}">Meedoen</a>
+          <a class="klassikaal-knop docent" href="{{ url_for('kahoot.host') }}">Quiz hosten (docent)</a>
+        </div>
+      </div>
     </main>
     <footer>
       <p>© 2024 Ichthus Lyceum | Floris Joël Luuk Liam Sami</p>

@@ -1,0 +1,959 @@
+/* Klassikale quiz (Kahoot-modus) — bord (docent) en speler (leerling) */
+
+:root {
+  --k-red: #e21b3c;
+  --k-blue: #1368ce;
+  --k-yellow: #d89e00;
+  --k-green: #26890c;
+  --k-card: #6a7f8b;
+  --k-cream: #fbeee0;
+  --k-shadow: #2c3532;
+}
+
+html,
+body {
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  overflow: auto;
+}
+
+body.kahoot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  color: #fff;
+}
+
+.kahoot a {
+  color: inherit;
+}
+
+.kahoot .hidden {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Topbalk                                                             */
+/* ------------------------------------------------------------------ */
+.k-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 2px solid #000;
+  flex-wrap: wrap;
+}
+
+.k-topbar .k-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.2em;
+  text-decoration: none;
+}
+
+.k-topbar .k-brand img {
+  width: 36px;
+  height: 36px;
+}
+
+.k-pill {
+  background: var(--k-cream);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 30px;
+  padding: 4px 16px;
+  font-weight: 700;
+  box-shadow: #000 3px 3px 0 0;
+  white-space: nowrap;
+}
+
+.k-pill.big {
+  font-size: 1.6em;
+  letter-spacing: 3px;
+  padding: 6px 22px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Algemene kaarten en knoppen                                         */
+/* ------------------------------------------------------------------ */
+.k-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  gap: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.k-card {
+  background: var(--k-card);
+  border: 2px solid #000;
+  border-radius: 15px;
+  box-shadow: var(--k-shadow) 4px 4px 0 0;
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 640px;
+  color: #fff;
+}
+
+.k-card h1,
+.k-card h2 {
+  margin-top: 0;
+  color: #fff;
+}
+
+.k-card.center {
+  text-align: center;
+}
+
+.k-btn {
+  background-color: var(--k-cream);
+  border: 2px solid #000;
+  border-radius: 30px;
+  box-shadow: #000 4px 4px 0 0;
+  color: #000;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 10px 26px;
+  margin: 0;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.15s;
+}
+
+.k-btn:hover {
+  background-color: #fff;
+}
+
+.k-btn:active {
+  box-shadow: #000 2px 2px 0 0;
+  transform: translate(2px, 2px);
+}
+
+.k-btn.primary {
+  background-color: var(--k-green);
+  color: #fff;
+}
+
+.k-btn.primary:hover {
+  background-color: #2fa60f;
+}
+
+.k-btn.secondary {
+  background-color: transparent;
+  color: #fff;
+  box-shadow: none;
+  border-color: #fff;
+}
+
+.k-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.k-btn-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.k-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 18px;
+  color: #333;
+  background-color: #f9f9f9;
+  border: 2px solid #000;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 14px;
+}
+
+.k-input:focus {
+  border-color: var(--k-blue);
+  box-shadow: 0 0 8px rgba(19, 104, 206, 0.4);
+}
+
+.k-input.pin {
+  text-align: center;
+  font-size: 28px;
+  letter-spacing: 8px;
+  font-weight: 700;
+}
+
+.k-label {
+  display: block;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+
+.k-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 2px solid #721c24;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.k-muted {
+  opacity: 0.8;
+  font-size: 0.95em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Setup-formulier (docent)                                            */
+/* ------------------------------------------------------------------ */
+.k-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.k-choice {
+  position: relative;
+}
+
+.k-choice input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.k-choice label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--k-cream);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 12px 8px;
+  cursor: pointer;
+  font-weight: 700;
+  margin: 0;
+  box-shadow: #000 3px 3px 0 0;
+  transition: transform 0.1s, background-color 0.1s;
+}
+
+.k-choice label img {
+  width: 80%;
+  height: auto;
+  border: 2px solid #000;
+  border-radius: 8px;
+  filter: contrast(0.8) brightness(1.2) saturate(1.4);
+}
+
+.k-choice input:checked + label {
+  background: #b7f3b7;
+  transform: translate(1px, 1px);
+  box-shadow: #000 2px 2px 0 0;
+}
+
+.k-choice input:focus-visible + label {
+  outline: 3px solid var(--k-blue);
+}
+
+.k-inline {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.k-inline > div {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Bord: lobby                                                         */
+/* ------------------------------------------------------------------ */
+.k-lobby {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.k-join-info {
+  text-align: center;
+}
+
+.k-join-info .k-url {
+  font-size: 1.5em;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.k-join-info .k-pin {
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  letter-spacing: 10px;
+  margin: 10px 0;
+  color: #fff;
+  text-shadow: 4px 4px 0 #000;
+}
+
+.k-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  min-height: 60px;
+}
+
+.k-player-chip {
+  background: var(--k-cream);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-weight: 700;
+  animation: popIn 0.3s ease;
+}
+
+.k-player-chip.offline {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.6);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Bord: vraag                                                         */
+/* ------------------------------------------------------------------ */
+.k-board {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.k-question-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.k-prompt {
+  font-size: clamp(24px, 3.5vw, 44px);
+  font-weight: 900;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.k-timer {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 4px solid #000;
+  background: conic-gradient(var(--k-cream) var(--progress, 100%), #33444d 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 900;
+  color: #000;
+  box-shadow: var(--k-shadow) 4px 4px 0 0;
+  position: relative;
+}
+
+.k-timer span {
+  background: var(--k-cream);
+  border-radius: 50%;
+  width: 66px;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.k-timer.urgent span {
+  background: #ffb3b3;
+}
+
+.k-answered {
+  text-align: center;
+  font-weight: 700;
+}
+
+.k-answered strong {
+  font-size: 2em;
+  display: block;
+}
+
+.k-board-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.k-board-body.single {
+  grid-template-columns: 1fr;
+}
+
+.k-board-body.reveal {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* De kaart houdt de verhouding van de viewBox (--map-w / --map-h) en past
+   in de hoogte van het scherm, zodat er geen lege randen ontstaan. */
+.k-map-wrap {
+  --map-max-h: 65vh;
+  background: var(--k-card);
+  border: 2px solid #000;
+  border-radius: 15px;
+  box-shadow: var(--k-shadow) 4px 4px 0 0;
+  padding: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(var(--map-max-h) * var(--map-w, 1) / var(--map-h, 1));
+  aspect-ratio: var(--map-w, 1) / var(--map-h, 1);
+  margin: 0 auto;
+  align-self: start;
+  justify-self: center;
+}
+
+.k-map-wrap > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.k-map-wrap.k-reveal-map {
+  --map-max-h: 55vh;
+}
+
+/* Het goede antwoord oplichten op de onthulling */
+.k-reveal-map #questions > g.k-correct {
+  fill: #26890c !important;
+  stroke: #000;
+  stroke-width: 0.6px;
+  animation: upDown 1.5s ease-in-out infinite;
+}
+
+/* Steden zijn kleine stippen: op het bord groter en pulserend, anders zie je ze niet. */
+.k-map-wrap #questions > g.Steden.active,
+.k-map-wrap #questions > g.Steden.k-correct {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: kPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kPulse {
+  0%,
+  100% {
+    transform: scale(1.8);
+  }
+  50% {
+    transform: scale(2.6);
+  }
+}
+
+/* Op het bord is de kaart alleen om naar te kijken. */
+.k-map-wrap #questions > g {
+  cursor: default;
+}
+
+.k-map-wrap #questions > g:hover:not(.active) {
+  filter: none;
+}
+
+/* Meerkeuze-opties */
+.k-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-content: stretch;
+}
+
+.k-options.single-col {
+  grid-template-columns: 1fr;
+}
+
+.k-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 3px solid #000;
+  border-radius: 12px;
+  color: #fff;
+  font-size: clamp(18px, 1.8vw, 26px);
+  font-weight: 700;
+  box-shadow: #000 4px 4px 0 0;
+  min-height: 70px;
+  transition: opacity 0.3s, transform 0.15s;
+  text-align: left;
+  cursor: default;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.k-option .k-text {
+  min-width: 0;
+}
+
+.k-option .k-shape {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  background: #fff;
+  display: inline-block;
+}
+
+.k-option[data-color="0"] {
+  background: var(--k-red);
+}
+.k-option[data-color="1"] {
+  background: var(--k-blue);
+}
+.k-option[data-color="2"] {
+  background: var(--k-yellow);
+}
+.k-option[data-color="3"] {
+  background: var(--k-green);
+}
+
+.k-option[data-color="0"] .k-shape {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.k-option[data-color="1"] .k-shape {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+.k-option[data-color="2"] .k-shape {
+  border-radius: 50%;
+}
+.k-option[data-color="3"] .k-shape {
+  border-radius: 4px;
+}
+
+.k-option.dim {
+  opacity: 0.3;
+}
+
+.k-option.correct {
+  outline: 5px solid #fff;
+  transform: scale(1.03);
+}
+
+.k-option .k-check {
+  margin-left: auto;
+  font-size: 1.2em;
+}
+
+/* Speler-knoppen zijn echte knoppen */
+button.k-option {
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  margin: 0;
+  min-height: 110px;
+  justify-content: flex-start;
+}
+
+button.k-option:hover {
+  filter: brightness(1.1);
+}
+
+button.k-option:active {
+  transform: translate(2px, 2px);
+  box-shadow: #000 2px 2px 0 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Bord: onthulling en scorebord                                       */
+/* ------------------------------------------------------------------ */
+.k-reveal-title {
+  text-align: center;
+  font-size: clamp(22px, 3vw, 40px);
+  margin: 0;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.k-reveal-title span {
+  background: var(--k-cream);
+  color: #000;
+  padding: 2px 16px;
+  border-radius: 30px;
+  border: 2px solid #000;
+  text-shadow: none;
+}
+
+.k-chart {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px 0 0;
+}
+
+.k-bar {
+  flex: 1;
+  max-width: 180px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.k-bar .k-bar-count {
+  font-weight: 900;
+  font-size: 1.5em;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.k-bar .k-bar-track {
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.k-bar .k-bar-fill {
+  width: 100%;
+  border: 3px solid #000;
+  border-radius: 8px 8px 0 0;
+  box-shadow: #000 4px 0 0 0;
+  min-height: 6px;
+  height: 6px;
+  transition: height 0.6s ease;
+  box-sizing: border-box;
+}
+
+.k-bar.correct .k-bar-fill {
+  outline: 4px solid #fff;
+}
+
+.k-bar .k-bar-label {
+  font-weight: 700;
+  text-align: center;
+  font-size: 0.85em;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.k-bar[data-color="0"] .k-bar-fill {
+  background: var(--k-red);
+}
+.k-bar[data-color="1"] .k-bar-fill {
+  background: var(--k-blue);
+}
+.k-bar[data-color="2"] .k-bar-fill {
+  background: var(--k-yellow);
+}
+.k-bar[data-color="3"] .k-bar-fill {
+  background: var(--k-green);
+}
+.k-bar.wrong .k-bar-fill {
+  background: var(--k-red);
+}
+
+.k-leaderboard {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.k-leaderboard li {
+  display: grid;
+  grid-template-columns: 44px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--k-cream);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 1.15em;
+  box-shadow: #000 3px 3px 0 0;
+  animation: slideIn 0.35s ease both;
+}
+
+.k-leaderboard li:nth-child(1) {
+  background: #ffd700;
+}
+.k-leaderboard li:nth-child(2) {
+  background: #d9d9d9;
+}
+.k-leaderboard li:nth-child(3) {
+  background: #e7a866;
+}
+
+.k-leaderboard li.me {
+  outline: 3px solid var(--k-blue);
+}
+
+.k-leaderboard .k-rank {
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.k-leaderboard .k-delta {
+  color: var(--k-green);
+  font-size: 0.9em;
+}
+
+.k-leaderboard .k-delta.zero {
+  color: #999;
+}
+
+.k-leaderboard .k-score {
+  font-variant-numeric: tabular-nums;
+  min-width: 70px;
+  text-align: right;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Eindstand / podium                                                  */
+/* ------------------------------------------------------------------ */
+.k-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.k-podium-place {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 30%;
+  max-width: 220px;
+}
+
+.k-podium-name {
+  font-weight: 900;
+  font-size: 1.3em;
+  text-align: center;
+  text-shadow: 2px 2px 0 #000;
+  word-break: break-word;
+}
+
+.k-podium-block {
+  width: 100%;
+  border: 3px solid #000;
+  border-radius: 12px 12px 0 0;
+  box-shadow: #000 4px 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 10px;
+  color: #000;
+  font-weight: 900;
+  font-size: 2em;
+}
+
+.k-podium-place[data-place="1"] .k-podium-block {
+  background: #ffd700;
+  height: 180px;
+}
+.k-podium-place[data-place="2"] .k-podium-block {
+  background: #d9d9d9;
+  height: 130px;
+}
+.k-podium-place[data-place="3"] .k-podium-block {
+  background: #e7a866;
+  height: 100px;
+}
+
+.k-podium-score {
+  font-size: 0.5em;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------ */
+/* Speler (leerling)                                                   */
+/* ------------------------------------------------------------------ */
+.k-player-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.k-player-main .k-options {
+  width: 100%;
+  max-width: 900px;
+}
+
+.k-player-map {
+  width: 100%;
+  max-width: min(900px, calc(70vh * var(--map-w, 1) / var(--map-h, 1)));
+  aspect-ratio: var(--map-w, 1) / var(--map-h, 1);
+}
+
+.k-player-map > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  border: 2px solid #000;
+  box-sizing: border-box;
+}
+
+.k-status {
+  text-align: center;
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 900;
+  text-shadow: 3px 3px 0 #000;
+  margin: 0;
+}
+
+.k-result {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+  border: 3px solid #000;
+  border-radius: 15px;
+  box-shadow: var(--k-shadow) 4px 4px 0 0;
+  padding: 30px 20px;
+  box-sizing: border-box;
+  animation: popIn 0.3s ease;
+}
+
+.k-result.good {
+  background: var(--k-green);
+}
+
+.k-result.bad {
+  background: var(--k-red);
+}
+
+.k-result.none {
+  background: #555;
+}
+
+.k-result h2 {
+  font-size: 2.2em;
+  margin: 0 0 10px;
+  color: #fff;
+}
+
+.k-result .k-points {
+  font-size: 3em;
+  font-weight: 900;
+  margin: 10px 0;
+}
+
+.k-result p {
+  margin: 4px 0;
+  font-size: 1.1em;
+}
+
+.k-rank-badge {
+  display: inline-block;
+  background: var(--k-cream);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 30px;
+  padding: 4px 18px;
+  font-weight: 900;
+  margin-top: 10px;
+}
+
+.k-pulse {
+  animation: pulseText 1.4s ease-in-out infinite;
+}
+
+@keyframes pulseText {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsief                                                          */
+/* ------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .k-lobby,
+  .k-board-body,
+  .k-board-body.reveal {
+    grid-template-columns: 1fr;
+  }
+
+  .k-timer {
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
+  }
+
+  .k-timer span {
+    width: 50px;
+    height: 50px;
+  }
+
+  button.k-option {
+    min-height: 80px;
+  }
+}
+
+@media (max-width: 520px) {
+  .k-options {
+    grid-template-columns: 1fr;
+  }
+
+  .k-bar .k-bar-track {
+    height: 110px;
+  }
+}

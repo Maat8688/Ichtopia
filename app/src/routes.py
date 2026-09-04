@@ -60,17 +60,6 @@ def learn():
         return redirect(url_for('main.index'))
     
 
-@main.route('/host')
-def host():
-    print('host', file=sys.stderr)
-    return 'host'
-
-@main.route('/join')
-def join():
-    print('join', file=sys.stderr)
-    return 'join'
-
-
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
 #     if request.method == 'POST':

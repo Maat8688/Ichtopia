@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meedoen - IchTopia</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+  </head>
+  <body class="kahoot">
+    <div class="k-topbar">
+      <a class="k-brand" href="/">
+        <img src="{{ url_for('static', filename='img/logo_small.png') }}" alt="" />
+        IchTopia
+      </a>
+      <span class="k-pill">Klassikale quiz</span>
+    </div>
+
+    <div class="k-main">
+      <form class="k-card center" id="joinForm">
+        <h1>Meedoen</h1>
+        <div id="error" class="k-error hidden"></div>
+        <label class="k-label" for="pin">Pincode (staat op het bord)</label>
+        <input class="k-input pin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+               id="pin" name="pin" placeholder="000000" value="{{ pin }}" autocomplete="off" required />
+        <label class="k-label" for="name">Je naam</label>
+        <input class="k-input" type="text" id="name" name="name" maxlength="24"
+               placeholder="Bijv. Floris" autocomplete="off" required />
+        <div class="k-btn-row">
+          <button class="k-btn primary" type="submit" id="joinBtn">Meedoen</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      let socket = null;
+      try {
+        socket = io();
+      } catch (e) {
+        socket = null;
+      }
+      const form = document.getElementById("joinForm");
+      const errorBox = document.getElementById("error");
+      const joinBtn = document.getElementById("joinBtn");
+      const pinInput = document.getElementById("pin");
+      const nameInput = document.getElementById("name");
+
+      if (pinInput.value) {
+        nameInput.focus();
+      } else {
+        pinInput.focus();
+      }
+
+      function showError(message) {
+        errorBox.textContent = message;
+        errorBox.classList.remove("hidden");
+        joinBtn.disabled = false;
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        errorBox.classList.add("hidden");
+        if (!socket) {
+          showError("Kan geen verbinding maken met de server. Herlaad de pagina.");
+          return;
+        }
+        joinBtn.disabled = true;
+        const pin = pinInput.value.trim();
+        const name = nameInput.value.trim();
+        if (!/^\d{6}$/.test(pin)) {
+          showError("Een pincode bestaat uit 6 cijfers.");
+          return;
+        }
+        socket.emit("kahootJoin", { pin: pin, name: name });
+      });
+
+      if (!socket) {
+        showError("Kan geen verbinding maken met de server. Herlaad de pagina.");
+      }
+
+      socket && socket.on("kahootJoined", (data) => {
+        try {
+          sessionStorage.setItem("kahootPlayer-" + data.pin, JSON.stringify({
+            playerId: data.playerId,
+            name: data.name,
+          }));
+        } catch (e) {
+          // sessionStorage kan geblokkeerd zijn; dan valt de speler terug op de join-pagina.
+        }
+        window.location.href = "/play/" + data.pin;
+      });
+
+      socket && socket.on("kahootError", (data) => {
+        showError(data.message || "Er ging iets mis.");
+      });
+
+      socket && socket.on("connect_error", () => {
+        showError("Geen verbinding met de server.");
+      });
+    </script>
+  </body>
+</html>

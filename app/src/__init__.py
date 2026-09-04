@@ -45,7 +45,7 @@ werkzeug_logger.setLevel(logging.INFO)
 werkzeug_logger.addHandler(file_handler)
 # ------------------------------------------------
 
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(32).hex()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -58,6 +58,10 @@ with app.app_context():
     from .routes import main, setupSockets
     app.register_blueprint(main)
     setupSockets(socketio)
+
+    from .kahoot_routes import kahoot, setupKahootSockets
+    app.register_blueprint(kahoot)
+    setupKahootSockets(socketio)
 
     from .models import db, User
     db.init_app(app)

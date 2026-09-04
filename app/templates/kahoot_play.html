@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz {{ game.pin }} - IchTopia</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+  </head>
+  <body class="kahoot">
+    <div class="k-topbar">
+      <a class="k-brand" href="/">
+        <img src="{{ url_for('static', filename='img/logo_small.png') }}" alt="" />
+        IchTopia
+      </a>
+      <span class="k-pill" id="playerName"></span>
+      <span class="k-pill" id="playerScore">0 punten</span>
+    </div>
+
+    <div class="k-player-main">
+      <!-- LOBBY -->
+      <section id="waiting" class="k-card center">
+        <h1>Je doet mee!</h1>
+        <p class="k-status k-pulse">Kijk naar het bord, de quiz begint zo...</p>
+      </section>
+
+      <!-- VRAAG -->
+      <section id="question" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px">
+        <div class="k-question-head" style="width: 100%; max-width: 900px">
+          <div class="k-timer" id="timer"><span id="timerValue">0</span></div>
+          <h1 class="k-prompt" id="prompt"></h1>
+          <span class="k-pill" id="questionCounter"></span>
+        </div>
+        {% if game.mode == 1 %}
+        <div class="k-options" id="options"></div>
+        {% else %}
+        <div class="k-player-map" style="--map-w: {{ map.viewBox[2] }}; --map-h: {{ map.viewBox[3] }}">
+          {% include('partials/mapSvg.html') %}
+        </div>
+        {% endif %}
+      </section>
+
+      <!-- ANTWOORD VERSTUURD -->
+      <section id="answered" class="k-card center hidden">
+        <h1>Antwoord verstuurd!</h1>
+        <p class="k-status k-pulse">Wachten op de rest van de klas...</p>
+      </section>
+
+      <!-- RESULTAAT -->
+      <section id="result" class="k-result hidden">
+        <h2 id="resultTitle"></h2>
+        <div class="k-points" id="resultPoints"></div>
+        <p id="resultCorrect"></p>
+        <p>Totaal: <strong id="resultScore"></strong> punten</p>
+        <span class="k-rank-badge" id="resultRank"></span>
+        <p class="k-muted k-pulse" style="margin-top: 16px">Kijk naar het bord voor het scorebord</p>
+      </section>
+
+      <!-- EINDSTAND -->
+      <section id="finished" class="k-card center hidden">
+        <h1>Klaar!</h1>
+        <div class="k-points" id="finalScore" style="font-size: 3em; font-weight: 900"></div>
+        <span class="k-rank-badge" id="finalRank"></span>
+        <ol class="k-leaderboard" id="finalLeaderboard" style="margin-top: 20px; text-align: left"></ol>
+        <div class="k-btn-row">
+          <a class="k-btn primary" href="/">Home</a>
+        </div>
+      </section>
+
+      <div id="error" class="k-error hidden"></div>
+    </div>
+
+    <audio id="correctSound" src="{{ url_for('static', filename='sounds/correct.mp3') }}" preload="auto"></audio>
+    <audio id="incorrectSound" src="{{ url_for('static', filename='sounds/incorrect.mp3') }}" preload="auto"></audio>
+
+    <script>
+      const KAHOOT = {
+        pin: "{{ game.pin }}",
+        mode: {{ game.mode }},
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <script src="{{ url_for('static', filename='js/kahoot_play.js') }}"></script>
+  </body>
+</html>
