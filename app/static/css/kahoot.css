@@ -1,0 +1,776 @@
+/* Klassikale quiz. Bouwt voort op main.css en gebruikt dezelfde tokens.
+   De klassenamen komen overeen met de scripts in static/js. */
+
+.hidden {
+  display: none !important;
+}
+
+/* Kop */
+.k-topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 20px 12px;
+}
+
+.k-brand {
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.2;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.k-topbar > :nth-child(2) {
+  margin-left: auto;
+}
+
+.k-pill {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.k-pill.big {
+  font-family: var(--serif);
+  font-size: 19px;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+
+/* Inhoud */
+.k-main,
+.k-player-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 12px 20px 40px;
+}
+
+.k-player-main {
+  max-width: 640px;
+}
+
+.k-card {
+  min-width: 0;
+}
+
+.k-main > form.k-card {
+  max-width: 620px;
+}
+
+.k-final-list {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.k-card + .k-card {
+  margin-top: 36px;
+}
+
+.k-card.center {
+  max-width: 420px;
+  margin: 24px auto 0;
+}
+
+.k-card h1,
+.k-board h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+
+.k-card h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 19px;
+  margin: 0 0 10px;
+}
+
+.k-card p {
+  margin: 0 0 14px;
+}
+
+.k-muted {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.k-status {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Rustig knipperen bij wachten. */
+@keyframes kZacht {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.k-pulse {
+  animation: kZacht 2.4s ease-in-out infinite;
+}
+
+/* Formulieren */
+.k-label {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 18px 0 2px;
+}
+
+.k-input {
+  width: 100%;
+  font: 16px var(--sans);
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1.5px solid var(--ink);
+  background: transparent;
+  border-radius: 0;
+  color: var(--ink);
+}
+
+.k-input:focus {
+  outline: none;
+  border-bottom-color: var(--atlas);
+}
+
+.k-input::placeholder {
+  color: var(--muted);
+}
+
+.k-input.pin {
+  font-family: var(--serif);
+  font-size: 34px;
+  letter-spacing: 0.22em;
+  text-align: center;
+}
+
+.k-inline {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.k-inline > div {
+  flex: 0 1 160px;
+  min-width: 0;
+}
+
+.k-error {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--pen);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+/* Knoppen */
+.k-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.k-btn {
+  display: inline-block;
+  font: 500 14px var(--sans);
+  line-height: 1.4;
+  padding: 10px 18px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.k-btn:hover {
+  background: var(--paper-2);
+}
+
+.k-btn.primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.k-btn.primary:hover {
+  background: var(--atlas);
+  border-color: var(--atlas);
+}
+
+.k-btn.secondary {
+  border-color: var(--rule);
+  color: var(--muted);
+}
+
+.k-btn.secondary:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: transparent;
+}
+
+.k-btn:disabled {
+  border-color: var(--rule);
+  background: transparent;
+  color: var(--muted);
+  cursor: default;
+}
+
+/* Keuzes in het instelscherm: rijen met een lijn ertussen. */
+.k-choice-grid {
+  border-top: 0.5px solid var(--rule);
+}
+
+.k-choice {
+  border-bottom: 0.5px solid var(--rule);
+}
+
+.k-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.k-choice label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.k-choice label::after {
+  content: "";
+  order: 3;
+  margin-left: auto;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+}
+
+.k-choice input:checked + label::after {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+
+.k-choice input:focus-visible + label::after {
+  outline: 2px solid var(--atlas);
+  outline-offset: 2px;
+}
+
+.k-choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.k-choice label small {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.k-choice label img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  background: var(--paper-2);
+  border-radius: 4px;
+  padding: 3px;
+}
+
+.k-choice input:checked + label {
+  font-weight: 500;
+}
+
+/* Lobby op het bord */
+.k-lobby {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+  max-width: 900px;
+  margin: 24px auto 0;
+}
+
+.k-lobby .k-card + .k-card {
+  margin-top: 0;
+}
+
+.k-url {
+  font-family: var(--serif);
+  font-size: 24px;
+  word-break: break-all;
+  margin-bottom: 14px;
+}
+
+.k-pin {
+  font-family: var(--serif);
+  font-size: 68px;
+  line-height: 1.1;
+  letter-spacing: 0.1em;
+  color: var(--atlas);
+  margin-bottom: 14px;
+}
+
+.k-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.k-player-chip {
+  border: 1px solid var(--rule);
+  padding: 6px 12px;
+  font-size: 14px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.k-player-chip:hover {
+  border-color: var(--pen);
+  color: var(--pen);
+}
+
+.k-player-chip.offline {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+/* Vraagscherm */
+.k-question-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--rule);
+  margin-bottom: 20px;
+}
+
+.k-prompt {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.25;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.k-timer {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  font-family: var(--serif);
+  font-size: 22px;
+}
+
+.k-timer.urgent {
+  border-color: var(--pen);
+  color: var(--pen);
+}
+
+.k-answered {
+  flex: none;
+  text-align: right;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.k-answered strong {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 24px;
+  color: var(--ink);
+}
+
+.k-board-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 32px;
+  align-items: start;
+}
+
+.k-board-body.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.k-board-body.reveal {
+  grid-template-columns: minmax(0, 1fr) 260px 260px;
+}
+
+.k-map-wrap,
+.k-player-map {
+  background: var(--paper-2);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.k-map-wrap svg,
+.k-player-map svg {
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  display: block;
+}
+
+.k-player-map svg {
+  max-height: 46vh;
+}
+
+.k-player-question {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Antwoordkeuzes */
+.k-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.k-option {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font: 15px var(--sans);
+  padding: 10px 14px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+button.k-option:hover {
+  background: var(--paper-2);
+}
+
+button.k-option:active {
+  background: var(--track);
+}
+
+.k-option .k-shape {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--ink);
+  align-self: center;
+}
+
+.k-option .k-text {
+  min-width: 0;
+}
+
+/* Onthulling */
+.k-reveal-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 26px;
+  margin: 0 0 20px;
+}
+
+.k-reveal-title span {
+  color: var(--atlas);
+}
+
+#questions > g.k-correct {
+  fill: var(--atlas);
+  fill-opacity: 0.45;
+  stroke: var(--atlas);
+  stroke-width: 2;
+}
+
+#questions > g.k-correct > path {
+  vector-effect: non-scaling-stroke;
+}
+
+/* Verdeling van de antwoorden */
+.k-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  min-height: 150px;
+}
+
+.k-bar {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  text-align: center;
+}
+
+.k-bar-count {
+  font-family: var(--serif);
+  font-size: 18px;
+}
+
+.k-bar-track {
+  display: flex;
+  align-items: flex-end;
+  height: 90px;
+}
+
+.k-bar-fill {
+  width: 100%;
+  background: var(--track);
+  transition: height 0.5s ease;
+}
+
+.k-bar.correct .k-bar-fill {
+  background: var(--atlas);
+}
+
+.k-bar.wrong .k-bar-fill {
+  background: var(--pen);
+}
+
+.k-bar.correct .k-bar-count {
+  color: var(--atlas);
+}
+
+.k-bar-label {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* Scorebord */
+.k-leaderboard {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 0.5px solid var(--rule);
+}
+
+.k-leaderboard li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--rule);
+  font-size: 15px;
+}
+
+.k-leaderboard .k-rank {
+  flex: none;
+  width: 22px;
+  font-family: var(--serif);
+  color: var(--muted);
+}
+
+.k-leaderboard .k-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.k-leaderboard .k-delta {
+  flex: none;
+  font-size: 13px;
+  color: var(--atlas);
+}
+
+.k-leaderboard .k-delta.zero {
+  color: var(--muted);
+}
+
+.k-leaderboard .k-score {
+  flex: none;
+  font-family: var(--serif);
+  font-size: 17px;
+  min-width: 44px;
+  text-align: right;
+}
+
+.k-leaderboard li.me .k-name {
+  font-weight: 500;
+  color: var(--atlas);
+}
+
+/* Podium */
+.k-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 20px;
+  margin: 0 0 36px;
+}
+
+.k-podium-place {
+  width: 160px;
+  text-align: center;
+}
+
+.k-podium-name {
+  font-size: 15px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.k-podium-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--serif);
+  font-size: 30px;
+  color: var(--muted);
+  background: var(--paper-2);
+  border-radius: 4px 4px 0 0;
+}
+
+/* Het script zet de plaats in data-place; de volgorde op het scherm is
+   tweede, eerste, derde. */
+.k-podium-place[data-place="1"] .k-podium-block {
+  height: 150px;
+  background: var(--atlas);
+  color: var(--paper);
+}
+
+.k-podium-place[data-place="2"] .k-podium-block {
+  height: 110px;
+}
+
+.k-podium-place[data-place="3"] .k-podium-block {
+  height: 80px;
+}
+
+.k-podium-score {
+  font-family: var(--sans);
+  font-size: 12px;
+}
+
+/* Speler: uitslag van één vraag */
+.k-result {
+  text-align: center;
+  padding: 32px 20px;
+  margin-top: 24px;
+  border-top: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule);
+}
+
+.k-result h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 26px;
+  margin: 0 0 10px;
+}
+
+.k-result.good h2 {
+  color: var(--atlas);
+}
+
+.k-result.bad h2,
+.k-result.none h2 {
+  color: var(--pen);
+}
+
+.k-result p {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.k-points {
+  font-family: var(--serif);
+  font-size: 48px;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+.k-result.good .k-points {
+  color: var(--atlas);
+}
+
+.k-rank-badge {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Smal scherm */
+@media (max-width: 899px) {
+  .k-lobby,
+  .k-board-body,
+  .k-board-body.reveal {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .k-pin {
+    font-size: 52px;
+  }
+
+  .k-prompt {
+    font-size: 21px;
+  }
+
+  .k-question-head {
+    gap: 14px;
+  }
+
+  .k-topbar {
+    padding-top: 20px;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .k-podium-place {
+    width: 100px;
+  }
+}
+
+/* Eindscherm van de speler */
+.k-player-main #finished .k-points {
+  margin-bottom: 4px;
+}
+
+.k-player-main #finished .k-leaderboard {
+  margin-top: 22px;
+  text-align: left;
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Klassikale quiz starten · Topo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+  </head>
+  <body class="kahoot">
+    <div class="k-topbar">
+      <a class="k-brand" href="/">Topo</a>
+      <span class="k-pill">Docent</span>
+      <a class="k-btn secondary" href="{{ url_for('kahoot.hostLogout') }}">Uitloggen</a>
+    </div>
+
+    <div class="k-main">
+      <form class="k-card" method="POST" id="setupForm">
+        <h1>Nieuwe klassikale quiz</h1>
+        <p class="k-muted">
+          Deel je scherm met de klas. Leerlingen gaan op hun laptop naar
+          <strong>{{ url_for('kahoot.join', _external=True) }}</strong> en vullen de pincode in.
+        </p>
+
+        {% if error %}
+        <div class="k-error">{{ error }}</div>
+        {% endif %}
+
+        <span class="k-label">Kaart</span>
+        <div class="k-choice-grid">
+          {% for mapName in maps %}
+          <div class="k-choice">
+            <input type="radio" name="KaartInput" id="map-{{ mapName }}" value="{{ mapName }}"
+                   {% if loop.first %}checked{% endif %} />
+            <label for="map-{{ mapName }}">
+              <img src="{{ url_for('static', filename='img/kaart-' ~ mapName ~ '.svg') }}" alt="" />
+              <span class="k-choice-text">{{ mapName }}</span>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+
+        
+
+        <span class="k-label">Vraagvorm</span>
+        <div class="k-choice-grid">
+          <div class="k-choice">
+            <input type="radio" name="mode" id="mode-mc" value="MultipleChoise" checked />
+            <label for="mode-mc"><span class="k-choice-text">Meerkeuze<small>het bord licht een gebied op, leerlingen kiezen de naam</small></span></label>
+          </div>
+          <div class="k-choice">
+            <input type="radio" name="mode" id="mode-click" value="ClickTheCountry" />
+            <label for="mode-click"><span class="k-choice-text">Aanwijzen op de kaart<small>het bord toont een naam, leerlingen klikken het gebied aan</small></span></label>
+          </div>
+        </div>
+
+        <span class="k-label">Onderdelen</span>
+        <div class="k-choice-grid" id="categorySelect"></div>
+        <p class="k-error hidden" id="formError">Kies minstens één onderdeel.</p>
+
+        <div class="k-inline">
+          <div>
+            <label class="k-label" for="questionCount">Aantal vragen</label>
+            <input class="k-input" type="number" id="questionCount" name="questionCount"
+                   min="1" max="100" value="10" required />
+          </div>
+          <div>
+            <label class="k-label" for="seconds">Seconden per vraag</label>
+            <input class="k-input" type="number" id="seconds" name="seconds"
+                   min="5" max="120" value="20" required />
+          </div>
+        </div>
+
+        <div class="k-btn-row">
+          <a class="k-btn secondary" href="/">Terug</a>
+          <button class="k-btn primary" type="submit">Quiz aanmaken</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      const categoriesPerMap = {{ categories | tojson }};
+      const categorySelect = document.getElementById("categorySelect");
+      const mapInputs = document.querySelectorAll('input[name="KaartInput"]');
+
+      function renderCategories() {
+        const selected = document.querySelector('input[name="KaartInput"]:checked').value;
+        const categories = categoriesPerMap[selected] || [];
+        categorySelect.innerHTML = "";
+        categories.forEach((category, i) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "k-choice";
+          wrapper.innerHTML = `
+            <input type="checkbox" name="questions" id="cat-${i}" value="${category}" ${i === 0 ? "checked" : ""} />
+            <label for="cat-${i}"><span class="k-choice-text">${category}</span></label>
+          `;
+          categorySelect.appendChild(wrapper);
+        });
+      }
+
+      mapInputs.forEach((input) => input.addEventListener("change", renderCategories));
+      renderCategories();
+
+      const formError = document.getElementById("formError");
+
+      categorySelect.addEventListener("change", () => formError.classList.add("hidden"));
+
+      document.getElementById("setupForm").addEventListener("submit", (event) => {
+        if (document.querySelectorAll('input[name="questions"]:checked').length === 0) {
+          formError.classList.remove("hidden");
+          event.preventDefault();
+        }
+      });
+    </script>
+    <footer>
+      <div class="page">
+        <p>Gemaakt door Floris, Joël, Luuk, Liam en Sami · geen account nodig</p>
+      </div>
+    </footer>
+  </body>
+</html>

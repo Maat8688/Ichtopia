@@ -160,3 +160,24 @@
     padding: 10px;
   }
 }
+
+/* Met de klas: twee rijen die naar de klassikale quiz leiden. */
+.klassikaal {
+  margin-top: 40px;
+  max-width: 560px;
+}
+
+.klassikaal .row {
+  text-decoration: none;
+  padding: 14px 0;
+}
+
+.klassikaal .status {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.klassikaal .row:hover .status {
+  color: var(--ink);
+}
+

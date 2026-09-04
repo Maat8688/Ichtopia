@@ -104,6 +104,20 @@
           </section>
         </div>
       </form>
+
+      <section class="klassikaal">
+        <p class="section-label">Met de klas</p>
+        <div class="rule-list">
+          <a class="row" href="{{ url_for('kahoot.join') }}">
+            <span class="name"><span class="row-title">Meedoen aan een quiz</span><span class="row-note">je docent geeft een pincode</span></span>
+            <span class="status">→</span>
+          </a>
+          <a class="row" href="{{ url_for('kahoot.host') }}">
+            <span class="name"><span class="row-title">Een quiz hosten</span><span class="row-note">voor docenten, op het digibord</span></span>
+            <span class="status">→</span>
+          </a>
+        </div>
+      </section>
     </main>
 
     <footer>
