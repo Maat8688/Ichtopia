@@ -2,7 +2,7 @@
 (function () {
   let stored = null;
   try {
-    stored = JSON.parse(sessionStorage.getItem("kahootPlayer-" + KAHOOT.pin));
+    stored = JSON.parse(localStorage.getItem("kahootPlayer-" + KAHOOT.pin));
   } catch (e) {
     stored = null;
   }
@@ -235,11 +235,18 @@
     show("answered");
   });
 
+  socket.on("kahootKicked", (data) => {
+    try {
+      localStorage.removeItem("kahootPlayer-" + KAHOOT.pin);
+    } catch (e) {}
+    window.location.href = "/join?pin=" + KAHOOT.pin + "&kicked=1";
+  });
+
   socket.on("kahootError", (data) => {
     showError(data.message || "Er ging iets mis.");
     if (data.fatal) {
       try {
-        sessionStorage.removeItem("kahootPlayer-" + KAHOOT.pin);
+        localStorage.removeItem("kahootPlayer-" + KAHOOT.pin);
       } catch (e) {}
       setTimeout(() => (window.location.href = "/join"), 3000);
     }

@@ -104,9 +104,16 @@
       els.playerList.innerHTML = '<p class="k-muted k-pulse">Wachten op spelers...</p>';
     }
     players.forEach((player) => {
-      const chip = document.createElement("span");
+      const chip = document.createElement("button");
+      chip.type = "button";
       chip.className = "k-player-chip" + (player.connected ? "" : " offline");
       chip.textContent = player.name;
+      chip.title = "Verwijder " + player.name;
+      chip.addEventListener("click", () => {
+        if (confirm(player.name + " uit de quiz verwijderen?")) {
+          socket.emit("kahootKick", hostData({ playerId: player.id }));
+        }
+      });
       els.playerList.appendChild(chip);
     });
     els.startBtn.disabled = data.connected === 0;

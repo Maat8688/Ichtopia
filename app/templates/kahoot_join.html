@@ -53,6 +53,11 @@
         pinInput.focus();
       }
 
+      if (new URLSearchParams(window.location.search).get("kicked") === "1") {
+        errorBox.textContent = "De docent heeft je uit de quiz verwijderd.";
+        errorBox.classList.remove("hidden");
+      }
+
       function showError(message) {
         errorBox.textContent = message;
         errorBox.classList.remove("hidden");
@@ -82,12 +87,12 @@
 
       socket && socket.on("kahootJoined", (data) => {
         try {
-          sessionStorage.setItem("kahootPlayer-" + data.pin, JSON.stringify({
+          localStorage.setItem("kahootPlayer-" + data.pin, JSON.stringify({
             playerId: data.playerId,
             name: data.name,
           }));
         } catch (e) {
-          // sessionStorage kan geblokkeerd zijn; dan valt de speler terug op de join-pagina.
+          // localStorage kan geblokkeerd zijn; dan valt de speler terug op de join-pagina.
         }
         window.location.href = "/play/" + data.pin;
       });

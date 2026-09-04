@@ -46,6 +46,16 @@ QUESTION_PROMPTS = {
 # Spellen die langer dan dit bestaan worden opgeruimd.
 GAME_MAX_AGE = 4 * 60 * 60
 
+MAX_PLAYERS = 100
+MAX_NAME_LENGTH = 24
+MAX_ANSWER_LENGTH = 200
+
+
+def cleanName(name: str) -> str:
+    """Haal rare tekens en dubbele spaties uit een spelersnaam."""
+    name = ''.join(ch for ch in str(name) if ch.isprintable())
+    return ' '.join(name.split())[:MAX_NAME_LENGTH]
+
 
 def displayName(question: mapQuestion) -> str:
     """De naam die op het bord getoond wordt voor een vraag."""
@@ -92,6 +102,7 @@ class KahootGame:
         self.state = 'lobby'  # lobby -> question -> reveal -> ... -> finished
         self.currentIndex = -1
         self.players: dict[str, KahootPlayer] = {}
+        self.kicked: set[str] = set()
         self.lock = threading.Lock()
         self.questionStart: float | None = None
         self.questionRun = 0  # verhoogd per vraag, zodat een oude timer niets meer doet
@@ -104,21 +115,29 @@ class KahootGame:
     # Spelers
     # ------------------------------------------------------------------
     def addPlayer(self, name: str) -> KahootPlayer:
-        name = ' '.join(name.split())[:24]
+        name = cleanName(name)
         if not name:
             raise ValueError('Vul een naam in.')
         if self.state == 'finished':
             raise ValueError('Deze quiz is al afgelopen.')
         with self.lock:
+            if len(self.players) >= MAX_PLAYERS:
+                raise ValueError('Deze quiz zit vol.')
+            # Namen zijn uniek, ook van spelers die even geen verbinding hebben:
+            # anders kan iemand anders jouw naam en score overnemen.
             for player in self.players.values():
                 if player.name.lower() == name.lower():
-                    if player.connected:
-                        raise ValueError('Deze naam is al in gebruik, kies een andere naam.')
-                    # Iemand die de verbinding kwijtraakte mag met dezelfde naam terugkomen.
-                    player.connected = True
-                    return player
+                    raise ValueError('Deze naam is al in gebruik, kies een andere naam.')
             player = KahootPlayer(name)
             self.players[player.id] = player
+            return player
+
+    def removePlayer(self, playerId: str) -> KahootPlayer | None:
+        """Verwijder een speler (door de docent). Die kan met dit id niet meer terugkomen."""
+        with self.lock:
+            player = self.players.pop(playerId, None)
+            if player is not None:
+                self.kicked.add(playerId)
             return player
 
     def getPlayer(self, playerId: str) -> KahootPlayer | None:
@@ -223,7 +242,7 @@ class KahootGame:
         question = self.currentQuestion
         if question is None:
             return False
-        answer = str(answer)
+        answer = str(answer)[:MAX_ANSWER_LENGTH]
         if self.mode == MODE_CLICKTHECOUNTRY:
             if hashed:
                 return answer == self.map.hash(question.id)
@@ -247,7 +266,7 @@ class KahootGame:
             fraction = min(max(elapsed / self.seconds, 0.0), 1.0)
             points = round(MAX_POINTS * (1 - fraction / 2)) if correct else 0
             player.answers[self.currentIndex] = {
-                'answer': str(answer),
+                'answer': str(answer)[:MAX_ANSWER_LENGTH],
                 'hashed': hashed,
                 'correct': correct,
                 'points': points,

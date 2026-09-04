@@ -326,7 +326,17 @@ body.kahoot {
   border-radius: 30px;
   padding: 6px 16px;
   font-weight: 700;
+  font-family: inherit;
+  font-size: 1em;
+  margin: 0;
+  box-shadow: none;
+  cursor: pointer;
   animation: popIn 0.3s ease;
+}
+
+.k-player-chip:hover {
+  background: #f3b7b7;
+  text-decoration: line-through;
 }
 
 .k-player-chip.offline {
