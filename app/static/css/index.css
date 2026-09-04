@@ -1,11 +1,70 @@
-/* Startscherm */
+/* Startscherm: uitleg en stappen bovenaan, keuzes links, kaartvoorbeeld rechts. */
 
-.start {
-  max-width: 560px;
+/* Inleiding */
+.lead {
+  max-width: 620px;
+  margin: 20px 0 0;
 }
 
-.intro {
-  margin: 18px 0 6px;
+.lead-text {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 18px 0 0;
+  padding: 14px 0 0;
+  border-top: 0.5px solid var(--rule);
+  list-style: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.steps li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.step-nr {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--atlas);
+}
+
+/* Twee kolommen. De blokken staan expliciet in het raster, zodat het
+   kaartvoorbeeld tussen de kaartkeuze en de instellingen kan staan zonder
+   dat de volgorde in de HTML omgezet hoeft te worden. */
+.start-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) 340px;
+  gap: 32px 40px;
+  align-items: start;
+  margin-top: 32px;
+}
+
+.block-maps {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.block-settings {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.block-maps .section-label:first-child {
+  margin-top: 0;
+}
+
+.block-settings .section-label:first-child {
+  margin-top: 0;
 }
 
 .rule-list.maps .row {
@@ -16,24 +75,88 @@
   display: none;
 }
 
-#instellingen {
-  margin-top: 36px;
-}
-
-#instellingen h2 {
-  font-size: 19px;
-}
-
 #instellingen .rule-list .row {
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
 #formError {
   margin-top: 12px;
 }
 
-@media (max-width: 480px) {
+.actions .muted {
+  white-space: nowrap;
+}
+
+/* Kaartvoorbeeld */
+.preview {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  position: sticky;
+  top: 24px;
+  min-width: 0;
+}
+
+.preview-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  padding: 16px;
+  background: var(--paper-2);
+  border-radius: 6px;
+}
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.preview-empty {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.preview-caption {
+  margin-top: 10px;
+  min-height: 20px;
+}
+
+/* Smal scherm: kaartvoorbeeld boven de keuzes, minder hoog. */
+@media (max-width: 799px) {
   .topbar {
     padding-top: 22px;
+  }
+
+  .lead-text {
+    font-size: 17px;
+  }
+
+  .steps {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .start-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 26px;
+  }
+
+  /* Onder elkaar in de volgorde van de HTML: kaarten, voorbeeld, instellingen. */
+  .preview {
+    position: static;
+  }
+
+  /* Zolang er niets gekozen is, is een leeg kader hier alleen maar ruis. */
+  .preview.empty {
+    display: none;
+  }
+
+  .preview-frame {
+    aspect-ratio: 3 / 2;
+    padding: 10px;
   }
 }

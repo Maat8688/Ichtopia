@@ -125,7 +125,23 @@ section + section {
 }
 
 .row .name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-size: 16px;
+  min-width: 0;
+}
+
+/* Regel uitleg onder de naam van een rij. */
+.row-note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.row:hover .row-note,
+.row:has(input:checked) .row-note {
+  color: var(--muted);
 }
 
 .row .status {
@@ -138,12 +154,14 @@ section + section {
   color: var(--atlas);
 }
 
-.row:hover .name {
+.row:hover .row-title,
+.row:hover .name:not(:has(.row-title)) {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.row:has(input:checked) .name {
+.row:has(input:checked) .row-title,
+.row:has(input:checked) .name:not(:has(.row-title)) {
   font-weight: 500;
 }
 
@@ -180,6 +198,15 @@ section + section {
   outline-offset: 2px;
 }
 
+/* Een rij waarvan het keuzerondje verborgen is (de kaartkeuze) mag geen
+   onzichtbaar klikvlak over de tekst leggen. */
+.row input.visually-hidden {
+  width: 1px;
+  height: 1px;
+  border: 0;
+  box-shadow: none;
+}
+
 .row input:disabled {
   border-color: var(--rule);
   cursor: default;
@@ -190,7 +217,7 @@ section + section {
   cursor: default;
 }
 
-.row:has(input:disabled):hover .name {
+.row:has(input:disabled):hover .row-title {
   text-decoration: none;
 }
 

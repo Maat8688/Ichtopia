@@ -30,55 +30,79 @@
     </header>
 
     <main class="page">
-      <form method="POST" id="startForm" class="start" onsubmit="return validateForm()">
+      <section class="lead">
+        <p class="lead-text">
+          Oefen de topografie van <span class="accent">Nederland</span>,
+          <span class="accent">Europa</span> en de <span class="accent">wereld</span>.
+          Je oefent net zo lang tot je alles kent, en je hoeft niet in te loggen.
+        </p>
+        <ol class="steps">
+          <li><span class="step-nr">1</span> Kies een kaart</li>
+          <li><span class="step-nr">2</span> Kies hoe je wilt oefenen</li>
+          <li><span class="step-nr">3</span> Fout gegokt? De vraag komt terug</li>
+        </ol>
+      </section>
+
+      <form method="POST" id="startForm" class="start-grid" onsubmit="return validateForm()">
         <input type="hidden" name="type" value="Singleplayer" />
 
-        <h2 class="intro">Kies een kaart</h2>
-        <div class="rule-list maps" id="kaarten">
-          <label class="row">
-            <input class="visually-hidden" type="radio" name="KaartInput" value="Nederland" />
-            <span class="name">Nederland</span>
-            <span class="status" data-map="Nederland">nog niet begonnen</span>
-          </label>
-          <label class="row">
-            <input class="visually-hidden" type="radio" name="KaartInput" value="Europa" />
-            <span class="name">Europa</span>
-            <span class="status" data-map="Europa">nog niet begonnen</span>
-          </label>
-          <label class="row">
-            <input class="visually-hidden" type="radio" name="KaartInput" value="Wereld" />
-            <span class="name">Wereld</span>
-            <span class="status" data-map="Wereld">nog niet begonnen</span>
-          </label>
+        <div class="block-maps">
+          <p class="section-label">Kaart</p>
+          <div class="rule-list maps" id="kaarten">
+            <label class="row">
+              <input class="visually-hidden" type="radio" name="KaartInput" value="Nederland" />
+              <span class="name"><span class="row-title">Nederland</span><span class="row-note">provincies, steden, water en gebieden</span></span>
+              <span class="status" data-map="Nederland">98 vragen</span>
+            </label>
+            <label class="row">
+              <input class="visually-hidden" type="radio" name="KaartInput" value="Europa" />
+              <span class="name"><span class="row-title">Europa</span><span class="row-note">alle landen</span></span>
+              <span class="status" data-map="Europa">41 vragen</span>
+            </label>
+            <label class="row">
+              <input class="visually-hidden" type="radio" name="KaartInput" value="Wereld" />
+              <span class="name"><span class="row-title">Wereld</span><span class="row-note">landen en hoofdsteden</span></span>
+              <span class="status" data-map="Wereld">101 vragen</span>
+            </label>
+          </div>
         </div>
 
-        <section id="instellingen" hidden>
-          <h2 id="KaartTitel">Kaart</h2>
-
-          <p class="section-label">Vraagvorm</p>
-          <div class="rule-list" id="ModeSelect">
-            <label class="row">
-              <span class="name">Meerkeuze</span>
-              <input type="radio" name="mode" value="MultipleChoise" checked />
-            </label>
-            <label class="row">
-              <span class="name">Naam typen</span>
-              <input type="radio" name="mode" value="FillInTheBlank" />
-            </label>
-            <label class="row">
-              <span class="name">Aanwijzen op de kaart</span>
-              <input type="radio" name="mode" value="ClickTheCountry" />
-            </label>
+        <aside class="preview empty" id="preview" aria-hidden="true">
+          <div class="preview-frame">
+            <p class="preview-empty" id="previewEmpty">Kies een kaart om te beginnen.</p>
+            <img class="preview-img" id="previewImg" alt="" hidden />
           </div>
+          <p class="preview-caption muted" id="previewCaption"></p>
+        </aside>
 
-          <p class="section-label">Onderdelen</p>
-          <div class="rule-list" id="questionsSelect"></div>
-          <p class="feedback" id="formError" hidden>Kies minstens één onderdeel.</p>
+        <div class="block-settings">
+          <section id="instellingen" hidden>
+            <p class="section-label">Vraagvorm</p>
+            <div class="rule-list" id="ModeSelect">
+              <label class="row">
+                <span class="name"><span class="row-title">Meerkeuze</span><span class="row-note">kies de juiste naam uit vier antwoorden</span></span>
+                <input type="radio" name="mode" value="MultipleChoise" checked />
+              </label>
+              <label class="row">
+                <span class="name"><span class="row-title">Naam typen</span><span class="row-note">lastiger, maar je onthoudt het beter</span></span>
+                <input type="radio" name="mode" value="FillInTheBlank" />
+              </label>
+              <label class="row">
+                <span class="name"><span class="row-title">Aanwijzen op de kaart</span><span class="row-note">je krijgt een naam en klikt de plek aan</span></span>
+                <input type="radio" name="mode" value="ClickTheCountry" />
+              </label>
+            </div>
 
-          <div class="actions actions-end">
-            <button type="submit" class="btn btn-primary">Oefenen</button>
-          </div>
-        </section>
+            <p class="section-label">Onderdelen</p>
+            <div class="rule-list" id="questionsSelect"></div>
+            <p class="feedback" id="formError" hidden>Kies minstens één onderdeel.</p>
+
+            <div class="actions">
+              <span class="muted" id="totalCount"></span>
+              <button type="submit" class="btn btn-primary">Oefenen</button>
+            </div>
+          </section>
+        </div>
       </form>
     </main>
 
@@ -92,15 +116,54 @@
       const form = document.getElementById("startForm");
       const mapInputs = document.querySelectorAll('input[name="KaartInput"]');
       const settings = document.getElementById("instellingen");
-      const kaartTitel = document.getElementById("KaartTitel");
       const questionsSelect = document.getElementById("questionsSelect");
       const formError = document.getElementById("formError");
+      const totalCount = document.getElementById("totalCount");
+      const preview = document.getElementById("preview");
+      const previewImg = document.getElementById("previewImg");
+      const previewEmpty = document.getElementById("previewEmpty");
+      const previewCaption = document.getElementById("previewCaption");
 
-      const categories = {
-        Nederland: ["Steden", "Provincies", "Wateren", "Gebieden"],
-        Europa: ["Landen"],
-        Wereld: ["Landen", "Steden"],
+      const maps = {
+        Nederland: {
+          bestand: "{{ url_for('static', filename='img/kaart-Nederland.svg') }}",
+          categories: { Provincies: 12, Steden: 60, Wateren: 15, Gebieden: 11 },
+        },
+        Europa: {
+          bestand: "{{ url_for('static', filename='img/kaart-Europa.svg') }}",
+          categories: { Landen: 41 },
+        },
+        Wereld: {
+          bestand: "{{ url_for('static', filename='img/kaart-Wereld.svg') }}",
+          categories: { Landen: 51, Steden: 50 },
+        },
       };
+
+      var gekozenKaart = null;
+
+      function showPreview(mapName) {
+        if (!mapName) {
+          previewImg.hidden = true;
+          previewEmpty.hidden = false;
+          previewCaption.textContent = "";
+          preview.classList.add("empty");
+          return;
+        }
+        previewImg.src = maps[mapName].bestand;
+        previewImg.hidden = false;
+        previewEmpty.hidden = true;
+        previewCaption.textContent = mapName;
+        preview.classList.remove("empty");
+      }
+
+      function updateTotal() {
+        var checked = document.querySelectorAll('input[name="questions"]:checked');
+        var total = 0;
+        checked.forEach(function (box) {
+          total += Number(box.dataset.aantal || 0);
+        });
+        totalCount.textContent = total === 0 ? "" : total + " vragen";
+      }
 
       function validateForm() {
         const map = document.querySelector('input[name="KaartInput"]:checked');
@@ -120,31 +183,64 @@
       }
 
       function showSettings(mapName) {
-        kaartTitel.textContent = mapName;
         questionsSelect.innerHTML = "";
-        (categories[mapName] || categories.Nederland).forEach(function (category) {
+        const categories = maps[mapName].categories;
+        Object.keys(categories).forEach(function (category) {
           const row = document.createElement("label");
           row.className = "row";
+
           const name = document.createElement("span");
           name.className = "name";
-          name.textContent = category;
+          const title = document.createElement("span");
+          title.className = "row-title";
+          title.textContent = category;
+          const note = document.createElement("span");
+          note.className = "row-note";
+          note.textContent = categories[category] + " vragen";
+          name.appendChild(title);
+          name.appendChild(note);
+
           const box = document.createElement("input");
           box.type = "checkbox";
           box.name = "questions";
           box.value = category;
+          box.dataset.aantal = categories[category];
           box.checked = true;
+          box.addEventListener("change", function () {
+            formError.hidden = true;
+            updateTotal();
+          });
+
           row.appendChild(name);
           row.appendChild(box);
           questionsSelect.appendChild(row);
         });
         formError.hidden = true;
         settings.hidden = false;
+        updateTotal();
       }
 
       mapInputs.forEach(function (input) {
+        const row = input.closest(".row");
         input.addEventListener("change", function () {
           if (input.checked) {
-            showSettings(input.value);
+            gekozenKaart = input.value;
+            showPreview(gekozenKaart);
+            showSettings(gekozenKaart);
+          }
+        });
+        // Even meekijken bij de kaart waar de muis boven hangt. Alleen in de
+        // brede weergave, want daaronder staat het voorbeeld boven de rijen en
+        // zou het die tijdens het aanwijzen wegduwen.
+        const breed = window.matchMedia("(min-width: 800px)");
+        row.addEventListener("mouseenter", function () {
+          if (breed.matches) {
+            showPreview(input.value);
+          }
+        });
+        row.addEventListener("mouseleave", function () {
+          if (breed.matches) {
+            showPreview(gekozenKaart);
           }
         });
       });
@@ -155,7 +251,7 @@
         document.querySelectorAll(".status[data-map]").forEach(function (el) {
           const p = saved[el.dataset.map];
           if (p && p.total > 0) {
-            el.textContent = p.known + " / " + p.total + " gekend";
+            el.textContent = p.known + " van " + p.total + " gekend";
             el.classList.add("known");
           }
         });
