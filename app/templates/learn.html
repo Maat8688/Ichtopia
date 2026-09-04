@@ -103,11 +103,6 @@
         document.title = mapName + " · oefenen";
       }
 
-      var correctSound = new Audio("{{ url_for('static', filename='sounds/correct.mp3') }}");
-      var incorrectSound = new Audio("{{ url_for('static', filename='sounds/incorrect.mp3') }}");
-      correctSound.volume = 0.4;
-      incorrectSound.volume = 0.4;
-
       var questionCount = 0;
       var feedback = document.getElementById("feedback");
       var questionText = document.getElementById("questionText");
@@ -179,7 +174,6 @@
       });
 
       socket.on("questionCorrect", function () {
-        correctSound.play().catch(function () {});
         if (sessionMode === 3) {
           showFeedback("Dat is " + currentQuestionName + ".", true);
         } else if (lastAnswer) {
@@ -190,7 +184,6 @@
       });
 
       socket.on("questionIncorrect", function () {
-        incorrectSound.play().catch(function () {});
         var text = "Je krijgt hem straks nog een keer.";
         if (sessionMode === 3) {
           text = "Dat was niet " + currentQuestionName + ". " + text;
