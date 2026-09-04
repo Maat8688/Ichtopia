@@ -18,6 +18,7 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/learn.css') }}"
     />
+    <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
     <link
       rel="icon"
       href="{{ url_for('static', filename='img/logo_small.png') }}"
@@ -29,6 +30,8 @@
       var lastAnswer = "";
       var currentQuestionName = "";
     </script>
+
+    {% with loadingText = 'Kaart laden' %}{% include('partials/loading.html') %}{% endwith %}
 
     <header class="page topbar">
       <h1 id="sessionTitle">Oefenen</h1>

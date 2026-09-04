@@ -1,0 +1,5 @@
+{# Laadscherm. Blijft staan tot de pagina klaar is; static/js/loading.js haalt het weg. #}
+<div class="loading" id="loadingScreen" role="status" aria-live="polite">
+  <p class="loading-text">{{ loadingText | default('Laden') }}</p>
+  <div class="loading-bar"><span></span></div>
+</div>

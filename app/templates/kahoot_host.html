@@ -8,9 +8,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
     <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
   </head>
   <body class="kahoot">
+    {% with loadingText = 'Quiz laden' %}{% include('partials/loading.html') %}{% endwith %}
     <div class="k-topbar">
       <a class="k-brand" href="/">Topo</a>
       <span id="questionCounter" class="k-pill hidden"></span>

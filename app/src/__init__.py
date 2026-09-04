@@ -2,7 +2,8 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+from werkzeug.exceptions import HTTPException
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -64,6 +65,9 @@ with app.app_context():
     from .kahoot_routes import kahoot, setupKahootSockets
     app.register_blueprint(kahoot)
     setupKahootSockets(socketio)
+
+    from .errors import registerErrorHandlers
+    registerErrorHandlers(app)
 
     from .models import db, User
     db.init_app(app)
