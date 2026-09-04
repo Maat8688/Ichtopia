@@ -134,7 +134,7 @@ def setupSockets(socketio: SocketIO):
         elif session.sessionMode == 2:
             emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
-            emit('question', {'question': session.currentQuestion.id})
+            emit('question', {'question': session.currentQuestion.displayName})
 
     @socketio.on('getQuestion')
     def getQuestion(data): # expects {'sessionToken': str}
@@ -144,7 +144,7 @@ def setupSockets(socketio: SocketIO):
         elif session.sessionMode == 2:
             emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
-            emit('question', {'question': session.currentQuestion.id})
+            emit('question', {'question': session.currentQuestion.displayName})
 
     @socketio.on('getProgressbar')
     def getProgressbar(data):

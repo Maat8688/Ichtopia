@@ -2,10 +2,24 @@ from __future__ import annotations
 import werkzeug.security
 import hashlib
 import random
+import unicodedata
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
 from datetime import datetime
+
+def normalizeAnswer(text) -> str:
+    """Maak een antwoord vergelijkbaar met de goede antwoorden.
+
+    Hoofdletters, accenten, spaties, streepjes, apostroffen en punten doen er
+    niet toe. "den haag", "Den-Haag" en "Den Haag" worden alle drie "denhaag",
+    en "Slovenie" wordt hetzelfde als "Slovenië". Zo hoeft niet elke schrijfwijze
+    los in de kaart te staan.
+    """
+    text = unicodedata.normalize('NFD', str(text))
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    return ''.join(c for c in text.lower() if c.isalnum())
+
 
 class SessionGamemode(Enum):
     MULTIPLECHOICE = 1
@@ -133,13 +147,12 @@ class mapSession():
         self.currentQuestion.tries += 1
 
         if hashed:
-            possibleAwnsers = [self.hash(awnser) for awnser in possibleAwnsers]
+            awnser = str(awnser)
+            possibleAwnsers = [self.hash(a) for a in possibleAwnsers]
         else:
-            awnser = awnser.upper()
-            possibleAwnsers = [awnser.upper() for awnser in possibleAwnsers]
-        
-        print(awnser, file=sys.stderr)
-        print(possibleAwnsers, file=sys.stderr)
+            awnser = normalizeAnswer(awnser)
+            possibleAwnsers = [normalizeAnswer(a) for a in possibleAwnsers]
+
         if awnser in possibleAwnsers:
             self.score += 1
             self.currentQuestion.timesCorrect += 1
@@ -220,3 +233,9 @@ class mapQuestion():
     @property
     def allAnswers(self):
         return self.answers + [self.id]
+
+    @property
+    def displayName(self) -> str:
+        """De naam die de leerling te zien krijgt: de eerste <awnser> uit de
+        kaart, en anders het id."""
+        return self.answers[0] if self.answers else self.id

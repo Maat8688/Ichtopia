@@ -14,7 +14,7 @@ import secrets
 import threading
 import time
 
-from .map import mapSession, mapQuestion
+from .map import mapSession, mapQuestion, normalizeAnswer
 
 # Maximale punten per vraag. Wie meteen goed antwoordt krijgt MAX_POINTS,
 # wie op het allerlaatste moment goed antwoordt krijgt de helft.
@@ -59,9 +59,7 @@ def cleanName(name: str) -> str:
 
 def displayName(question: mapQuestion) -> str:
     """De naam die op het bord getoond wordt voor een vraag."""
-    if question.answers:
-        return question.answers[0]
-    return question.id
+    return question.displayName
 
 
 class KahootPlayer:
@@ -243,13 +241,9 @@ class KahootGame:
         if question is None:
             return False
         answer = str(answer)[:MAX_ANSWER_LENGTH]
-        if self.mode == MODE_CLICKTHECOUNTRY:
-            if hashed:
-                return answer == self.map.hash(question.id)
-            return answer.upper() in [a.upper() for a in question.allAnswers]
         if hashed:
             return answer == self.map.hash(question.id)
-        return answer.strip().upper() in [a.upper() for a in question.allAnswers]
+        return normalizeAnswer(answer) in [normalizeAnswer(a) for a in question.allAnswers]
 
     def answer(self, playerId: str, answer: str, hashed: bool) -> tuple[bool, bool]:
         """Verwerk een antwoord. Geeft (geaccepteerd, iedereen heeft geantwoord)."""
@@ -307,7 +301,7 @@ class KahootGame:
                     count = sum(
                         1 for p in self.players.values()
                         if self.currentIndex in p.answers
-                        and p.answers[self.currentIndex]['answer'].strip().lower() == option.lower()
+                        and normalizeAnswer(p.answers[self.currentIndex]['answer']) == normalizeAnswer(option)
                     )
                     distribution.append({
                         'label': option,
