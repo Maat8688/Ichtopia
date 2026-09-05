@@ -11,7 +11,7 @@
     <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
     <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
   </head>
-  <body class="kahoot">
+  <body class="kahoot bord">
     {% with loadingText = 'Quiz laden' %}{% include('partials/loading.html') %}{% endwith %}
     <div class="k-topbar">
       <a class="k-brand" href="/">Topo</a>
