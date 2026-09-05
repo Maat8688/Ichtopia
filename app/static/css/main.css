@@ -392,3 +392,18 @@ main.error > * {
   padding-bottom: 20px;
   border-bottom: 0.5px solid var(--rule);
 }
+
+/* Melding als de verbinding met de server weg is */
+.verbinding {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border: 0.5px solid var(--pen);
+  border-left: 3px solid var(--pen);
+  background: var(--paper-2);
+  color: var(--pen);
+  font-size: 14px;
+}
+
+.verbinding[hidden] {
+  display: none;
+}

@@ -14,8 +14,22 @@
     socket.emit('getProgressbar', {'sessionToken': urlParams.get('sessionToken')});
   }
 
+  // Zonder verbinding gebeurt er niets als je klikt of typt. Zeg dat dan ook,
+  // anders lijkt de kaart gewoon kapot.
+  function toonVerbinding(kwijt) {
+    var melding = document.getElementById('verbinding');
+    if (melding) {
+      melding.hidden = !kwijt;
+    }
+  }
+
   // Bij een nieuwe of herstelde verbinding.
-  socket.on('connect', vraagStandOp);
+  socket.on('connect', function () {
+    toonVerbinding(false);
+    vraagStandOp();
+  });
+  socket.on('disconnect', function () { toonVerbinding(true); });
+  socket.on('connect_error', function () { toonVerbinding(true); });
 
   // En meteen, want de verbinding kan al openstaan voordat dit script draait.
   if (socket.connected) {

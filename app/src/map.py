@@ -147,8 +147,10 @@ class mapSession():
         self.currentQuestion.tries += 1
 
         if hashed:
+            # Bij aanwijzen stuurt de browser de id van het gebied door (gehasht),
+            # dus de id telt hier altijd mee, ook als er <awnser>-regels zijn.
             awnser = str(awnser)
-            possibleAwnsers = [self.hash(a) for a in possibleAwnsers]
+            possibleAwnsers = [self.hash(a) for a in possibleAwnsers + [self.currentQuestion.id]]
         else:
             awnser = normalizeAnswer(awnser)
             possibleAwnsers = [normalizeAnswer(a) for a in possibleAwnsers]

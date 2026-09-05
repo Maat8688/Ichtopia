@@ -6,6 +6,17 @@ sys.path.insert(0,'.')
 with contextlib.redirect_stdout(io.StringIO()):
     exec(open('lijsten.py').read())
 
+
+# Namen die op twee verschillende vormen slaan. De eerste <awnser> is wat de
+# leerling te zien krijgt, de rest wordt ook goedgerekend bij het typen.
+VERDUIDELIJK = {
+    ('Uruguay', 'Wateren'):    'Uruguay (rivier)',
+    ('Paraná', 'Wateren'):     'Paraná (rivier)',
+    ('Paraná', 'Provincies'):  'Paraná (deelstaat)',
+    ('São Paulo', 'Provincies'): 'São Paulo (deelstaat)',
+    ('São Paulo', 'Plaatsen'): 'São Paulo (stad)',
+}
+
 def N(t):
     t = unicodedata.normalize('NFD', str(t))
     return ''.join(c for c in t if not unicodedata.combining(c)).lower()
@@ -191,8 +202,24 @@ def bouw(bestand, items, kader, extra_vertaling=None, eps=0.45, breed=900.0):
     groepen, tel = [], {}
     # Tekenvolgorde: land onderop, dan provincies en gebergten, dan rivieren en
     # zeeen, en de steden bovenop. Anders dekt een landvorm de stadsstippen af.
-    VOLGORDE = {'Landen':0, 'Provincies':1, 'Gebergten':2, 'Wateren':3, 'Plaatsen':4}
-    for (naam, rub), (g, niveau) in sorted(geoms.items(), key=lambda t: (VOLGORDE[t[0][1]], t[0][0])):
+    VOLGORDE = {'Landen':1, 'Provincies':2, 'Gebergten':3, 'Wateren':4, 'Plaatsen':5}
+
+    def is_zee(naam, rub):
+        """Oceanen en zeeen zijn zo groot dat ze het land zouden afdekken.
+        Ze gaan onderop, zodat je ze kunt aanklikken zonder landen te blokkeren."""
+        if rub != 'Wateren': return False
+        g = geoms[(naam, rub)][0]
+        for soort, pts in ringen(g):
+            if soort != 'vlak': continue
+            xs = [x for x,_ in pts]; ys = [y for _,y in pts]
+            if (max(xs)-min(xs))*(max(ys)-min(ys)) > 0.008*breed*hoog: return True
+        return False
+
+    def rang(sleutel):
+        naam, rub = sleutel
+        return (0 if is_zee(naam, rub) else VOLGORDE[rub], naam)
+
+    for (naam, rub), (g, niveau) in sorted(geoms.items(), key=lambda t: rang(t[0])):
         vormen = ringen(g)
         id_ = ''.join(ch for ch in N(naam).replace(' ','-').replace('/','-') if ch.isalnum() or ch=='-')
         if rub in ('Plaatsen',): id_ += ''
@@ -213,9 +240,16 @@ def bouw(bestand, items, kader, extra_vertaling=None, eps=0.45, breed=900.0):
                 kl = ' class="zeevlak"' if (rub == 'Wateren' and groot) else ''
                 binnen.append(f'      <path{kl} d="M ' + ' L '.join(f'{x:.1f},{y:.1f}' for x,y in p) + ' Z"/>')
             else:
-                binnen.append('      <path class="lijn" d="M ' + ' L '.join(f'{x:.1f},{y:.1f}' for x,y in p) + '"/>')
+                # Een rivier is een haarlijn. Daaronder komt een brede onzichtbare
+                # kopie, anders is hij vrijwel niet aan te klikken.
+                d = 'M ' + ' L '.join(f'{x:.1f},{y:.1f}' for x,y in p)
+                binnen.append(f'      <path class="raakvlak" d="{d}"/>')
+                binnen.append(f'      <path class="lijn" d="{d}"/>')
+        toon = VERDUIDELIJK.get((naam, rub))
+        namen = [toon, naam] if toon else [naam]
+        regels = ''.join(f'      <awnser>{n}</awnser>\n' for n in namen)
         groepen.append(f'    <g id="{id_}" class="{klasse} question" category="{rub}" niveau="{niveau}">\n'
-                       f'      <awnser>{naam}</awnser>\n' + '\n'.join(binnen) + '\n    </g>')
+                       + regels + '\n'.join(binnen) + '\n    </g>')
         tel[rub] = tel.get(rub,0)+1
 
     # achtergrond: alle landen in beeld, niet aanklikbaar

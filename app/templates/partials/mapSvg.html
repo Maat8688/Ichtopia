@@ -318,6 +318,19 @@
   /* Een oceaan die nog niet gevraagd is laat de zee eronder gewoon zien. */
   #questions > g.Wateren:not(.active):not([state="Correct"]):not([state="Incorrect"]) path.zeevlak {
     fill: none;
+    /* Zonder vulling vangt een vorm geen muisklikken meer op, dus dat hier
+       expliciet aanzetten. De zee ligt onder het land, dus hij zit niets in de weg. */
+    pointer-events: all;
+  }
+
+  /* Onzichtbaar maar wel aanklikbaar: het brede raakvlak onder een rivier. */
+  #questions > g.Wateren path.raakvlak {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 11;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: stroke;
   }
 
   #questions > g.Wateren path.lijn {
