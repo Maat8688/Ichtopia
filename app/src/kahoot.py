@@ -32,12 +32,13 @@ MAP_FILES = {
 MAP_CATEGORIES = {
     'Nederland': ['Steden', 'Provincies', 'Wateren', 'Gebieden'],
     'Europa': ['Landen'],
-    'Wereld': ['Landen', 'Steden'],
+    'Wereld': ['Landen', 'Hoofdsteden', 'Steden'],
 }
 
 QUESTION_PROMPTS = {
     'Landen': 'Welk land is dit?',
     'Steden': 'Welke stad is dit?',
+    'Hoofdsteden': 'Welke hoofdstad is dit?',
     'Provincies': 'Welke provincie is dit?',
     'Wateren': 'Welk water is dit?',
     'Gebieden': 'Welk gebied is dit?',

@@ -285,7 +285,8 @@
     transition: fill 0.2s ease, fill-opacity 0.2s ease;
   }
 
-  #questions > g.Steden {
+  #questions > g.Steden,
+  #questions > g.Hoofdsteden {
     fill: var(--ink);
   }
 
@@ -302,7 +303,8 @@
     fill: var(--track);
   }
 
-  #questions > g.Steden:hover:not(.active) {
+  #questions > g.Steden,
+  #questions > g.Hoofdsteden:hover:not(.active) {
     fill: var(--atlas);
   }
 
@@ -317,7 +319,8 @@
     fill-opacity: 0.28;
   }
 
-  #questions > g.Steden[state="Correct"] {
+  #questions > g.Steden,
+  #questions > g.Hoofdsteden[state="Correct"] {
     fill: var(--atlas);
     fill-opacity: 1;
   }
@@ -327,7 +330,8 @@
     fill-opacity: 0.28;
   }
 
-  #questions > g.Steden[state="Incorrect"] {
+  #questions > g.Steden,
+  #questions > g.Hoofdsteden[state="Incorrect"] {
     fill: var(--pen);
     fill-opacity: 1;
   }
@@ -344,7 +348,8 @@
     vector-effect: non-scaling-stroke;
   }
 
-  #questions > g.Steden.active {
+  #questions > g.Steden,
+  #questions > g.Hoofdsteden.active {
     fill: var(--pen);
     fill-opacity: 1;
     stroke: none;
