@@ -27,12 +27,21 @@ MAP_FILES = {
     'Nederland': 'data/maps/Nederland.svg',
     'Europa': 'data/maps/Europa.svg',
     'Wereld': 'data/maps/Wereld.svg',
+    'Noord-Amerika': 'data/maps/Noord-Amerika.svg',
+    'Zuid-Amerika': 'data/maps/Zuid-Amerika.svg',
 }
 
 MAP_CATEGORIES = {
     'Nederland': ['Steden', 'Provincies', 'Wateren', 'Gebieden'],
     'Europa': ['Landen'],
     'Wereld': ['Landen', 'Hoofdsteden', 'Steden'],
+    'Noord-Amerika': ['Landen', 'Plaatsen', 'Wateren', 'Gebergten'],
+    'Zuid-Amerika': ['Landen', 'Provincies', 'Plaatsen', 'Wateren', 'Gebergten'],
+}
+
+# Kaarten waarop de vragen per niveau verschillen.
+MAP_NIVEAUS = {
+    'Zuid-Amerika': ['havo', 'vwo'],
 }
 
 QUESTION_PROMPTS = {
@@ -42,6 +51,8 @@ QUESTION_PROMPTS = {
     'Provincies': 'Welke provincie is dit?',
     'Wateren': 'Welk water is dit?',
     'Gebieden': 'Welk gebied is dit?',
+    'Plaatsen': 'Welke plaats is dit?',
+    'Gebergten': 'Welk gebergte is dit?',
 }
 
 # Spellen die langer dan dit bestaan worden opgeruimd.
@@ -436,7 +447,7 @@ class KahootManager:
                 return pin
 
     def createGame(self, mapName: str, mode: str | int, categories: list[str],
-                   questionCount: int, secondsPerQuestion: int) -> KahootGame:
+                   questionCount: int, secondsPerQuestion: int, niveau: str = None) -> KahootGame:
         if mapName not in MAP_FILES:
             raise ValueError('Onbekende kaart.')
         categories = [c for c in categories if c in MAP_CATEGORIES[mapName]]
@@ -449,7 +460,8 @@ class KahootManager:
         secondsPerQuestion = max(5, min(int(secondsPerQuestion), 120))
         questionCount = max(1, min(int(questionCount), 100))
 
-        gameMap = mapSession.fromSVG(MAP_FILES[mapName], modeValue, categories)
+        if niveau not in (MAP_NIVEAUS.get(mapName) or []): niveau = None
+        gameMap = mapSession.fromSVG(MAP_FILES[mapName], modeValue, categories, niveau)
         with self.lock:
             self._cleanup()
             pin = self._newPin()

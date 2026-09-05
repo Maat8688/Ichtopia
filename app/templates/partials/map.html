@@ -34,7 +34,7 @@
   socket.on('question', function(data) {
     var marker = document.getElementById('marker');
     var element = document.getElementById(data.question);
-    if (element && (element.classList.contains('Steden') || element.classList.contains('Hoofdsteden'))) {
+    if (element && ['Steden','Hoofdsteden','Plaatsen'].some(function(c){return element.classList.contains(c)})) {
       var box = element.getBBox();
       var viewBox = document.getElementById('map').viewBox.baseVal;
       var padding = Math.max(viewBox.width, viewBox.height) * 0.012;

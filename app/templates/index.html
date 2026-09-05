@@ -61,7 +61,17 @@
             <label class="row">
               <input class="visually-hidden" type="radio" name="KaartInput" value="Wereld" />
               <span class="name"><span class="row-title">Wereld</span><span class="row-note">landen en hoofdsteden</span></span>
-              <span class="status" data-map="Wereld">101 vragen</span>
+              <span class="status" data-map="Wereld">119 vragen</span>
+            </label>
+            <label class="row">
+              <input class="visually-hidden" type="radio" name="KaartInput" value="Noord-Amerika" />
+              <span class="name"><span class="row-title">Noord-Amerika</span><span class="row-note">4 havo en 4 vwo, deel 1</span></span>
+              <span class="status" data-map="Noord-Amerika">57 vragen</span>
+            </label>
+            <label class="row">
+              <input class="visually-hidden" type="radio" name="KaartInput" value="Zuid-Amerika" />
+              <span class="name"><span class="row-title">Zuid-Amerika</span><span class="row-note">4 havo en 4 vwo, deel 2</span></span>
+              <span class="status" data-map="Zuid-Amerika">98 vragen</span>
             </label>
           </div>
         </div>
@@ -90,6 +100,11 @@
                 <span class="name"><span class="row-title">Aanwijzen op de kaart</span><span class="row-note">je krijgt een naam en klikt de plek aan</span></span>
                 <input type="radio" name="mode" value="ClickTheCountry" />
               </label>
+            </div>
+
+            <div id="niveauBlok" hidden>
+              <p class="section-label">Niveau</p>
+              <div class="rule-list" id="niveauSelect"></div>
             </div>
 
             <p class="section-label">Onderdelen</p>
@@ -150,6 +165,21 @@
           bestand: "{{ url_for('static', filename='img/kaart-Wereld.svg') }}",
           categories: { Landen: 51, Hoofdsteden: 51, Steden: 17 },
         },
+        "Noord-Amerika": {
+          bestand: "{{ url_for('static', filename='img/kaart-Noord-Amerika.svg') }}",
+          categories: { Landen: 8, Plaatsen: 30, Wateren: 14, Gebergten: 5 },
+        },
+        "Zuid-Amerika": {
+          bestand: "{{ url_for('static', filename='img/kaart-Zuid-Amerika.svg') }}",
+          categories: { Landen: 15, Provincies: 7, Plaatsen: 57, Wateren: 16, Gebergten: 3 },
+          niveaus: { havo: 40, vwo: 88 },
+          // Havo en vwo hebben niet dezelfde onderdelen: alleen havo doet de
+          // Braziliaanse deelstaten, alleen vwo de gebergten.
+          perNiveau: {
+            havo: { Landen: 10, Provincies: 7, Plaatsen: 17, Wateren: 6 },
+            vwo: { Landen: 15, Plaatsen: 56, Wateren: 14, Gebergten: 3 },
+          },
+        },
       };
 
       var gekozenKaart = null;
@@ -195,9 +225,45 @@
         return true;
       }
 
+      function showNiveaus(mapName) {
+        const blok = document.getElementById("niveauBlok");
+        const lijst = document.getElementById("niveauSelect");
+        const niveaus = maps[mapName].niveaus;
+        lijst.innerHTML = "";
+        blok.hidden = !niveaus;
+        if (!niveaus) return;
+        Object.keys(niveaus).forEach(function (niveau, i) {
+          const row = document.createElement("label");
+          row.className = "row";
+          const naam = document.createElement("span");
+          naam.className = "name";
+          const titel = document.createElement("span");
+          titel.className = "row-title";
+          titel.textContent = niveau === "havo" ? "Havo" : "Vwo";
+          const note = document.createElement("span");
+          note.className = "row-note";
+          note.textContent = niveaus[niveau] + " vragen";
+          naam.appendChild(titel); naam.appendChild(note);
+          const knop = document.createElement("input");
+          knop.type = "radio"; knop.name = "niveau"; knop.value = niveau;
+          knop.checked = i === 0;
+          knop.addEventListener("change", function () { showSettings(mapName); });
+          row.appendChild(naam); row.appendChild(knop);
+          lijst.appendChild(row);
+        });
+      }
+
+      function gekozenNiveau() {
+        const knop = document.querySelector('input[name="niveau"]:checked');
+        return knop ? knop.value : null;
+      }
+
       function showSettings(mapName) {
         questionsSelect.innerHTML = "";
-        const categories = maps[mapName].categories;
+        const niveau = gekozenNiveau();
+        const perNiveau = maps[mapName].perNiveau;
+        const categories =
+          niveau && perNiveau && perNiveau[niveau] ? perNiveau[niveau] : maps[mapName].categories;
         Object.keys(categories).forEach(function (category) {
           const row = document.createElement("label");
           row.className = "row";
@@ -239,6 +305,7 @@
           if (input.checked) {
             gekozenKaart = input.value;
             showPreview(gekozenKaart);
+            showNiveaus(gekozenKaart);
             showSettings(gekozenKaart);
           }
         });

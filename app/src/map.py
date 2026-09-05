@@ -47,7 +47,7 @@ class mapSession():
         self.backgroundElements = backgroundElements
         self.foregroundElements = foregroundElements
         self.viewBox = viewBox
-        self.currentQuestionIndex = random.randint(0, len(questions) - 1)
+        self.currentQuestionIndex = random.randint(0, len(questions) - 1) if questions else -1
         self.score = 0
         self.finished = False
         self.antiCheat = True
@@ -172,7 +172,7 @@ class mapSession():
         
 
     @staticmethod
-    def fromSVG(file:str, sessionMode:SessionGamemode|str=SessionGamemode.MULTIPLECHOICE, includeQuestions:list[str]=[]) -> mapSession:
+    def fromSVG(file:str, sessionMode:SessionGamemode|str=SessionGamemode.MULTIPLECHOICE, includeQuestions:list[str]=[], niveau:str=None) -> mapSession:
         with open(file, 'r') as f:
             svg = f.read()
         
@@ -182,12 +182,15 @@ class mapSession():
         backgroundElements = []
         foregroundElements = []
         #loop trough all g in map
-        print(includeQuestions, file=sys.stderr)
         for g in mapElement.find_all('g'):
             if g.get('class') == None:
                 backgroundElements.append(str(g))
             elif "question" in g.get('class'):
                 if g.get('category') != None and g.get('category') not in includeQuestions:
+                    continue
+                # Kaarten met een niveau-kenmerk (havo/vwo) alleen de vragen van
+                # dat niveau. Vormen zonder kenmerk horen bij allebei.
+                if niveau and g.get('niveau') and niveau not in g.get('niveau').split():
                     continue
                 answers = []
                 for awnser in g.find_all('awnser'):

@@ -278,6 +278,18 @@
   #map [style*="stroke:#1a1a18"] { stroke: var(--ink) !important; }
   #map [style*="stroke:#575656"] { stroke: var(--rule) !important; }
 
+  /* Achtergrond van de gegenereerde kaarten (Amerika). De oudere kaarten
+     dragen hun eigen stijl inline mee en trekken zich hier niets van aan. */
+  #background .zee {
+    fill: #dde7e9;
+  }
+
+  #background path {
+    fill: var(--paper-2);
+    stroke: var(--rule);
+    stroke-width: 0.6;
+  }
+
   /* Vraagelementen */
   #questions > g {
     cursor: pointer;
@@ -286,8 +298,33 @@
   }
 
   #questions > g.Steden,
-  #questions > g.Hoofdsteden {
+  #questions > g.Hoofdsteden,
+  #questions > g.Plaatsen {
     fill: var(--ink);
+  }
+
+  #questions > g.Landen,
+  #questions > g.Provincies {
+    fill: var(--paper-2);
+    stroke: var(--ink);
+    stroke-width: 0.6;
+  }
+
+  #questions > g.Gebergten {
+    fill: #c9bfa4;
+    fill-opacity: 0.75;
+  }
+
+  /* Een oceaan die nog niet gevraagd is laat de zee eronder gewoon zien. */
+  #questions > g.Wateren:not(.active):not([state="Correct"]):not([state="Incorrect"]) path.zeevlak {
+    fill: none;
+  }
+
+  #questions > g.Wateren path.lijn {
+    fill: none;
+    stroke: var(--atlas);
+    stroke-width: 1.6;
+    stroke-linecap: round;
   }
 
   #questions > g.Wateren {

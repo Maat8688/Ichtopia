@@ -148,6 +148,7 @@ def host():
                 categories=request.form.getlist('questions'),
                 questionCount=request.form.get('questionCount', 10),
                 secondsPerQuestion=request.form.get('seconds', 20),
+                niveau=request.form.get('niveau') or None,
             )
         except (ValueError, TypeError) as e:
             error = str(e) or 'Er ging iets mis bij het aanmaken van de quiz.'

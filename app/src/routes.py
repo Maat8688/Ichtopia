@@ -5,6 +5,7 @@ import sys
 from . import sessionManager
 from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
+from .kahoot import MAP_FILES
 
 main = Blueprint('main', __name__)
 
@@ -12,13 +13,14 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        print(request.form, file=sys.stderr)
-        if request.form.get('KaartInput') == 'Nederland':
-            newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
-        elif request.form.get('KaartInput') == 'Europa':
-            newSession = mapSession.fromSVG('data/maps/Europa.svg', request.form.get('mode'), request.form.getlist('questions'))
-        elif request.form.get('KaartInput') == 'Wereld':
-            newSession = mapSession.fromSVG('data/maps/Wereld.svg', request.form.get('mode'), request.form.getlist('questions'))
+        kaart = request.form.get('KaartInput')
+        if kaart not in MAP_FILES:
+            return redirect(url_for('main.index'))
+        niveau = request.form.get('niveau') or None
+        newSession = mapSession.fromSVG(MAP_FILES[kaart], request.form.get('mode'),
+                                        request.form.getlist('questions'), niveau)
+        if not newSession.questions:
+            return redirect(url_for('main.index'))
         id = sessionManager.createSession(newSession)
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
