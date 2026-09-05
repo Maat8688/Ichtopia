@@ -232,7 +232,10 @@ class mapQuestion():
 
     @property
     def allAnswers(self):
-        return self.answers + [self.id]
+        # Staan er <awnser>-regels in de kaart, dan gelden alleen die. Het id is
+        # dan puur een naam om de vorm mee aan te wijzen, zodat twee vormen
+        # dezelfde naam mogen hebben (Sao Paulo is een stad en een deelstaat).
+        return self.answers if self.answers else [self.id]
 
     @property
     def displayName(self) -> str:
