@@ -248,9 +248,12 @@
       {{ background | safe }}
     {% endfor %}
   </g>
+  {# Alleen in de aanwijs-modus zijn de gebieden knoppen. Elders is de kaart
+     illustratie en hoort hij niet in de tabvolgorde. #}
+  {% set klikbaar = klikbaar | default(false) %}
   <g id="questions">
     {% for question in map.questions %}
-      <g Id="{{ map.hash(question.id) }}" class="{{ question.category }}" state="{{ map.getQuestionState(question) }}">
+      <g Id="{{ map.hash(question.id) }}" class="{{ question.category }}" state="{{ map.getQuestionState(question) }}"{% if klikbaar %} tabindex="0" role="button"{% endif %}>
         {{ question.svg | safe }}
       </g>
     {% endfor %}
@@ -403,5 +406,20 @@
     fill: var(--pen);
     fill-opacity: 1;
     stroke: none;
+  }
+
+  /* Met het toetsenbord aanwijzen: laat zien waar je bent. */
+  #questions > g:focus {
+    outline: none;
+  }
+
+  #questions > g:focus-visible {
+    fill: var(--track);
+    stroke: var(--atlas);
+    stroke-width: 3;
+  }
+
+  #questions > g:focus-visible > path {
+    vector-effect: non-scaling-stroke;
   }
 </style>

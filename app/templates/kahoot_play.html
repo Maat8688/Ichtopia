@@ -37,7 +37,7 @@
         <div class="k-options" id="options"></div>
         {% else %}
         <div class="k-player-map">
-          {% include('partials/mapSvg.html') %}
+          {% with klikbaar = true %}{% include('partials/mapSvg.html') %}{% endwith %}
         </div>
         {% endif %}
       </section>
