@@ -18,6 +18,10 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/learn.css') }}"
     />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/account.css') }}"
+    />
     <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
     <link
       rel="icon"
@@ -83,6 +87,12 @@
             <div><span>Pogingen</span><span id="T-Tries">?</span></div>
             <div><span>Fout</span><span id="T-Incorrect">?</span></div>
             <div><span>Tijd</span><span id="T-Time">?</span></div>
+          </div>
+
+          <!-- Alleen zichtbaar als je ingelogd bent; zonder account is er geen XP. -->
+          <div id="xpBlok" hidden>
+            <p class="feedback ok" id="xpTekst"></p>
+            <div class="level-bar"><span id="xpBalk" style="width: 0%"></span></div>
           </div>
           <div class="actions">
             <button type="button" class="link" onclick="showBreakdown()">overzicht per vraag</button>
@@ -234,6 +244,20 @@
         var marker = document.getElementById("marker");
         if (marker) {
           marker.setAttribute("visibility", "hidden");
+        }
+
+        var xp = data["xp"];
+        if (xp && xp["earned"] > 0) {
+          var tekst = "+" + xp["earned"] + " XP · level " + xp["level"];
+          if (!xp["levelProgress"]["max"]) {
+            tekst += " · nog " + xp["levelProgress"]["toNext"] + " XP tot level " + (xp["level"] + 1);
+          }
+          if (xp["capped"]) {
+            tekst += " (je hebt vandaag het maximum aan XP gehaald)";
+          }
+          document.getElementById("xpTekst").textContent = tekst;
+          document.getElementById("xpBalk").style.width = xp["levelProgress"]["percent"] + "%";
+          document.getElementById("xpBlok").hidden = false;
         }
 
         document.getElementById("questionArea").hidden = true;

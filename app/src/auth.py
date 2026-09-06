@@ -14,7 +14,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .models import db, User, AccountType
+from .models import db, DuelMatch, User, AccountType
+from .names import NameError_, checkName
 from .security import (AttemptLimiter, clientIp, csrfToken, csrfValid,
                        rotateCsrfToken, safeUrl)
 
@@ -26,7 +27,6 @@ loginLimiter = AttemptLimiter(maxAttempts=5, window=5 * 60)
 # aanmaken van accounts.
 registerLimiter = AttemptLimiter(maxAttempts=5, window=60 * 60)
 
-USERNAME_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9 ._-]{1,31}$')
 EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$')
 MIN_PASSWORD_LENGTH = 8
 
@@ -55,9 +55,11 @@ def validateRegistration(username: str, email: str, password: str,
     """Alle fouten in een keer terug, zodat het formulier ze samen kan tonen."""
     errors: list[str] = []
 
-    if not USERNAME_RE.match(username):
-        errors.append('Kies een naam van 2 tot 32 tekens: letters, cijfers, '
-                      'spatie, punt, streepje of liggend streepje.')
+    # Dezelfde controle als bij een quiznaam: hij komt op de ranglijst te staan.
+    try:
+        checkName(username)
+    except NameError_ as e:
+        errors.append(str(e))
     if not EMAIL_RE.match(email) or len(email) > 120:
         errors.append('Vul een geldig e-mailadres in.')
     if len(password) < MIN_PASSWORD_LENGTH:
@@ -201,4 +203,9 @@ def logout():
 @auth.route('/account')
 @login_required
 def account():
-    return render_template('account.html')
+    recent = (DuelMatch.query
+              .filter(db.or_(DuelMatch.one_id == current_user.id,
+                             DuelMatch.two_id == current_user.id))
+              .order_by(DuelMatch.played_at.desc())
+              .limit(5).all())
+    return render_template('account.html', duels=recent)

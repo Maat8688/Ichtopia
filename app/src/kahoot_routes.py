@@ -15,8 +15,10 @@ from .kahoot import (
     KahootManager, KahootGame, MAP_CATEGORIES, MAP_FILES,
     MODE_MULTIPLECHOICE, MODE_CLICKTHECOUNTRY,
 )
-from .models import AccountType
+from .models import AccountType, User, db
+from .progress import XP_DAILY_CAP, quizXp
 from .security import safeUrl
+from .sockets import registerDisconnect
 
 kahoot = Blueprint('kahoot', __name__)
 kahootManager = KahootManager()
@@ -78,6 +80,25 @@ def registerFailedLogin(ip: str):
 def safeNext(target: str) -> str:
     """Alleen doorsturen naar een pad binnen deze site."""
     return safeUrl(target, url_for('kahoot.host'))
+
+
+def awardQuizXp(game: KahootGame):
+    """Schrijf XP bij voor de spelers die ook ingelogd waren."""
+    scores = [(p, game.rankOf(p)) for p in game.players.values() if p.userId]
+    if not scores:
+        return
+    from . import app
+    with app.app_context():
+        for player, rank in scores:
+            user = db.session.get(User, player.userId)
+            if user is None:
+                continue
+            user.addXp(quizXp(player.score, rank, len(game.players)), cap=XP_DAILY_CAP)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            app.logger.exception('XP van de klassikale quiz bijschrijven mislukt')
 
 
 def hostRoom(pin: str) -> str:
@@ -211,6 +232,7 @@ def setupKahootSockets(socketio: SocketIO):
             socketio.start_background_task(questionTimer, game, game.questionRun)
         else:
             game.finish()
+            awardQuizXp(game)
             leaderboard = game.leaderboard()
             socketio.emit('kahootFinished', {'leaderboard': leaderboard}, to=hostRoom(game.pin))
             for player in game.players.values():
@@ -246,8 +268,9 @@ def setupKahootSockets(socketio: SocketIO):
         if game is None:
             emit('kahootError', {'message': 'Geen quiz gevonden met deze pincode.'})
             return
+        userId = current_user.id if current_user.is_authenticated else None
         try:
-            player = game.addPlayer(str(data.get('name', '')))
+            player = game.addPlayer(str(data.get('name', '')), userId)
         except ValueError as e:
             emit('kahootError', {'message': str(e)})
             return
@@ -336,9 +359,9 @@ def setupKahootSockets(socketio: SocketIO):
         if everyoneAnswered:
             sendReveal(game)
 
-    @socketio.on('disconnect')
-    def onDisconnect(*args):
-        game, player = kahootManager.findBySid(request.sid)
+    @registerDisconnect
+    def onDisconnect(sid):
+        game, player = kahootManager.findBySid(sid)
         if game is None:
             return
         if player is None:

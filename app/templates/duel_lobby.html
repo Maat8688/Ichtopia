@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Duel · Topo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/duel.css') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+  </head>
+  <body class="kahoot">
+    <div class="k-topbar">
+      <a class="k-brand" href="/">Topo</a>
+      <span class="k-pill">Duel</span>
+      <span class="k-pill">{{ current_user.username }} · {{ current_user.rating }} elo</span>
+      <a class="k-btn secondary" href="{{ url_for('ranking.board', lijst='elo') }}">Ranglijst</a>
+    </div>
+
+    <div class="k-main">
+      {% if error %}
+      <div class="k-error">{{ error }}</div>
+      {% endif %}
+
+      {% if running %}
+      <div class="k-card">
+        <h1>Je hebt een duel openstaan</h1>
+        <p class="k-muted">
+          {% if running.isFull %}Het duel is bezig.{% else %}Er is nog geen tegenstander.{% endif %}
+          Code <strong>{{ running.code }}</strong>.
+        </p>
+        <div class="k-btn-row">
+          <a class="k-btn primary" href="{{ url_for('duel.play', code=running.code) }}">Terug naar het duel</a>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="duel-columns">
+        <!-- OPENSTAANDE DUELS -->
+        <section class="k-card">
+          <h1>Doe mee</h1>
+          {% if openDuels %}
+          <ul class="duel-open-list">
+            {% for open in openDuels %}
+            <li>
+              <div>
+                <strong>{{ open.creator }}</strong>
+                <span class="k-muted">· level {{ open.creatorLevel }} · {{ open.creatorRating }} elo</span>
+                <div class="k-muted">
+                  {{ open.mapName }} · {{ open.questions }} vragen ·
+                  {{ 'meerkeuze' if open.mode == 1 else 'aanwijzen' }}
+                </div>
+              </div>
+              <a class="k-btn primary" href="{{ url_for('duel.play', code=open.code) }}">Spelen</a>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="k-muted">Er wacht nu niemand op een tegenstander. Maak zelf een duel
+            en stuur de code naar een klasgenoot.</p>
+          {% endif %}
+
+          <form class="duel-code-form" method="GET" action="{{ url_for('duel.lobby') }}"
+                onsubmit="event.preventDefault(); const c = this.code.value.trim().toUpperCase(); if (c) window.location.href = '/duel/' + encodeURIComponent(c);">
+            <label class="k-label" for="code">Of vul een code in</label>
+            <div class="k-inline">
+              <input class="k-input" type="text" id="code" name="code" maxlength="5"
+                     placeholder="ABCDE" autocomplete="off" />
+              <button class="k-btn secondary" type="submit">Meedoen</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- NIEUW DUEL -->
+        <form class="k-card" method="POST" action="{{ url_for('duel.create') }}" id="duelForm">
+          <h1>Nieuw duel</h1>
+          <p class="k-muted">Jullie krijgen dezelfde vragen tegelijk. Sneller goed
+            antwoorden levert meer punten op; de winnaar pakt elo van de ander af.</p>
+
+          <span class="k-label">Kaart</span>
+          <div class="k-choice-grid">
+            {% for mapName in maps %}
+            <div class="k-choice">
+              <input type="radio" name="KaartInput" id="map-{{ mapName }}" value="{{ mapName }}"
+                     {% if loop.first %}checked{% endif %} />
+              <label for="map-{{ mapName }}">
+                <img src="{{ url_for('static', filename='img/kaart-' ~ mapName ~ '.svg') }}" alt="" />
+                <span class="k-choice-text">{{ mapName }}</span>
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div id="niveauBlok" class="hidden">
+            <span class="k-label">Niveau</span>
+            <div class="k-choice-grid">
+              <div class="k-choice">
+                <input type="radio" name="niveau" id="niveau-havo" value="havo" checked />
+                <label for="niveau-havo"><span class="k-choice-text">Havo</span></label>
+              </div>
+              <div class="k-choice">
+                <input type="radio" name="niveau" id="niveau-vwo" value="vwo" />
+                <label for="niveau-vwo"><span class="k-choice-text">Vwo</span></label>
+              </div>
+            </div>
+          </div>
+
+          <span class="k-label">Vraagvorm</span>
+          <div class="k-choice-grid">
+            <div class="k-choice">
+              <input type="radio" name="mode" id="mode-mc" value="MultipleChoise" checked />
+              <label for="mode-mc"><span class="k-choice-text">Meerkeuze</span></label>
+            </div>
+            <div class="k-choice">
+              <input type="radio" name="mode" id="mode-click" value="ClickTheCountry" />
+              <label for="mode-click"><span class="k-choice-text">Aanwijzen op de kaart</span></label>
+            </div>
+          </div>
+
+          <span class="k-label">Onderdelen</span>
+          <div class="k-choice-grid" id="categorySelect"></div>
+          <p class="k-error hidden" id="formError">Kies minstens één onderdeel.</p>
+
+          <div class="k-inline">
+            <div>
+              <label class="k-label" for="questionCount">Aantal vragen</label>
+              <input class="k-input" type="number" id="questionCount" name="questionCount"
+                     min="3" max="25" value="{{ defaultQuestions }}" required />
+            </div>
+            <div>
+              <label class="k-label" for="seconds">Seconden per vraag</label>
+              <input class="k-input" type="number" id="seconds" name="seconds"
+                     min="5" max="60" value="{{ defaultSeconds }}" required />
+            </div>
+          </div>
+
+          <label class="duel-checkline">
+            <input type="checkbox" name="open" value="1" checked />
+            In de lijst zetten, zodat iedereen mee kan doen
+          </label>
+
+          <div class="k-btn-row">
+            <a class="k-btn secondary" href="/">Terug</a>
+            <button class="k-btn primary" type="submit">Duel maken</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const categoriesPerMap = {{ categories | tojson }};
+      const mapsMetNiveau = {{ niveaus | tojson }};
+      const categorySelect = document.getElementById("categorySelect");
+
+      function renderCategories() {
+        const selected = document.querySelector('input[name="KaartInput"]:checked').value;
+        const heeftNiveau = Object.prototype.hasOwnProperty.call(mapsMetNiveau, selected);
+        document.getElementById("niveauBlok").classList.toggle("hidden", !heeftNiveau);
+        const categories = categoriesPerMap[selected] || [];
+        categorySelect.innerHTML = "";
+        categories.forEach((category, i) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "k-choice";
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.name = "questions";
+          input.id = "cat-" + i;
+          input.value = category;
+          input.checked = i === 0;
+          const label = document.createElement("label");
+          label.htmlFor = input.id;
+          const text = document.createElement("span");
+          text.className = "k-choice-text";
+          text.textContent = category;
+          label.appendChild(text);
+          wrapper.appendChild(input);
+          wrapper.appendChild(label);
+          categorySelect.appendChild(wrapper);
+        });
+      }
+
+      document.querySelectorAll('input[name="KaartInput"], input[name="niveau"]').forEach((input) => {
+        input.addEventListener("change", renderCategories);
+      });
+      renderCategories();
+
+      document.getElementById("duelForm").addEventListener("submit", (event) => {
+        const gekozen = document.querySelectorAll('input[name="questions"]:checked').length;
+        document.getElementById("formError").classList.toggle("hidden", gekozen > 0);
+        if (!gekozen) event.preventDefault();
+      });
+    </script>
+  </body>
+</html>

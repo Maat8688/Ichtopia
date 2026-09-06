@@ -77,6 +77,21 @@ with app.app_context():
     from .auth import auth
     app.register_blueprint(auth)
 
+    from .duel_routes import duel, setupDuelSockets
+    app.register_blueprint(duel)
+    setupDuelSockets(socketio)
+
+    from .ranking import ranking
+    app.register_blueprint(ranking)
+
+    # Een event heeft bij Flask-SocketIO maar een handler, dus verdelen we
+    # 'disconnect' zelf over de modules die er iets mee moeten.
+    from .sockets import dispatchDisconnect
+
+    @socketio.on('disconnect')
+    def onDisconnect(*args):
+        dispatchDisconnect(request.sid)
+
     from .errors import registerErrorHandlers
     registerErrorHandlers(app)
 

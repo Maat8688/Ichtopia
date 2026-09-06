@@ -15,6 +15,7 @@ import threading
 import time
 
 from .map import mapSession, mapQuestion, normalizeAnswer
+from .names import MAX_LENGTH as MAX_NAME_LENGTH, NameError_, checkName
 
 # Maximale punten per vraag. Wie meteen goed antwoordt krijgt MAX_POINTS,
 # wie op het allerlaatste moment goed antwoordt krijgt de helft.
@@ -59,14 +60,7 @@ QUESTION_PROMPTS = {
 GAME_MAX_AGE = 4 * 60 * 60
 
 MAX_PLAYERS = 100
-MAX_NAME_LENGTH = 24
 MAX_ANSWER_LENGTH = 200
-
-
-def cleanName(name: str) -> str:
-    """Haal rare tekens en dubbele spaties uit een spelersnaam."""
-    name = ''.join(ch for ch in str(name) if ch.isprintable())
-    return ' '.join(name.split())[:MAX_NAME_LENGTH]
 
 
 def displayName(question: mapQuestion) -> str:
@@ -74,10 +68,32 @@ def displayName(question: mapQuestion) -> str:
     return question.displayName
 
 
+def buildOptions(gameMap: mapSession, question: mapQuestion, length: int = 4) -> list[str]:
+    """Maak meerkeuze-opties: het goede antwoord plus afleiders uit dezelfde categorie."""
+    correct = displayName(question)
+    sameCategory = [q for q in gameMap.questions
+                    if q.category == question.category and q is not question]
+    others = [q for q in gameMap.questions if q is not question]
+    pool = sameCategory if len(sameCategory) >= length - 1 else others
+
+    options = [correct]
+    candidates = [displayName(q) for q in pool]
+    random.shuffle(candidates)
+    for candidate in candidates:
+        if len(options) >= length:
+            break
+        if candidate.lower() not in [o.lower() for o in options]:
+            options.append(candidate)
+    random.shuffle(options)
+    return options
+
+
 class KahootPlayer:
-    def __init__(self, name: str):
+    def __init__(self, name: str, userId: int | None = None):
         self.id = secrets.token_urlsafe(16)
         self.name = name
+        # Alleen gevuld als de speler ook ingelogd is; dan levert de quiz XP op.
+        self.userId = userId
         self.score = 0
         self.sid = None
         self.connected = True
@@ -124,10 +140,12 @@ class KahootGame:
     # ------------------------------------------------------------------
     # Spelers
     # ------------------------------------------------------------------
-    def addPlayer(self, name: str) -> KahootPlayer:
-        name = cleanName(name)
-        if not name:
-            raise ValueError('Vul een naam in.')
+    def addPlayer(self, name: str, userId: int | None = None) -> KahootPlayer:
+        # Namen komen op het digibord, dus door hetzelfde filter als accounts.
+        try:
+            name = checkName(name)
+        except NameError_ as e:
+            raise ValueError(str(e))
         if self.state == 'finished':
             raise ValueError('Deze quiz is al afgelopen.')
         with self.lock:
@@ -138,7 +156,7 @@ class KahootGame:
             for player in self.players.values():
                 if player.name.lower() == name.lower():
                     raise ValueError('Deze naam is al in gebruik, kies een andere naam.')
-            player = KahootPlayer(name)
+            player = KahootPlayer(name, userId)
             self.players[player.id] = player
             return player
 
@@ -186,23 +204,7 @@ class KahootGame:
         return max(0.0, self.seconds - (time.time() - self.questionStart))
 
     def buildOptions(self, question: mapQuestion, length: int = 4) -> list[str]:
-        """Maak meerkeuze-opties: het goede antwoord plus afleiders uit dezelfde categorie."""
-        correct = displayName(question)
-        sameCategory = [q for q in self.map.questions
-                        if q.category == question.category and q is not question]
-        others = [q for q in self.map.questions if q is not question]
-        pool = sameCategory if len(sameCategory) >= length - 1 else others
-
-        options = [correct]
-        candidates = [displayName(q) for q in pool]
-        random.shuffle(candidates)
-        for candidate in candidates:
-            if len(options) >= length:
-                break
-            if candidate.lower() not in [o.lower() for o in options]:
-                options.append(candidate)
-        random.shuffle(options)
-        return options
+        return buildOptions(self.map, question, length)
 
     def nextQuestion(self) -> bool:
         """Ga naar de volgende vraag. Geeft False als er geen vragen meer zijn."""

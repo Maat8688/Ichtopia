@@ -34,5 +34,41 @@ DATABASE_URL=postgresql://gebruiker:wachtwoord@db:5432/main
 COOKIE_SECURE=1   # alleen als er https voor de app zit; standaard uit
 ```
 
-De rooktest van het accountsysteem draai je vanuit `app` met
-`python tests/test_auth.py` (gebruikt een tijdelijke SQLite-database).
+## Punten, levels en duels
+
+Twee losse ladders, allebei zichtbaar op `/ranglijst`:
+
+- **XP en levels** verdien je door te oefenen, mee te doen met een klassikale
+  quiz of een duel te spelen. XP kan alleen omhoog. Er zit een rem van 600 XP
+  per dag op, zodat dezelfde kleine kaart eindeloos herhalen niets oplevert.
+- **Elo** verandert alleen door duels en kan ook zakken. Iedereen begint op
+  1000. De eerste tien duels tellen zwaarder mee (K=40, daarna K=24).
+
+Een duel (`/duel`) is 1 tegen 1: allebei dezelfde vragen tegelijk, sneller goed
+antwoorden levert meer punten op, de winnaar pakt elo van de ander af. Je maakt
+een duel aan en deelt de code, of je pakt er een uit de lijst met openstaande
+duels. Speel je meer dan vijf keer op een dag tegen dezelfde persoon, dan
+tellen die duels niet meer voor je elo - anders spelen twee vrienden elkaar
+gewoon naar boven.
+
+## Namen
+
+Namen komen op de ranglijst, op het digibord en in duels te staan, dus ze gaan
+door een filter (`src/names.py`): 2 tot 20 tekens, alleen letters, cijfers,
+spaties, punten en streepjes, en geen scheldwoorden of namen als "docent" of
+"admin". Het filter kijkt ook door l3etspeak en tussengevoegde tekens heen
+("K-U-T", "K4nker"). Hetzelfde filter geldt voor accountnamen en voor de naam
+waarmee een leerling aan een klassikale quiz meedoet.
+
+De woordenlijst staat bovenin `src/names.py` en is bedoeld om aangevuld te
+worden zodra er iets doorheen glipt.
+
+## Tests
+
+Draaien vanuit `app`, allemaal op een tijdelijke SQLite-database:
+
+```
+python tests/test_names.py     # het naamfilter
+python tests/test_auth.py      # registreren, inloggen, afgeschermde pagina's
+python tests/test_ranking.py   # XP, levels, elo, ranglijst en een heel duel
+```

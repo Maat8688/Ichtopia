@@ -3,39 +3,17 @@
 Draaien vanuit de map `app`:
 
     python tests/test_auth.py
-
-Gebruikt een tijdelijke SQLite-database, zodat er geen Postgres nodig is. De
-tabel `results` gebruikt een Postgres-array; die wordt hieronder voor SQLite
-als tekst weggeschreven, puur om de tabellen te kunnen aanmaken.
 """
-import os, re, sys, tempfile
+import os
+import sys
 
-os.environ['DATABASE_URL'] = 'sqlite:///' + tempfile.mkstemp(suffix='.db')[1]
-os.environ['SECRET_KEY'] = 'test-secret'
-os.environ['KAHOOT_HOST_CODE'] = 'docent123'
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy import ARRAY
+from helpers import Checks, csrf as token, loadApp   # noqa: E402
 
-@compiles(ARRAY, "sqlite")
-def _array_as_text(element, compiler, **kw):  # alleen nodig voor deze test
-    return "TEXT"
+app = loadApp()
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from src import app
-app.config['TESTING'] = True
-
-def token(html):
-    m = re.search(r'name="csrfToken" value="([^"]+)"', html)
-    assert m, 'geen csrf-token in formulier'
-    return m.group(1)
-
-fails = []
-def check(name, cond, extra=''):
-    print(('OK   ' if cond else 'FOUT ') + name + ('' if cond else ' :: ' + str(extra)[:300]))
-    if not cond:
-        fails.append(name)
+check = Checks()
 
 c = app.test_client()
 
@@ -118,11 +96,12 @@ check('rem na 5 pogingen', 'Te veel mislukte pogingen' in r.get_data(as_text=Tru
 # --- docentaccount ---
 c5 = app.test_client()
 t7 = token(c5.get('/registreren').get_data(as_text=True))
-r = c5.post('/registreren', data={'csrfToken': t7, 'username': 'Docent Jansen', 'email': 'd@example.com',
+r = c5.post('/registreren', data={'csrfToken': t7, 'username': 'Kevin', 'email': 'd@example.com',
                                   'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
                                   'accountType': 'docent', 'teacherCode': 'docent123'},
             follow_redirects=True)
-check('docentaccount aanmaken', 'Docent' in r.get_data(as_text=True))
+body = r.get_data(as_text=True)
+check('docentaccount aanmaken', 'Mijn account' in body and 'Docent' in body, body[:300])
 r = c5.get('/host')
 check('docent mag de klassikale quiz hosten', r.status_code == 200, r.status_code)
 
@@ -130,5 +109,4 @@ check('docent mag de klassikale quiz hosten', r.status_code == 200, r.status_cod
 r = app.test_client().get('/login')
 check('/login stuurt door naar /inloggen', r.status_code == 302 and r.headers['Location'].endswith('/inloggen'), r.headers.get('Location'))
 
-print('\n' + ('ALLES GOED' if not fails else 'MISLUKT: ' + ', '.join(fails)))
-sys.exit(1 if fails else 0)
+sys.exit(check.report())
