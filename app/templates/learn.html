@@ -3,9 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Topo Leren</title>
+    <title>Oefenen | IchTopia</title>
+    <meta name="theme-color" content="#006b85" />
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/theme.css') }}"
+    />
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/main.css') }}"
@@ -21,19 +32,34 @@
   </head>
   <body>
     
-    <a href="/" class="button-56" role="button">Home</a>
+    <header class="school-header">
+      <div class="school-header__inner">
+        <span class="school-header__mark">
+          {% include 'partials/ichthus.html' %}
+        </span>
+        <div>
+          <p class="school-header__name">IchTopia</p>
+          <p class="school-header__sub">Topografie &middot; Ichthus Lyceum</p>
+        </div>
+        <span class="school-header__spacer"></span>
+        <a href="/" class="btn-ghost" role="button">Home</a>
+      </div>
+    </header>
     <div id="finishedOverlay" class="overlay">
       
       <div class="popup">
-        <h2>Finished</h2>
+        <h2>Klaar!</h2>
         <p>Score: <span id="T-Score">?</span></p>
-        <p>Total tries: <span id="T-Tries">?</span></p>
-        <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
-        <p>Time: <span id="T-Time">?</span> sec</p>
+        <p>Aantal pogingen: <span id="T-Tries">?</span></p>
+        <p>Fout beantwoord: <span id="T-Incorrect">?</span></p>
+        <p>Tijd: <span id="T-Time">?</span> sec</p>
    
-        <a href="/" class="button-56" role="button">Home</a>
-
-        <button onclick="showBreakdown()">Overzicht</button>
+        <div class="popup__actions">
+          <a href="/" class="btn-ghost" role="button">Home</a>
+          <button type="button" class="btn-primary" onclick="showBreakdown()">
+            Overzicht
+          </button>
+        </div>
         <div id="QuestionBreakdown"></div>
       </div>
     </div>
@@ -68,6 +94,13 @@
         == 3 %} {% include('partials/clickTheCountry.html') %} {% endif %}
       </div>
     </div>
+    <script>
+      function showBreakdown() {
+        var breakdown = document.getElementById("QuestionBreakdown");
+        breakdown.style.display =
+          breakdown.style.display === "block" ? "none" : "block";
+      }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
     <script>
       socket.on("finished", function (data) {
@@ -94,8 +127,8 @@
           questionElement.classList.add("question");
           questionElement.innerHTML = `
             <h3>${question["name"]}</h3>
-            <p>Tries: ${question["tries"]}</p>
-            <p>Correct: ${question["timesCorrect"]}</p>
+            <p>Pogingen: ${question["tries"]}</p>
+            <p>Goed: ${question["timesCorrect"]}</p>
           `;
           QuestionBreakdown.appendChild(questionElement);
         });

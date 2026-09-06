@@ -1,5 +1,5 @@
 
-<svg id="map" aspect-ratio="map.viewBox[2]/map.viewBox[3]" viewBox="{{map.getViewBox()}}" xmlns="http://www.w3.org/2000/svg" style="background-color:#fffbdb">
+<svg id="map" aspect-ratio="map.viewBox[2]/map.viewBox[3]" viewBox="{{map.getViewBox()}}" xmlns="http://www.w3.org/2000/svg" style="background-color:#deedf8">
   <defs xmlns="http://www.w3.org/2000/svg" id="defs1">
     <clipPath clipPathUnits="userSpaceOnUse" id="clipPath1401">
       <path d="m 396.944,518.685 c 0,-25.379 20.574,-45.953 45.952,-45.953 v 0 c 25.38,0 45.953,20.574 45.953,45.953 v 0 c 0,25.38 -20.573,45.953 -45.953,45.953 v 0 c -25.378,0 -45.952,-20.573 -45.952,-45.953" id="path1401"/>
@@ -263,88 +263,96 @@
 </svg>
 
 <style>
+  /* Kaartkleuren in de huisstijl van het Ichthus Lyceum.
+     Land = zandgeel, zee = zachtblauw, huidige vraag = oranje accent. */
   #questions > g {
     cursor: pointer;
-    fill: #fffbdb;
+    fill: #fff8dd;
+    stroke: #b9c6cc;
+    stroke-width: 0.4px;
     transition: all 0.25s ease-in-out;
   }
 
   #questions > g.Steden {
     cursor: pointer;
-    fill: #c7bd74;
+    fill: #006b85;
+    stroke: none;
     transition: all 0.25s ease-in-out;
   }
 
   #questions > g.Gebieden {
     cursor: pointer;
-    fill: #b3a86423;
+    fill: #006b8523;
+    stroke: none;
     transition: all 0.25s ease-in-out;
   }
 
   #questions > g:hover:not(.active):not([state="Correct"]) {
-    filter: brightness(0.9);
+    filter: brightness(0.93);
     z-index: 1;
   }
-  
+
   #questions > g.Gebieden:hover:not(.active):not([state="Correct"]) {
-    fill: #00000023;
+    fill: #006b8540;
     stroke-width: 2px;
-    stroke:#421b1b;
+    stroke: #004b5e;
   }
 
   #questions > g:active {
-    filter: brightness(0.85);
+    filter: brightness(0.88);
   }
 
   #questions > g.Gebieden:active {
     stroke-width: 2px;
-    stroke:#421b1b;
+    stroke: #004b5e;
   }
 
   #questions > g[state="Incorrect"] {
-    fill: #f3b7b7;
+    fill: #f2c4c1;
   }
 
   #questions > g.Steden[state="Incorrect"] {
-    fill: #b37b7b;
+    fill: #c2554f;
   }
 
-  #questions > g.Gebieden[state="Correct"] {
-    fill: #e0a4a4;
+  #questions > g.Gebieden[state="Incorrect"] {
+    fill: #c2554f4d;
   }
 
   #questions > g[state="Correct"] {
-    fill: #b7f3b7;
+    fill: #bfe6cd;
   }
 
   #questions > g.Steden[state="Correct"] {
-    fill: #6ca56c;
+    fill: #3f9d68;
   }
 
   #questions > g.Gebieden[state="Correct"] {
-    fill: #94d39480;
+    fill: #3f9d684d;
   }
 
   @keyframes upDown {
-    0% { transform: translateY(0);}
-    50% { transform: translateY(-4px); } /* Move up */
-    100% { transform: translateY(0); } /* Return to starting position */
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+    100% { transform: translateY(0); }
   }
 
   #questions > g.active {
-    fill: #b7b7f3;
+    fill: #ffcf9a;
+    stroke: #ef7911;
+    stroke-width: 1px;
   }
 
   #questions > g.Steden.active {
-    fill: #c848ff;
+    fill: #ef7911;
+    stroke: none;
     animation: upDown 2s ease-in-out infinite;
-    box-shadow: 0px 20px 15px rgba(0, 0, 0, 0.3); 
   }
 
   #questions > g.Gebieden.active {
-    fill: #c848ff;
+    fill: #ef79114d;
     stroke-width: 2px;
-    stroke:#421b1b;
+    stroke: #ef7911;
   }
 </style>
 

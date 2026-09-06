@@ -1,60 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inloggen | IchTopia</title>
+    <meta name="theme-color" content="#006b85" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/theme.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/logo_small.png') }}"
+    />
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f8f9fa;
-        }
-        .login-container {
-            width: 400px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 420px;
+        padding: 34px 32px;
+        background-color: var(--white);
+        border-radius: var(--radius-lg);
+        border-top: 5px solid var(--brand-orange);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .login-card__logo {
+        display: block;
+        width: 84px;
+        margin: 0 auto 12px;
+      }
+
+      .login-card h1 {
+        text-align: center;
+        color: var(--brand-teal);
+        font-size: 1.6em;
+        margin: 0 0 4px;
+      }
+
+      .login-card__sub {
+        text-align: center;
+        color: var(--ink-soft);
+        font-size: 0.9em;
+        margin: 0 0 26px;
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      .field label {
+        display: block;
+        font-family: var(--font-heading);
+        font-size: 0.9em;
+        font-weight: 500;
+        color: var(--ink-soft);
+        margin-bottom: 6px;
+      }
+
+      .field input {
+        width: 100%;
+        padding: 11px 14px;
+        font-family: var(--font-body);
+        font-size: 1em;
+        color: var(--ink);
+        background-color: var(--white);
+        border: 2px solid var(--line);
+        border-radius: var(--radius);
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .field input:focus {
+        border-color: var(--brand-orange);
+        box-shadow: var(--ring);
+      }
+
+      .login-card .btn-primary {
+        width: 100%;
+        margin-top: 6px;
+      }
+
+      .alert {
+        padding: 11px 14px;
+        border-radius: var(--radius);
+        font-size: 0.9em;
+        margin-bottom: 16px;
+        border-left: 4px solid var(--brand-teal);
+        background-color: var(--brand-sky);
+        color: var(--ink);
+      }
+
+      .alert-danger {
+        border-left-color: var(--state-incorrect);
+        background-color: var(--state-incorrect-soft);
+      }
+
+      .alert-success {
+        border-left-color: var(--state-correct);
+        background-color: var(--state-correct-soft);
+      }
+
+      .login-card__foot {
+        text-align: center;
+        color: var(--ink-soft);
+        font-size: 0.85em;
+        margin: 22px 0 0;
+      }
     </style>
-</head>
-<body>
-
-<div class="login-container">
-    <h2 class="text-center">Login</h2>
-
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <form method="POST" action="{{ url_for('socket.login') }}">
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+  </head>
+  <body>
+    <header class="school-header">
+      <div class="school-header__inner">
+        <span class="school-header__mark">
+          {% include 'partials/ichthus.html' %}
+        </span>
+        <div>
+          <p class="school-header__name">Ichthus Lyceum</p>
+          <p class="school-header__sub">
+            Gymnasium, Atheneum en Havo &middot; Driehuis
+          </p>
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password" required>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Login</button>
-    </form>
+        <span class="school-header__spacer"></span>
+      </div>
+    </header>
 
-    <div class="text-center mt-3">
-        <p>Don't have an account? <a>Register here</a></p>
-    </div>
-</div>
+    <main>
+      <div class="login-card">
+        <img
+          class="login-card__logo"
+          src="{{ url_for('static', filename='img/logo.png') }}"
+          alt="IchTopia"
+        />
+        <h1>Inloggen</h1>
+        <p class="login-card__sub">Topografie oefenen op het Ichthus Lyceum</p>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
+
+        <form method="POST" action="{{ url_for('main.login') }}">
+          <div class="field">
+            <label for="email">E-mailadres</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="field">
+            <label for="password">Wachtwoord</label>
+            <input type="password" id="password" name="password" required />
+          </div>
+          <button type="submit" class="btn-primary">Inloggen</button>
+        </form>
+
+        <p class="login-card__foot">Nog geen account? Vraag het je docent.</p>
+      </div>
+    </main>
+
+    <footer class="school-footer">
+      <span class="school-footer__mark">
+        {% include 'partials/ichthus.html' %}
+      </span>
+      <p>&copy; 2024 Ichthus Lyceum &middot; Floris Joël Luuk Liam Sami</p>
+    </footer>
+  </body>
 </html>

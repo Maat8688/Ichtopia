@@ -3,9 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Topo IchthusLyceum</title>
+    <title>IchTopia | Topo leren op het Ichthus Lyceum</title>
+    <meta
+      name="description"
+      content="IchTopia: topografie oefenen voor leerlingen van het Ichthus Lyceum in Driehuis."
+    />
+    <meta name="theme-color" content="#006b85" />
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/theme.css') }}"
+    />
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/main.css') }}"
@@ -29,7 +44,20 @@
       />
       <p>Loading...</p>
     </div>
-    <header></header>
+    <header class="school-header">
+      <div class="school-header__inner">
+        <span class="school-header__mark">
+          {% include 'partials/ichthus.html' %}
+        </span>
+        <div>
+          <p class="school-header__name">Ichthus Lyceum</p>
+          <p class="school-header__sub">
+            Gymnasium, Atheneum en Havo &middot; Driehuis
+          </p>
+        </div>
+        <span class="school-header__spacer"></span>
+      </div>
+    </header>
     <main>
       <div id="container">
 
@@ -40,9 +68,9 @@
         />      
       </div>
       
-      <h1 id="Title">IchTopia</h1>
+      <h1 id="Title">Ich<span>Topia</span></h1>
       <hr class="expanding" />
-      <p id="SubTitle">Topo leren op het Ichthus Lyceum</p>
+      <p id="SubTitle">Topografie oefenen op het Ichthus Lyceum</p>
 
       <div id="kaarten">
         <div class="vertical-nesting">
@@ -99,8 +127,8 @@
         </div>  -->
       </div>
     </main>
-    <footer>
-      <p>© 2024 Ichthus Lyceum | Floris Joël Luuk Liam Sami</p>
+    <footer class="school-footer">
+      <p>&copy; 2024 Ichthus Lyceum &middot; Floris Joël Luuk Liam Sami</p>
     </footer>
 
     <div class="overlay">
@@ -116,7 +144,8 @@
             value="Nederland"
           />
           <div id="typeSelect">
-            <div class="checkbox-wrapper-30">
+            <div class="option">
+              <div class="checkbox-wrapper-30">
               <span class="checkbox">
                 <input
                   type="radio"
@@ -138,8 +167,10 @@
                 </symbol>
               </svg>
             </div>
-            <label for="Singleplayer">Singleplayer</label>
-            <div class="checkbox-wrapper-30">
+              <label for="Singleplayer">Singleplayer</label>
+            </div>
+            <div class="option">
+              <div class="checkbox-wrapper-30">
               <span class="checkbox">
                 <input
                   type="radio"
@@ -162,10 +193,12 @@
                 </symbol>
               </svg>
             </div>
-            <label for="Multiplayer" title="Coming soon">Multiplayer</label>
+              <label for="Multiplayer" title="Coming soon">Multiplayer</label>
+            </div>
           </div>
           <div id="ModeSelect">
-            <div class="checkbox-wrapper-30">
+            <div class="option">
+              <div class="checkbox-wrapper-30">
               <span class="checkbox">
                 <input
                   type="radio"
@@ -187,8 +220,10 @@
                 </symbol>
               </svg>
             </div>
-            <label for="MultipleChoise">Multiple Choice</label>
-            <div class="checkbox-wrapper-30">
+              <label for="MultipleChoise">Multiple choice</label>
+            </div>
+            <div class="option">
+              <div class="checkbox-wrapper-30">
               <span class="checkbox">
                 <input
                   type="radio"
@@ -210,8 +245,10 @@
                 </symbol>
               </svg>
             </div>
-            <label for="FillInTheBlank">Fill in the blank</label>
-            <div class="checkbox-wrapper-30">
+              <label for="FillInTheBlank">Antwoord typen</label>
+            </div>
+            <div class="option">
+              <div class="checkbox-wrapper-30">
               <span class="checkbox">
                 <input
                   type="radio"
@@ -233,7 +270,8 @@
                 </symbol>
               </svg>
             </div>
-            <label for="ClickTheCountry">Click the country</label>
+              <label for="ClickTheCountry">Klik het land</label>
+            </div>
           </div>
           <div id="questionsSelect"></div>
           <hr />
@@ -249,7 +287,7 @@
         'input[name="questions"]:checked'
       );
       if (checkboxes.length === 0) {
-        alert("Please select at least one question type.");
+        alert("Kies minimaal één categorie om te oefenen.");
         return false;
       }
       return true;
@@ -292,18 +330,25 @@
         questionsSelect.innerHTML = "";
 
         for (var i = 0; i < category.length; i++) {
-          var checkbox = document.createElement("div");
-          checkbox.classList.add("checkbox-wrapper-30");
-          checkbox.innerHTML = `
-            <span class="checkbox">
-              <input type="checkbox" name="questions" value="${category[i]}" />
-              <svg>
-                <use xlink:href="#checkbox-30" class="checkbox"></use>
-              </svg>
-            </span>
-            <label for="${category[i]}">${category[i]}</label>
+          var option = document.createElement("div");
+          option.classList.add("option");
+          option.innerHTML = `
+            <div class="checkbox-wrapper-30">
+              <span class="checkbox">
+                <input
+                  type="checkbox"
+                  id="question-${category[i]}"
+                  name="questions"
+                  value="${category[i]}"
+                />
+                <svg>
+                  <use xlink:href="#checkbox-30" class="checkbox"></use>
+                </svg>
+              </span>
+            </div>
+            <label for="question-${category[i]}">${category[i]}</label>
           `;
-          questionsSelect.appendChild(checkbox);
+          questionsSelect.appendChild(option);
         }
       });
     });

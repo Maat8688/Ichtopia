@@ -1,6 +1,4 @@
-body {
-  flex-direction: column;
-}
+/* Oefenpagina: kaart, voortgangsbalk en spelmodi. */
 
 html,
 body {
@@ -9,228 +7,16 @@ body {
   padding: 0;
   overflow: hidden;
   display: flex;
+  flex-direction: column;
 }
 
-#progressBar {
-  width: 90%;
-  max-width: 900px;
-  margin: 0;
-  margin-top: 40px;
-  height: 5vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #e0e0e0;
+/* --------------------------------------------------------- Kopbalk --- */
+
+.school-header {
+  flex: none;
 }
 
-#gamemodeContainer > #multipleChoise > button {
-  width: 12vw;
-  padding: 15px 0;
-  color: black;
-  border-radius: 6px;
-  border: 1px solid black;
-  font-size: clamp(10px, 2vw, 20px);
-  cursor: pointer;
-}
-
-#gamemodeContainer > #multipleChoise > button:hover {
-  transform: translateY(-1px);
-}
-
-#gamemodeContainer > #multipleChoise > button:active {
-  background-color: #f0f0f1;
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
-  color: rgba(0, 0, 0, 0.65);
-  transform: translateY(0);
-}
-
-#progressBar,
-#progressBar > #bar {
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-#progressBar > #bar {
-  width: 100%;
-  display: flex;
-  background-color: #f0f0f1;
-  height: 100%;
-}
-
-#questionsCorrect {
-  background-color: #3b9e3b;
-  height: 100%;
-  transition: width 0.5s ease;
-}
-#questionsIncorrect {
-  background-color: #b43f3f;
-  height: 100%;
-  transition: width 0.5s ease;
-}
-
-#finishedContainer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s, opacity 0.5s;
-}
-
-.button-56 {
-  align-items: center;
-  background-color: #fee6e3;
-  border: 2px solid #111;
-  border-radius: 8px;
-  box-sizing: border-box;
-  color: #111;
-  cursor: pointer;
-  display: flex;
-  font-family: Inter, sans-serif;
-  font-size: 16px;
-  height: 48px;
-  justify-content: center;
-  line-height: 24px;
-  max-width: 100%;
-  padding: 0 25px;
-  position: absolute;
-  text-align: center;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  width: 10%;
-  top: 10%;
-  right: 5%;
-}
-.typeAwnserInput {
-  width: 100%;
-  max-width: 300px;
-  padding: 12px 16px;
-  font-size: 16px;
-  color: #333;
-  background-color: #f9f9f9;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  box-sizing: border-box;
-}
-
-.typeAwnserInput::placeholder {
-  color: #aaa;
-}
-
-.typeAwnserInput:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
-}
-
-.button-56:after {
-  background-color: #111;
-  border-radius: 8px;
-  content: "";
-  display: block;
-  height: 48px;
-  left: 0;
-  width: 100%;
-  position: absolute;
-  top: -2px;
-  transform: translate(8px, 8px);
-  transition: transform 0.2s ease-out;
-  z-index: -1;
-}
-
-.button-56:hover:after {
-  transform: translate(0, 0);
-}
-
-.button-56:active {
-  background-color: #ffdeda;
-  outline: 0;
-}
-
-.button-56:hover {
-  outline: 0;
-}
-
-@media (min-width: 768px) {
-  .button-56 {
-    padding: 0 40px;
-  }
-}
-
-#finishedContainer.show {
-  visibility: visible;
-  opacity: 1;
-}
-
-.popup {
-  position: fixed;
-  width: 40%;
-  max-width: 400px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-.popup h2 {
-  margin: 0 0 10px;
-}
-
-.popup p {
-  margin: 5px 0;
-}
-
-#QuestionBreakdown {
-  max-height: 150px;
-  overflow-y: auto;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-}
-
-.overlay {
-  background: rgba(0, 0, 0, 0.5); /* Darker overlay */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  animation: fadeIn 0.3s ease; /* Fade-in animation */
-}
-
-.overlay.show {
-  display: flex;
-}
-
-.popup {
-  background-color: #6a7f8b;
-  border-radius: 15px;
-  text-align: center;
-  border: 2px solid #000000;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  width: 90%;
-  max-width: 500px;
-  transform: scale(0.8);
-  animation: popupEnter 0.3s forwards;
-  box-shadow: #2c3532 4px 4px 0 0;
-}
+/* ------------------------------------------------------ Hoofdgebied --- */
 
 #mainContent {
   display: flex;
@@ -243,6 +29,69 @@ body {
   overflow: hidden;
 }
 
+#mapContainer {
+  max-width: 60vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 60%;
+  height: clamp(30vh, 40vw, 70vh);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 4px solid var(--brand-orange);
+  background-color: var(--white);
+  box-shadow: var(--shadow-lg);
+  padding: 20px 0;
+  border-radius: var(--radius);
+}
+
+#mapContainer > svg {
+  max-width: 70%;
+  min-height: 65%;
+}
+
+/* --------------------------------------------------- Voortgangsbalk --- */
+
+#progressBar {
+  width: 90%;
+  max-width: 900px;
+  margin: 0;
+  margin-top: 24px;
+  height: 14px;
+  min-height: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--brand-sky);
+}
+
+#progressBar,
+#progressBar > #bar {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#progressBar > #bar {
+  width: 100%;
+  display: flex;
+  background-color: var(--brand-sky);
+  height: 100%;
+}
+
+#questionsCorrect {
+  background-color: var(--state-correct);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+#questionsIncorrect {
+  background-color: var(--state-incorrect);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+/* ---------------------------------------------------------- Spelmodi --- */
+
 #gamemodeContainer {
   width: fit-content;
   height: fit-content;
@@ -252,29 +101,258 @@ body {
 
 #gamemodeContainer > #multipleChoise {
   display: flex;
-  gap: 30px;
+  gap: 20px;
   flex-wrap: wrap;
   max-width: 30vw;
 }
 
-#mapContainer {
-  max-width: 60vw;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  width: 60%;
-  height: clamp(30vh, 40vw, 70vh);
-  border: 2px solid black;
-  background-color: #6a7f8b;
-  padding: 20px 0;
-  border-radius: 10px;
+#gamemodeContainer > #multipleChoise > button {
+  width: 12vw;
+  padding: 15px 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  background-color: var(--white);
+  color: var(--brand-teal);
+  border-radius: var(--radius);
+  border: 2px solid var(--white);
+  box-shadow: var(--shadow-sm);
+  font-size: clamp(10px, 2vw, 20px);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, transform 0.1s ease;
 }
 
-#mapContainer > svg {
-  max-width: 70%;
-  min-height: 65%;
+#gamemodeContainer > #multipleChoise > button:hover {
+  background-color: var(--brand-sand);
+  border-color: var(--brand-orange);
+  transform: translateY(-2px);
 }
+
+#gamemodeContainer > #multipleChoise > button:active {
+  background-color: var(--brand-orange);
+  border-color: var(--brand-orange);
+  color: var(--white);
+  transform: translateY(0);
+}
+
+.Klikhetland {
+  color: var(--white);
+  font-family: var(--font-heading);
+  text-shadow: 0 2px 10px rgba(0, 53, 68, 0.45);
+}
+
+.Klikhetland span {
+  color: var(--brand-orange-light);
+}
+
+.typeAwnserInput {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  background-color: var(--white);
+  border: 2px solid var(--white);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+  box-shadow: var(--shadow-sm);
+}
+
+.typeAwnserInput::placeholder {
+  color: #9aa5aa;
+}
+
+.typeAwnserInput:focus {
+  border-color: var(--brand-orange);
+  box-shadow: var(--ring);
+}
+
+/* ----------------------------------------------------- Eindschermen --- */
+
+.overlay {
+  background: rgba(0, 53, 68, 0.6);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease;
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.popup {
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--brand-orange);
+  box-shadow: var(--shadow-lg);
+  padding: 30px;
+  width: 90%;
+  max-width: 460px;
+  transform: scale(0.8);
+  animation: popupEnter 0.3s forwards;
+}
+
+.popup h2 {
+  font-family: var(--font-heading);
+  color: var(--brand-teal);
+  margin: 0 0 14px;
+}
+
+.popup p {
+  margin: 5px 0;
+  color: var(--ink-soft);
+}
+
+.popup p span {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.popup__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+#QuestionBreakdown {
+  display: none;
+  max-height: 180px;
+  overflow-y: auto;
+  text-align: left;
+  padding: 14px 18px;
+  background-color: var(--brand-sky);
+  border-radius: var(--radius);
+  margin-top: 16px;
+}
+
+#QuestionBreakdown h3 {
+  font-size: 1em;
+  color: var(--brand-teal);
+  margin: 10px 0 2px;
+}
+
+#QuestionBreakdown p {
+  margin: 0;
+  font-size: 0.85em;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popupEnter {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------- Feedback --- */
+
+.correct-answer {
+  animation: correctFlash 0.5s ease-in-out;
+}
+
+.incorrect-answer {
+  animation: incorrectFlash 0.5s ease-in-out;
+}
+
+@keyframes correctFlash {
+  from {
+    background-color: var(--state-correct-soft);
+  }
+  to {
+    background-color: var(--white);
+  }
+}
+
+@keyframes incorrectFlash {
+  from {
+    background-color: var(--state-incorrect-soft);
+  }
+  to {
+    background-color: var(--white);
+  }
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+}
+
+/* --------------------------------------------------------- Laadscherm --- */
+
+.loadingScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--brand-teal-darkest);
+  color: var(--white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  font-family: var(--font-heading);
+  font-size: 26px;
+}
+
+#logo_loading {
+  width: 150px;
+  animation: spin 2s linear infinite;
+  position: absolute;
+  margin-bottom: 200px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------------------------------ Responsiviteit --- */
 
 @media (max-width: 799px) {
   #mainContent {
@@ -311,7 +389,7 @@ body {
   #gamemodeContainer {
     display: flex;
     justify-content: center;
-    margin-top: -30px;
+    margin-top: -10px;
   }
 
   #gamemodeContainer > #multipleChoise > button {
@@ -340,7 +418,6 @@ body {
   }
 
   #mapContainer {
-    max-height: 70vh;
     max-height: 500px;
   }
 
@@ -348,76 +425,4 @@ body {
     max-height: 80%;
     max-width: 90%;
   }
-}
-.loadingScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  font-size: 30px;
-}
-
-#logo_loading {
-  width: 150px;
-  animation: spin 2s linear infinite;
-  position: absolute;
-  margin-bottom: 200px;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-#logo {
-  transition: transform 2s;
-}
-
-.Klikhetland {
-  color: white;
-}
-
-#QuestionBreakdown {
-  display: none;
-  padding: 20px;
-  background-color: white;
-  margin-top: 10px;
-  pointer-events: none; /* Prevent interactions initially */
-  opacity: 0.5; /* Make it look visually disabled */
-  
-}
-.correct-answer {
-  animation: correctFlash 0.5s ease-in-out;
-}
-.incorrect-answer {
-  animation: incorrectFlash 0.5s ease-in-out;
-}
-
-@keyframes correctFlash {
-  from { background-color: #d4edda; }
-  to { background-color: transparent; }
-}
-
-@keyframes incorrectFlash {
-  from { background-color: #f8d7da; }
-  to { background-color: transparent; }
-}
-.shake {
-  animation: shake 0.5s;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
 }

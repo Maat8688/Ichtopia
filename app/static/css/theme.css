@@ -1,0 +1,203 @@
+/* ==========================================================================
+   IchTopia - huisstijl Ichthus Lyceum
+   Kleuren en typografie afgeleid van ichthuslyceum.nl
+   ========================================================================== */
+
+:root {
+  /* Merkkleuren */
+  --brand-teal: #006b85;
+  --brand-teal-light: #1a8ba8;
+  --brand-teal-dark: #004b5e;
+  --brand-teal-darkest: #003544;
+  --brand-orange: #ef7911;
+  --brand-orange-light: #ff9a3d;
+  --brand-orange-dark: #c96206;
+  --brand-sky: #deedf8;
+  --brand-sand: #fff2b3;
+
+  /* Neutralen */
+  --ink: #171717;
+  --ink-soft: #4f4f4f;
+  --line: #e5e5e5;
+  --white: #ffffff;
+
+  /* Statuskleuren (topo-feedback) */
+  --state-correct: #3f9d68;
+  --state-correct-soft: #bfe6cd;
+  --state-incorrect: #c2554f;
+  --state-incorrect-soft: #f2c4c1;
+  --state-active: var(--brand-orange);
+
+  /* Typografie */
+  --font-heading: "Rubik", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Roboto", "Segoe UI", system-ui, sans-serif;
+
+  /* Vormgeving */
+  --radius-sm: 6px;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 6px rgba(0, 53, 68, 0.15);
+  --shadow: 0 6px 18px rgba(0, 53, 68, 0.22);
+  --shadow-lg: 0 14px 40px rgba(0, 53, 68, 0.3);
+  --ring: 0 0 0 3px rgba(239, 121, 17, 0.45);
+}
+
+/* --------------------------------------------------------------- Basis --- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--brand-teal);
+}
+
+/* -------------------------------------------------------- Merkonderdelen --- */
+
+/* Het ichthus-teken, als inline SVG gebruikt in header en footer */
+.ichthus {
+  width: 32px;
+  height: 16px;
+  flex: none;
+  fill: currentColor;
+}
+
+.school-header {
+  width: 100%;
+  background-color: var(--white);
+  border-bottom: 3px solid var(--brand-orange);
+  box-shadow: var(--shadow-sm);
+}
+
+.school-header__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.school-header__mark {
+  display: flex;
+  align-items: center;
+  color: var(--brand-teal);
+}
+
+.school-header__name {
+  font-family: var(--font-heading);
+  font-size: clamp(15px, 1.6vw, 19px);
+  font-weight: 600;
+  color: var(--brand-teal);
+  line-height: 1.15;
+  margin: 0;
+}
+
+.school-header__sub {
+  font-size: clamp(11px, 1.1vw, 13px);
+  color: var(--ink-soft);
+  margin: 2px 0 0;
+  line-height: 1.15;
+}
+
+.school-header__spacer {
+  flex: 1;
+}
+
+.school-footer {
+  background-color: var(--brand-teal-darkest);
+  border-top: 3px solid var(--brand-orange);
+  color: var(--white);
+  text-align: center;
+  width: 100%;
+  padding: 14px 20px;
+}
+
+.school-footer p {
+  margin: 0;
+  font-size: 0.85em;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.school-footer__mark {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+  color: var(--brand-orange);
+}
+
+/* ------------------------------------------------------------- Knoppen --- */
+
+.btn,
+.btn-primary,
+.btn-ghost {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  border-radius: var(--radius-lg);
+  border: 2px solid transparent;
+  padding: 10px 22px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--brand-orange);
+  border-color: var(--brand-orange);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-orange-light);
+  border-color: var(--brand-orange-light);
+}
+
+.btn-primary:active {
+  background-color: var(--brand-orange-dark);
+  border-color: var(--brand-orange-dark);
+  transform: translateY(1px);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  border-color: var(--brand-teal);
+  color: var(--brand-teal);
+}
+
+.btn-ghost:hover {
+  background-color: var(--brand-teal);
+  color: var(--white);
+}
+
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible,
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
