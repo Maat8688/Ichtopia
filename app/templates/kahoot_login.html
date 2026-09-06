@@ -19,7 +19,8 @@
       <form class="k-card center" method="POST" autocomplete="off">
         <h1>Alleen voor docenten</h1>
         <p class="k-muted">
-          Om een klassikale quiz te hosten heb je de docentcode nodig.
+          Om een klassikale quiz te hosten heb je de docentcode nodig, of een
+          <a href="{{ url_for('auth.login') }}">docentaccount</a>.
           Leerlingen doen mee via <a href="{{ url_for('kahoot.join') }}">Meedoen</a>.
         </p>
 

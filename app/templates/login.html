@@ -6,69 +6,62 @@
     <title>Inloggen · Topo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}">
-    <style>
-        .login {
-            max-width: 400px;
-            margin-top: 24px;
-        }
-        .login form {
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-            margin-top: 24px;
-        }
-        .login label {
-            display: block;
-            color: var(--muted);
-            font-size: 13px;
-        }
-        .login .feedback {
-            margin: 18px 0 0;
-        }
-    </style>
 </head>
 <body>
 
 <header class="page topbar">
-    <h1>Topo</h1>
+    <h1><a href="{{ url_for('main.index') }}">Topo</a></h1>
     <span class="muted">Ichthus · 2026–27</span>
 </header>
 
 <main class="page">
-    <div class="login">
+    <div class="account-form">
         <h2>Inloggen</h2>
+        <p class="muted">Oefenen kan gewoon zonder account. Inloggen is voor docenten
+            en voor wie zijn voortgang wil bewaren.</p>
 
-        <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <p class="feedback{% if category == 'success' %} ok{% endif %}">{{ message }}</p>
-                {% endfor %}
-            {% endif %}
+            {% for category, message in messages %}
+                <p class="feedback{% if category == 'success' %} ok{% endif %}">{{ message }}</p>
+            {% endfor %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('main.login') }}">
+        {% for error in errors %}
+            <p class="feedback">{{ error }}</p>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+            <input type="hidden" name="next" value="{{ next }}">
             <div>
                 <label for="email">E-mail</label>
-                <input type="email" class="field" id="email" name="email" required>
+                <input type="email" class="field" id="email" name="email"
+                       value="{{ email }}" autocomplete="email" required autofocus>
             </div>
             <div>
                 <label for="password">Wachtwoord</label>
-                <input type="password" class="field" id="password" name="password" required>
+                <input type="password" class="field" id="password" name="password"
+                       autocomplete="current-password" required>
             </div>
+            <label class="checkline">
+                <input type="checkbox" name="remember" value="1"> Ingelogd blijven op dit apparaat
+            </label>
             <div class="actions actions-end">
+                <a class="link" href="{{ url_for('main.index') }}">Terug</a>
                 <button type="submit" class="btn btn-primary">Inloggen</button>
             </div>
         </form>
 
-        <p class="muted" style="margin-top: 24px;">Nog geen account? Registreren is nog niet mogelijk.</p>
+        <p class="muted form-footnote">Nog geen account?
+            <a class="link" href="{{ url_for('auth.register') }}">Maak er een aan</a>.</p>
     </div>
 </main>
 
 <footer>
     <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · geen account nodig</p>
+        <p>Gemaakt door Floris, Joël en Sami · een account is niet verplicht</p>
     </div>
 </footer>
 

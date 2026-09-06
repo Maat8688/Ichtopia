@@ -1,9 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, send, emit
-from flask_login import login_user, login_required, logout_user, current_user
 import sys
 from . import sessionManager
-from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
 from .kahoot import MAP_FILES
 
@@ -25,33 +23,6 @@ def index():
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
 
-@main.route('/me')
-@login_required
-def me():
-    print('me', file=sys.stderr)
-    return 'me'
-
-@main.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = User.query.filter_by(email=email).first()
-        
-        if user and user.check_password(password):
-            login_user(user)
-            flash('Logged in successfully!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.index'))
-        flash('Invalid email or password', 'danger')
-    return render_template('login.html')
-
-@main.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('main.login'))
-
 @main.route('/learn')
 def learn():
     sessionToken = request.args.get('sessionToken')
@@ -61,46 +32,6 @@ def learn():
     else:
         return redirect(url_for('main.index'))
     
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         password = request.form.get('password')
-
-#         if not username or not password:
-#             flash('Username and password are required.', 'error')
-#             return render_template('register.html')
-
-#         db = SQLDatabase()
-#         try:
-#             # Check if the username already exists in the database
-#             if db.execute("SELECT id FROM users WHERE username = %s", (username,)):
-#                 print("username alr exist")
-#                 flash('Username is already in use. Please choose a different one.', 'error')
-#                 return render_template('register.html')
-
-#             # If username is not in use, proceed with registration
-#             password_hash = generate_password_hash(password)
-#             db.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)", (username, password_hash))
-#             flash('Your account has been created! You can now login.', 'success')
-#             return redirect(url_for('login'))
-#         except IntegrityError:
-#             flash('Username is already in use. Please choose a different one.', 'error')
-#             return render_template('register.html')
-#         except Exception as e:
-#             flash('An error occurred during registration. Please try again.', 'error')
-#             print(e)  # For debugging purposes, it might help to log or print the exception
-#         finally:
-#             db.close()
-
-#     return render_template('pages/register.html')
-
-
-
-
-
-
 
 def setupSockets(socketio: SocketIO):
     @socketio.on('message')

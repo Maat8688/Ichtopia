@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account aanmaken · Topo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}">
+</head>
+<body>
+
+<header class="page topbar">
+    <h1><a href="{{ url_for('main.index') }}">Topo</a></h1>
+    <span class="muted">Ichthus · 2026–27</span>
+</header>
+
+<main class="page">
+    <div class="account-form">
+        <h2>Account aanmaken</h2>
+        <p class="muted">Je hebt geen account nodig om te oefenen. Met een account
+            onthoudt de site straks je voortgang, en docenten kunnen een klassikale
+            quiz starten zonder telkens de docentcode.</p>
+
+        {% for error in errors %}
+            <p class="feedback">{{ error }}</p>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+            <div>
+                <label for="username">Naam</label>
+                <input type="text" class="field" id="username" name="username"
+                       value="{{ form.username }}" autocomplete="nickname"
+                       maxlength="32" required autofocus>
+                <p class="hint">Zo zien anderen je in de klassikale quiz.</p>
+            </div>
+            <div>
+                <label for="email">E-mail</label>
+                <input type="email" class="field" id="email" name="email"
+                       value="{{ form.email }}" autocomplete="email" maxlength="120" required>
+            </div>
+            <div>
+                <label for="password">Wachtwoord</label>
+                <input type="password" class="field" id="password" name="password"
+                       autocomplete="new-password" minlength="8" required>
+                <p class="hint">Minstens 8 tekens.</p>
+            </div>
+            <div>
+                <label for="passwordRepeat">Wachtwoord herhalen</label>
+                <input type="password" class="field" id="passwordRepeat" name="passwordRepeat"
+                       autocomplete="new-password" minlength="8" required>
+            </div>
+
+            <fieldset class="choice">
+                <legend class="section-label">Ik ben</legend>
+                <label class="checkline">
+                    <input type="radio" name="accountType" value="student"
+                           {% if form.accountType != 'docent' %}checked{% endif %}> Leerling
+                </label>
+                <label class="checkline">
+                    <input type="radio" name="accountType" value="docent"
+                           {% if form.accountType == 'docent' %}checked{% endif %}> Docent
+                </label>
+            </fieldset>
+
+            <div id="teacherCodeBlock" hidden>
+                <label for="teacherCode">Docentcode</label>
+                <input type="password" class="field" id="teacherCode" name="teacherCode"
+                       autocomplete="off">
+                <p class="hint">
+                    {% if teacherSignupPossible %}
+                        Dezelfde code als bij de klassikale quiz.
+                    {% else %}
+                        Er is op de server nog geen docentcode ingesteld, dus een
+                        docentaccount aanmaken lukt nu niet.
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="actions actions-end">
+                <a class="link" href="{{ url_for('auth.login') }}">Ik heb al een account</a>
+                <button type="submit" class="btn btn-primary">Account aanmaken</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <div class="page">
+        <p>Gemaakt door Floris, Joël en Sami · een account is niet verplicht</p>
+    </div>
+</footer>
+
+<script>
+    // Het vak voor de docentcode heeft alleen zin als je docent kiest.
+    (function () {
+        const block = document.getElementById("teacherCodeBlock");
+        const keuzes = document.querySelectorAll('input[name="accountType"]');
+        function bijwerken() {
+            const docent = document.querySelector('input[name="accountType"]:checked').value === "docent";
+            block.hidden = !docent;
+        }
+        keuzes.forEach(function (keuze) {
+            keuze.addEventListener("change", bijwerken);
+        });
+        bijwerken();
+    })();
+</script>
+
+</body>
+</html>

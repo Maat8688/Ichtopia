@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import timedelta
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, render_template, request
@@ -49,6 +50,13 @@ werkzeug_logger.addHandler(file_handler)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(32).hex()
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+# De app zelf luistert op poort 80 (http), dus de cookie mag niet standaard
+# https-only zijn. Draait er ooit een https-proxy voor: zet COOKIE_SECURE=1.
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('COOKIE_SECURE', '0') == '1'
+app.config['REMEMBER_COOKIE_HTTPONLY'] = True
+app.config['REMEMBER_COOKIE_SAMESITE'] = 'Lax'
+app.config['REMEMBER_COOKIE_SECURE'] = app.config['SESSION_COOKIE_SECURE']
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=30)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -66,6 +74,9 @@ with app.app_context():
     app.register_blueprint(kahoot)
     setupKahootSockets(socketio)
 
+    from .auth import auth
+    app.register_blueprint(auth)
+
     from .errors import registerErrorHandlers
     registerErrorHandlers(app)
 
@@ -78,6 +89,7 @@ with app.app_context():
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    login_manager.login_view = 'socket.login'
+    login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
-    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message = 'Log eerst in om deze pagina te bekijken.'
+    login_manager.session_protection = 'strong'

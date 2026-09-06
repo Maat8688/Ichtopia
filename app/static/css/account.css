@@ -1,0 +1,73 @@
+/* Inloggen, registreren en de accountpagina. Zelfde stijl als de rest:
+   smalle kolom, lijnen in plaats van kaders. */
+
+.account-form {
+  max-width: 420px;
+  margin-top: 24px;
+}
+
+.account-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.account-form label {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.account-form .hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.account-form .feedback {
+  margin: 18px 0 0;
+}
+
+.account-form .rule-list {
+  margin-top: 24px;
+}
+
+.account-form .rule-list .row {
+  cursor: default;
+}
+
+.checkline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.choice {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice legend {
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.logout-form {
+  margin-top: 8px;
+}
+
+.form-footnote {
+  margin-top: 24px;
+}
+
+.topbar h1 a {
+  color: inherit;
+  text-decoration: none;
+}

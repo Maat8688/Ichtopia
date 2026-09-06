@@ -16,6 +16,7 @@ from .kahoot import (
     MODE_MULTIPLECHOICE, MODE_CLICKTHECOUNTRY,
 )
 from .models import AccountType
+from .security import safeUrl
 
 kahoot = Blueprint('kahoot', __name__)
 kahootManager = KahootManager()
@@ -76,9 +77,7 @@ def registerFailedLogin(ip: str):
 
 def safeNext(target: str) -> str:
     """Alleen doorsturen naar een pad binnen deze site."""
-    if target and target.startswith('/') and not target.startswith('//'):
-        return target
-    return url_for('kahoot.host')
+    return safeUrl(target, url_for('kahoot.host'))
 
 
 def hostRoom(pin: str) -> str:
