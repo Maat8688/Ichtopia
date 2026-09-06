@@ -121,7 +121,10 @@ check('duel staat klaar', duel is not None and len(duel.questions) == 3)
 
 page = clientB.get('/duel').get_data(as_text=True)
 check('duel staat in de lijst met openstaande duels', 'Floris' in page and 'Spelen' in page)
-check('duelpagina laadt', clientA.get('/duel/' + code).status_code == 200)
+duelPagina = clientA.get('/duel/' + code)
+check('duelpagina laadt', duelPagina.status_code == 200)
+check('meerkeuzeduel toont de kaart (er is geen digibord om naar te kijken)',
+      '<svg id="map"' in duelPagina.get_data(as_text=True))
 
 # Aanwijzen op de kaart heeft de hele kaart in de pagina nodig.
 klikDuel = clientB.post('/duel/nieuw', data={
@@ -167,6 +170,11 @@ for i in range(3):
         check(f'vraag {i + 1} komt binnen', False, 'geen vraag ontvangen')
         break
     # Floris antwoordt goed, Sami fout: de uitslag mag niet van toeval afhangen.
+    if i == 0:
+        check('meerkeuzevraag vertelt welk gebied gevraagd wordt',
+              bool(question.get('mapId')), question)
+        check('meerkeuzevraag geeft de categorie mee voor het oplichten',
+              bool(question.get('category')), question)
     juist = duel.currentQuestion.displayName
     fout = next((o for o in question['options'] if o != juist), juist)
     socketA.emit('duelAnswer', {'code': code, 'answer': juist, 'hashed': False})
@@ -174,6 +182,9 @@ for i in range(3):
     reveal = waitFor(socketA, 'duelReveal')
     if reveal and reveal['correct']:
         goedeAntwoorden += 1
+    if i == 0:
+        check('de uitslag wijst het goede gebied aan',
+              bool(reveal and reveal.get('mapId')), reveal)
 
 check('alle drie de vragen goed gerekend', goedeAntwoorden == 3, goedeAntwoorden)
 

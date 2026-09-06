@@ -508,14 +508,24 @@ button.k-option:active {
   color: var(--atlas);
 }
 
-#questions > g.k-correct {
+/* Het goede antwoord na een vraag. De kaart brengt zijn eigen stijlregels mee
+   in de pagina (mapSvg.html), en die staan later in het document. Met het id
+   van de svg erbij wegen deze regels zwaarder, zodat het gebied ook echt
+   groen wordt in plaats van de gewone kleur van zijn categorie te houden. */
+#map #questions > g.k-correct {
   fill: var(--atlas);
   fill-opacity: 0.45;
   stroke: var(--atlas);
   stroke-width: 2;
 }
 
-#questions > g.k-correct > path {
+#map #questions > g.Steden.k-correct,
+#map #questions > g.Hoofdsteden.k-correct,
+#map #questions > g.Plaatsen.k-correct {
+  fill-opacity: 1;
+}
+
+#map #questions > g.k-correct > path {
   vector-effect: non-scaling-stroke;
 }
 

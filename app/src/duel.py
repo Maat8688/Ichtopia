@@ -171,6 +171,10 @@ class Duel:
         if self.mode == MODE_MULTIPLECHOICE:
             payload['options'] = list(self.currentOptions)
             payload['prompt'] = QUESTION_PROMPTS.get(question.category, 'Wat is dit?')
+            # Bij de klassikale quiz staat de kaart op het digibord en hoeft de
+            # speler alleen te kiezen. In een duel is er geen bord, dus moet
+            # allebei de spelers zelf zien welk gebied er wordt gevraagd.
+            payload['mapId'] = self.map.hash(question.id)
         else:
             payload['prompt'] = f'Klik op: {displayName(question)}'
         return payload
@@ -243,6 +247,8 @@ class Duel:
             'correct': bool(info and info['correct']),
             'points': info['points'] if info else 0,
             'score': player.score,
+            'mapId': self.lastReveal['mapId'] if self.lastReveal else None,
+            'category': self.currentQuestion.category if self.currentQuestion else None,
             'opponentCorrect': bool(opponentInfo and opponentInfo['correct']),
             'opponentPoints': opponentInfo['points'] if opponentInfo else 0,
             'opponentScore': opponent.score if opponent else 0,

@@ -27,6 +27,7 @@
     prompt: document.getElementById("prompt"),
     questionNumber: document.getElementById("questionNumber"),
     options: document.getElementById("options"),
+    mapArea: document.getElementById("mapArea"),
     answeredText: document.getElementById("answeredText"),
     result: document.getElementById("result"),
     resultTitle: document.getElementById("resultTitle"),
@@ -49,6 +50,11 @@
     Object.keys(sections).forEach(function (key) {
       sections[key].classList.toggle("hidden", key !== name);
     });
+    // De kaart hoort bij de vraag, het wachten en de uitslag; de knoppen
+    // alleen bij de vraag zelf.
+    const kaartZichtbaar = name === "question" || name === "answered" || name === "result";
+    if (els.mapArea) els.mapArea.hidden = !kaartZichtbaar;
+    if (els.options) els.options.hidden = name !== "question";
   }
 
   function showError(message) {
@@ -102,24 +108,42 @@
 
   function clearMapHighlight() {
     document.querySelectorAll("#questions > g").forEach(function (g) {
-      g.classList.remove("active");
+      g.classList.remove("active", "k-correct");
       g.setAttribute("state", "Normal");
     });
   }
 
-  document.querySelectorAll("#questions > g").forEach(function (g) {
-    g.addEventListener("click", function () {
-      if (sections.question.classList.contains("hidden")) return;
-      g.classList.add("active");
-      sendAnswer(g.getAttribute("id"), true);
+  // Bij meerkeuze moet de speler zien welk gebied gevraagd wordt. In de
+  // klassikale quiz doet het digibord dat; in een duel is er geen bord.
+  function highlightMap(mapId, category, className) {
+    if (!mapId) return;
+    let element = null;
+    if (category) {
+      element = document.querySelector('#questions > g[id="' + mapId + '"].' + category);
+    }
+    if (!element) {
+      element = document.querySelector('#questions > g[id="' + mapId + '"]');
+    }
+    if (element) element.classList.add(className);
+  }
+
+  // Alleen in de aanwijs-modus is de kaart een antwoord. Bij meerkeuze staat
+  // hij er om naar te kijken, niet om op te klikken.
+  if (DUEL.mode !== 1) {
+    document.querySelectorAll("#questions > g").forEach(function (g) {
+      g.addEventListener("click", function () {
+        if (sections.question.classList.contains("hidden")) return;
+        g.classList.add("active");
+        sendAnswer(g.getAttribute("id"), true);
+      });
+      g.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          g.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        }
+      });
     });
-    g.addEventListener("keydown", function (event) {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        g.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      }
-    });
-  });
+  }
 
   // ------------------------------------------------------------------
   // Schermen
@@ -131,7 +155,9 @@
     els.prompt.textContent = q.prompt;
     els.answeredText.textContent = "Wachten op je tegenstander...";
 
+    clearMapHighlight();
     if (q.mode === 1 && els.options) {
+      highlightMap(q.mapId, q.category, "active");
       els.options.innerHTML = "";
       q.options.forEach(function (option, i) {
         const button = document.createElement("button");
@@ -145,8 +171,6 @@
         });
         els.options.appendChild(button);
       });
-    } else {
-      clearMapHighlight();
     }
 
     startTimer(q.seconds, q.remaining !== undefined ? q.remaining : q.seconds);
@@ -155,6 +179,8 @@
 
   function renderResult(r) {
     stopTimer();
+    clearMapHighlight();
+    highlightMap(r.mapId, r.category, "k-correct");
     els.meScore.textContent = r.score;
     els.themScore.textContent = r.opponentScore;
     els.result.classList.remove("good", "bad", "none");

@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div class="k-player-main">
+    <div class="k-player-main{% if duel.mode == 1 %} duel-mc{% endif %}">
       <!-- WACHTEN OP TEGENSTANDER -->
       <section id="waiting" class="k-card center">
         <h1>Wachten op een tegenstander</h1>
@@ -59,14 +59,17 @@
           <h1 class="k-prompt" id="prompt"></h1>
           <span class="k-pill" id="questionNumber"></span>
         </div>
-        {% if duel.mode == 1 %}
-        <div class="k-options" id="options"></div>
-        {% else %}
-        <div class="k-player-map">
-          {% with klikbaar = true %}{% include('partials/mapSvg.html') %}{% endwith %}
-        </div>
-        {% endif %}
       </section>
+
+      <!-- De kaart staat los van de schermen hierboven: hij blijft staan
+           terwijl je op je tegenstander wacht en terwijl de uitslag van de
+           vraag in beeld is, zodat je ziet waar het antwoord lag. -->
+      <div class="k-player-map" id="mapArea" hidden>
+        {% with klikbaar = duel.mode != 1 %}{% include('partials/mapSvg.html') %}{% endwith %}
+      </div>
+      {% if duel.mode == 1 %}
+      <div class="k-options" id="options" hidden></div>
+      {% endif %}
 
       <!-- ANTWOORD VERSTUURD -->
       <section id="answered" class="k-card center hidden">

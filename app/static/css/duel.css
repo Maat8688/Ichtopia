@@ -112,3 +112,46 @@
 .duel-rating.down {
   color: #f2857c;
 }
+
+/* De kaart en de knoppen worden met [hidden] aan- en uitgezet; zonder deze
+   regel wint hun eigen display-waarde daarvan. */
+.k-player-map[hidden],
+.k-options[hidden] {
+  display: none;
+}
+
+/* Bij meerkeuze staan de kaart en vier knoppen onder elkaar. Op een telefoon
+   past dat alleen als de kaart wat lager is. */
+.duel-mc .k-player-map svg {
+  max-height: 38vh;
+}
+
+.duel-mc .k-player-map {
+  padding: 8px;
+}
+
+@media (max-height: 740px) {
+  .duel-mc .k-player-map svg {
+    max-height: 30vh;
+  }
+}
+
+@media (max-width: 560px) {
+  .duel-bar {
+    gap: 12px;
+    padding: 8px 12px;
+  }
+
+  .duel-side {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .duel-name {
+    max-width: 90px;
+  }
+
+  .duel-score {
+    font-size: 22px;
+  }
+}
