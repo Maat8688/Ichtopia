@@ -25,10 +25,13 @@ duelManager = DuelManager()
 REVEAL_SECONDS = 4
 START_COUNTDOWN = 3
 
-# Meer dan dit aantal duels tegen dezelfde persoon op een dag telt niet meer
-# voor je elo. Anders spreken twee vrienden gewoon af om elkaar om de beurt te
-# laten winnen tot ze bovenaan staan.
-RATED_PER_PAIR_PER_DAY = 5
+# Elo is nul-som: om de beurt winnen levert niemand iets op, dus dat hoeft ook
+# niet geremd te worden. Wat wel werkt is eenzijdig voeren - iemand die zich
+# steeds expres laat verliezen, of een tweede account dat alleen bestaat om
+# punten weg te geven. Daarom tellen alleen de eerste paar overwinningen op
+# dezelfde tegenstander per dag. Twee rivalen die de hele middag tegen elkaar
+# spelen en netjes wisselen, merken hier niets van.
+RATED_WINS_PER_PAIR_PER_DAY = 3
 
 
 def duelRoom(code: str) -> str:
@@ -111,14 +114,31 @@ def play(code):
 # ----------------------------------------------------------------------
 # Uitslag verwerken
 # ----------------------------------------------------------------------
-def pairPlayedToday(oneId: int, twoId: int) -> int:
+def winsTodayAgainst(winnerId: int, loserId: int) -> int:
+    """Hoe vaak deze speler vandaag al van deze tegenstander won, in duels die telden."""
     since = datetime.now(timezone.utc) - timedelta(days=1)
     return DuelMatch.query.filter(
         DuelMatch.played_at >= since,
         DuelMatch.rated.is_(True),
-        db.or_(db.and_(DuelMatch.one_id == oneId, DuelMatch.two_id == twoId),
-               db.and_(DuelMatch.one_id == twoId, DuelMatch.two_id == oneId)),
+        db.or_(
+            db.and_(DuelMatch.one_id == winnerId, DuelMatch.two_id == loserId,
+                    DuelMatch.one_score > DuelMatch.two_score),
+            db.and_(DuelMatch.two_id == winnerId, DuelMatch.one_id == loserId,
+                    DuelMatch.two_score > DuelMatch.one_score),
+        ),
     ).count()
+
+
+def isRated(userOne, userTwo, resultOne: float) -> bool:
+    """Telt dit duel voor de elo?
+
+    Gelijkspel altijd: daar valt niets mee te voeren. Bij winst kijken we hoe
+    vaak de winnaar vandaag al van deze tegenstander won.
+    """
+    if resultOne == 0.5:
+        return True
+    winner, loser = ((userOne, userTwo) if resultOne == 1.0 else (userTwo, userOne))
+    return winsTodayAgainst(winner.id, loser.id) < RATED_WINS_PER_PAIR_PER_DAY
 
 
 def applyResults(finishedDuel: Duel) -> dict[int, dict]:
@@ -137,7 +157,6 @@ def applyResults(finishedDuel: Duel) -> dict[int, dict]:
         if userOne is None or userTwo is None:
             return {}
 
-        rated = pairPlayedToday(userOne.id, userTwo.id) < RATED_PER_PAIR_PER_DAY
         beforeOne, beforeTwo = userOne.rating, userTwo.rating
 
         if one.score > two.score:
@@ -146,6 +165,8 @@ def applyResults(finishedDuel: Duel) -> dict[int, dict]:
             resultOne = 0.0
         else:
             resultOne = 0.5
+
+        rated = isRated(userOne, userTwo, resultOne)
 
         if rated:
             afterOne = newRating(beforeOne, beforeTwo, resultOne, userOne.duelsPlayed)

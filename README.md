@@ -47,9 +47,15 @@ Twee losse ladders, allebei zichtbaar op `/ranglijst`:
 Een duel (`/duel`) is 1 tegen 1: allebei dezelfde vragen tegelijk, sneller goed
 antwoorden levert meer punten op, de winnaar pakt elo van de ander af. Je maakt
 een duel aan en deelt de code, of je pakt er een uit de lijst met openstaande
-duels. Speel je meer dan vijf keer op een dag tegen dezelfde persoon, dan
-tellen die duels niet meer voor je elo - anders spelen twee vrienden elkaar
-gewoon naar boven.
+duels.
+
+Elo is nul-som: om de beurt winnen levert allebei niets op, dus daar hoeft geen
+rem op. Wat wel misbruikt kan worden is eenzijdig voeren - iemand die zich
+steeds expres laat verliezen, of een tweede account dat alleen bestaat om
+punten weg te geven. Daarom tellen alleen je eerste drie overwinningen per dag
+op dezelfde tegenstander mee voor de elo. Verlies en gelijkspel tellen altijd,
+en de teller staat per richting, dus twee rivalen die de hele middag tegen
+elkaar spelen en netjes wisselen merken hier niets van.
 
 ## Namen
 

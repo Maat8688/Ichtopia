@@ -215,4 +215,41 @@ check('duel vereist inloggen',
 
 socketA.disconnect()
 socketB.disconnect()
+
+# ----------------------------------------------------------------------
+# De rem op eenzijdig voeren
+# ----------------------------------------------------------------------
+from src.duel_routes import RATED_WINS_PER_PAIR_PER_DAY, isRated   # noqa: E402
+
+
+def bewaarDuel(winnaar, verliezer, rated=True):
+    db.session.add(DuelMatch(
+        map_name='Europa', questions=3, rated=rated,
+        one_id=winnaar.id, two_id=verliezer.id, one_score=1000, two_score=0,
+        one_rating_before=winnaar.rating, two_rating_before=verliezer.rating,
+        one_rating_after=winnaar.rating, two_rating_after=verliezer.rating,
+    ))
+    db.session.commit()
+
+
+with app.app_context():
+    een = User.query.filter_by(email='a@example.com').first()
+    twee = User.query.filter_by(email='b@example.com').first()
+    drie = User.query.filter_by(email='c@example.com').first()
+
+    # Het duel hierboven telde al als een overwinning van 'een' op 'twee'.
+    for _ in range(RATED_WINS_PER_PAIR_PER_DAY - 1):
+        bewaarDuel(een, twee)
+    check('winnen telt tot de grens', isRated(een, twee, 1.0) is False,
+          'na de grens moet het stoppen')
+    # De andere kant op is een losse teller: teruggewonnen duels blijven tellen.
+    check('om de beurt winnen blijft altijd tellen', isRated(twee, een, 1.0) is True)
+    check('gelijkspel telt altijd', isRated(een, twee, 0.5) is True)
+    check('tegen een andere tegenstander telt gewoon', isRated(een, drie, 1.0) is True)
+
+    # Duels die niet meetelden, tellen ook niet mee voor de grens zelf.
+    bewaarDuel(drie, een, rated=False)
+    check('niet-meetellende duels tellen niet voor de rem',
+          isRated(drie, een, 1.0) is True)
+
 sys.exit(check.report())
