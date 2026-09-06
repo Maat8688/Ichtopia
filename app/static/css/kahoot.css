@@ -570,7 +570,7 @@ button.k-option:active {
   font-size: 12px;
   color: var(--muted);
   line-height: 1.3;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Scorebord */
@@ -773,4 +773,342 @@ button.k-option:active {
 .k-player-main #finished .k-leaderboard {
   margin-top: 22px;
   text-align: left;
+}
+
+/* Lage schermen (laptops van 768 hoog): de kaart wat kleiner, zodat het
+   bord in één beeld past en de docent niet hoeft te scrollen. */
+@media (max-height: 800px) {
+  .k-map-wrap svg {
+    max-height: 52vh;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Digibord
+
+   Het bord (kahoot_host.html) wordt van een meter of acht afstand gelezen,
+   niet van vijftig centimeter. Vanaf 1600 pixels breed gaat daarom alles een
+   maat omhoog, en vanaf 2400 nog een stap voor de 4K-borden. Deze maten
+   gelden alleen op het bord; het instelscherm van de docent blijft zoals het
+   is, want dat leest hij van zijn eigen scherm.
+   --------------------------------------------------------------------- */
+@media (min-width: 1600px) {
+  .bord .k-main {
+    max-width: 1440px;
+  }
+
+  .bord .k-topbar {
+    max-width: 1440px;
+    padding-top: 34px;
+  }
+
+  .bord .k-brand {
+    font-size: 32px;
+  }
+
+  .bord .k-pill {
+    font-size: 19px;
+  }
+
+  .bord .k-pill.big {
+    font-size: 28px;
+  }
+
+  .bord .k-card h2 {
+    font-size: 28px;
+  }
+
+  .bord .k-muted {
+    font-size: 19px;
+  }
+
+  .bord .k-btn {
+    font-size: 20px;
+    padding: 14px 26px;
+  }
+
+  /* Lobby: de pincode is het enige wat de klas moet kunnen lezen. */
+  .bord .k-url {
+    font-size: 36px;
+  }
+
+  .bord .k-pin {
+    font-size: 108px;
+  }
+
+  .bord .k-player-chip {
+    font-size: 21px;
+    padding: 9px 18px;
+  }
+
+  /* Vraag */
+  .bord .k-question-head {
+    gap: 30px;
+  }
+
+  .bord .k-timer {
+    width: 82px;
+    height: 82px;
+    font-size: 33px;
+  }
+
+  .bord .k-prompt {
+    font-size: 42px;
+  }
+
+  .bord .k-answered {
+    font-size: 19px;
+  }
+
+  .bord .k-answered strong {
+    font-size: 38px;
+  }
+
+  .bord .k-option {
+    font-size: 23px;
+    padding: 15px 20px;
+  }
+
+  .bord .k-option .k-shape {
+    width: 12px;
+    height: 12px;
+  }
+
+  .bord .k-board-body {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 44px;
+  }
+
+  .bord .k-board-body.reveal {
+    grid-template-columns: minmax(0, 1fr) 430px 390px;
+    gap: 40px;
+  }
+
+  /* Zo hoog dat de kaart groot is, maar het hele bord nog op een scherm van
+     1920 bij 1080 past. Scrollen tijdens de les wil je niet. */
+  .bord .k-map-wrap svg {
+    max-height: 58vh;
+  }
+
+  /* De lobby mag de breedte van het bord gebruiken. */
+  .bord .k-lobby {
+    max-width: 1200px;
+    gap: 72px;
+  }
+
+  /* Onthulling */
+  .bord .k-reveal-title {
+    font-size: 40px;
+  }
+
+  .bord .k-bar-count {
+    font-size: 28px;
+  }
+
+  .bord .k-bar-track {
+    height: 140px;
+  }
+
+  .bord .k-bar-label {
+    font-size: 17px;
+  }
+
+  .bord .k-leaderboard li {
+    font-size: 23px;
+    padding: 14px 0;
+  }
+
+  .bord .k-leaderboard .k-rank {
+    width: 34px;
+  }
+
+  .bord .k-leaderboard .k-delta {
+    font-size: 19px;
+  }
+
+  .bord .k-leaderboard .k-score {
+    font-size: 27px;
+    min-width: 68px;
+  }
+
+  /* Eindstand */
+  .bord .k-podium-place {
+    width: 240px;
+  }
+
+  .bord .k-podium-name {
+    font-size: 23px;
+  }
+
+  .bord .k-podium-block {
+    font-size: 46px;
+  }
+
+  .bord .k-podium-place[data-place="1"] .k-podium-block {
+    height: 220px;
+  }
+
+  .bord .k-podium-place[data-place="2"] .k-podium-block {
+    height: 165px;
+  }
+
+  .bord .k-podium-place[data-place="3"] .k-podium-block {
+    height: 120px;
+  }
+
+  .bord .k-podium-score {
+    font-size: 18px;
+  }
+
+  .bord .k-final-list {
+    max-width: 900px;
+  }
+}
+
+/* 4K-borden. */
+@media (min-width: 2400px) {
+  .bord .k-main,
+  .bord .k-topbar {
+    max-width: 2000px;
+  }
+
+  .bord .k-brand {
+    font-size: 42px;
+  }
+
+  .bord .k-pill {
+    font-size: 26px;
+  }
+
+  .bord .k-pill.big {
+    font-size: 36px;
+  }
+
+  .bord .k-card h2 {
+    font-size: 38px;
+  }
+
+  .bord .k-muted {
+    font-size: 26px;
+  }
+
+  .bord .k-btn {
+    font-size: 27px;
+    padding: 18px 34px;
+  }
+
+  .bord .k-url {
+    font-size: 48px;
+  }
+
+  .bord .k-pin {
+    font-size: 150px;
+  }
+
+  .bord .k-player-chip {
+    font-size: 28px;
+    padding: 12px 24px;
+  }
+
+  .bord .k-timer {
+    width: 110px;
+    height: 110px;
+    font-size: 44px;
+  }
+
+  .bord .k-prompt {
+    font-size: 58px;
+  }
+
+  .bord .k-answered {
+    font-size: 26px;
+  }
+
+  .bord .k-answered strong {
+    font-size: 50px;
+  }
+
+  .bord .k-option {
+    font-size: 30px;
+    padding: 20px 26px;
+  }
+
+  .bord .k-board-body {
+    grid-template-columns: minmax(0, 1fr) 560px;
+  }
+
+  .bord .k-board-body.reveal {
+    grid-template-columns: minmax(0, 1fr) 560px 500px;
+  }
+
+  .bord .k-reveal-title {
+    font-size: 54px;
+  }
+
+  .bord .k-bar-count {
+    font-size: 38px;
+  }
+
+  .bord .k-bar-track {
+    height: 190px;
+  }
+
+  .bord .k-bar-label {
+    font-size: 24px;
+  }
+
+  .bord .k-leaderboard li {
+    font-size: 30px;
+    padding: 18px 0;
+  }
+
+  .bord .k-leaderboard .k-rank {
+    width: 46px;
+  }
+
+  .bord .k-leaderboard .k-delta {
+    font-size: 26px;
+  }
+
+  .bord .k-leaderboard .k-score {
+    font-size: 36px;
+    min-width: 92px;
+  }
+
+  .bord .k-podium-place {
+    width: 320px;
+  }
+
+  .bord .k-podium-name {
+    font-size: 30px;
+  }
+
+  .bord .k-podium-block {
+    font-size: 62px;
+  }
+
+  .bord .k-podium-place[data-place="1"] .k-podium-block {
+    height: 300px;
+  }
+
+  .bord .k-podium-place[data-place="2"] .k-podium-block {
+    height: 220px;
+  }
+
+  .bord .k-podium-place[data-place="3"] .k-podium-block {
+    height: 160px;
+  }
+
+  .bord .k-podium-score {
+    font-size: 24px;
+  }
+
+  .bord .k-final-list {
+    max-width: 1200px;
+  }
+
+  /* Op een 4K-bord is er meer hoogte over, dus mag de kaart groter. */
+  .bord .k-map-wrap svg {
+    max-height: 64vh;
+  }
 }
