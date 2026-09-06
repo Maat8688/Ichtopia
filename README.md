@@ -69,12 +69,34 @@ waarmee een leerling aan een klassikale quiz meedoet.
 De woordenlijst staat bovenin `src/names.py` en is bedoeld om aangevuld te
 worden zodra er iets doorheen glipt.
 
+## Een bestaande database bijwerken
+
+De app maakt ontbrekende tabellen zelf aan bij het opstarten (`db.create_all()`),
+maar voegt geen kolommen toe aan een tabel die al bestaat. Draait er al een
+database van voor deze versie, dan moet je dus een keer migreren:
+
+```
+docker compose exec web flask db upgrade
+```
+
+Dat mag altijd en zo vaak je wilt: de migraties kijken eerst wat er al staat en
+slaan over wat er al is. Bestaande accounts blijven staan en beginnen op 0 XP
+en 1000 elo.
+
+Bij een lege database (of na `docker compose down -v`) hoeft dit niet.
+
+> De drie oudste migraties zijn met opzet leeggemaakt. Alembic had daar ooit
+> `op.drop_table('user')` van gemaakt, en die stonden klaar om alle accounts te
+> wissen bij de eerste `flask db upgrade` op een database zonder
+> alembic-geschiedenis.
+
 ## Tests
 
 Draaien vanuit `app`, allemaal op een tijdelijke SQLite-database:
 
 ```
-python tests/test_names.py     # het naamfilter
-python tests/test_auth.py      # registreren, inloggen, afgeschermde pagina's
-python tests/test_ranking.py   # XP, levels, elo, ranglijst en een heel duel
+python tests/test_names.py       # het naamfilter
+python tests/test_auth.py        # registreren, inloggen, afgeschermde pagina's
+python tests/test_ranking.py     # XP, levels, elo, ranglijst en een heel duel
+python tests/test_migraties.py   # upgrade op een oude en op een verse database
 ```
