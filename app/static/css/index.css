@@ -1,453 +1,187 @@
-main {
-  width: 90%;
+/* Startscherm: uitleg en stappen bovenaan, keuzes links, kaartvoorbeeld rechts. */
+
+/* Inleiding */
+.lead {
+  max-width: 620px;
+  margin: 20px 0 0;
+}
+
+.lead-text {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.steps {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  /* height: calc(100vh + 100px); */
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 18px 0 0;
+  padding: 14px 0 0;
+  border-top: 0.5px solid var(--rule);
+  list-style: none;
+  color: var(--muted);
+  font-size: 13px;
 }
 
-body {
-  padding-bottom: 10vh;
+.steps li {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: baseline;
+  gap: 8px;
 }
 
-html {
-  height: fit-content;
+.step-nr {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--atlas);
 }
 
-main > img {
-  width: clamp(130px, 10vw, 200px);
-  margin: 0 auto;
+/* Twee kolommen. De blokken staan expliciet in het raster, zodat het
+   kaartvoorbeeld tussen de kaartkeuze en de instellingen kan staan zonder
+   dat de volgorde in de HTML omgezet hoeft te worden. */
+.start-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) 340px;
+  gap: 32px 40px;
+  align-items: start;
+  margin-top: 32px;
 }
 
-#Title {
-  color: #ffffff;
-  font-size: clamp(30px, 2.5vw, 60px);
-  text-align: center;
-  font-weight: bold;
-  margin: 0px;
+.block-maps {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
 }
 
-#SubTitle {
-  color: #ffffff;
-  font-size: 1.2em;
-  text-align: center;
-  margin: 0px 0 30px 0;
+.block-settings {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
 }
 
-#kaarten {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: clamp(200px, 80vw, 700px);
-  justify-content: center;
-  align-items: center;
+.block-maps .section-label:first-child {
+  margin-top: 0;
 }
 
-.kaart {
-  background-color: #6a7f8b;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #000000;
-  box-shadow: #2c3532 4px 4px 0 0;
-  color: #422800;
-  padding: 10px;
-  width: 100%;
-  margin-bottom: 23px;
-  max-width: 200px;
+.block-settings .section-label:first-child {
+  margin-top: 0;
 }
 
-.kaart > div {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.rule-list.maps .row {
+  padding: 14px 0;
 }
 
-.kaart img {
-  width: 75%;
-  height: auto;
-  margin: 7%;
-  border: 2px solid #000000;
-  border-radius: 10px;
-  margin-bottom: 3%;
-  filter: contrast(0.8) brightness(1.2) saturate(1.4);
-}
-
-.vertical-nesting {
-  display: flex;
-  gap: 10vw;
-  justify-content: center;
-  align-items: center;
-}
-
-.horizontal-single {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.wide-kaart {
-  width: 50vw;
-  max-width: 45vw;
-  min-width: 550px;
-}
-
-.wide-kaart img {
-  width: 90%;
-}
-
-.margin-bottom {
-  margin-bottom: 22px;
-}
-
-#kaarten > hr {
-  width: 70%;
-  height: 1px;
-  background-color: white;
-  border: none;
-  border-radius: 10px;
-  min-width: 200px;
-  max-width: 700px;
-}
-
-button {
-  background-color: #fbeee0;
-  border: 2px solid #000000;
-  border-radius: 30px;
-  box-shadow: #000000 4px 4px 0 0;
-  color: #000000;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 18px;
-  padding: 2px 18px;
-  margin: 0 auto;
-}
-
-button:hover {
-  background-color: #fff;
-}
-
-button:active {
-  box-shadow: #000000 2px 2px 0 0;
-  transform: translate(2px, 2px);
-}
-
-.overlay {
-  background: rgba(0, 0, 0, 0.5); /* Darker overlay */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+#instellingen[hidden] {
   display: none;
+}
+
+#instellingen .rule-list .row {
+  padding: 12px 0;
+}
+
+#formError {
+  margin-top: 12px;
+}
+
+.actions .muted {
+  white-space: nowrap;
+}
+
+/* Kaartvoorbeeld */
+.preview {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  position: sticky;
+  top: 24px;
+  min-width: 0;
+}
+
+.preview-frame {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  z-index: 100;
-  animation: fadeIn 0.3s ease; /* Fade-in animation */
+  aspect-ratio: 1 / 1;
+  padding: 16px;
+  background: var(--paper-2);
+  border-radius: 6px;
 }
 
-.overlay.show {
-  display: flex;
-}
-
-.popup {
-  background-color: #6a7f8b;
-  border-radius: 15px;
-  text-align: center;
-  border: 2px solid #000000;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  width: 90%;
-  max-width: 500px;
-  transform: scale(0.8);
-  animation: popupEnter 0.3s forwards;
-  box-shadow: #2c3532 4px 4px 0 0;
-}
-
-.form {
-  width: fit-content;
-}
-
-.popup h2 {
-  font-size: 1.5em;
-  color: #000000;
-  margin-bottom: 20px;
-  width: fit-content;
-}
-
-#typeSelect,
-#ModeSelect,
-#questionsSelect {
-  margin-bottom: 20px;
-  text-align: left;
-  max-width: fit-content;
-  display: flex;
-  align-items: center;
-}
-
-label {
-  margin-right: 10px;
-}
-
-input[type="radio"],
-input[type="checkbox"] {
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-button[type="submit"] {
-  background-color: #a19485;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-button[type="submit"]:hover {
-  background-color: #fbeee0;
-  color: black;
-}
-
-button.close {
-  background-image: linear-gradient(to right, #f7f7f7, #ffffff);
-  border: none;
-  font-size: 1.5em;
-  color: #333;
-  cursor: pointer;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-button.close:hover {
-  filter: brightness(0.8);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes popupEnter {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-footer {
-  background-color: #f6f7ec;
-  color: #422800;
-  text-align: center;
-  padding: 10px;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-}
-
-.expanding {
-  background-color: white;
-  animation: pulse 4s infinite;
-  min-width: 170px;
-  border: none;
-  border-radius: 10px;
-  height: 1px;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    width: 19vw;
-  }
-  40% {
-    width: 20vw;
-  }
-}
-
-.loadingScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
+.preview-img {
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  font-size: 30px;
+  object-fit: contain;
 }
 
-#logo_loading {
-  width: 150px;
-  animation: spin 2s linear infinite;
-  position: absolute;
-  margin-bottom: 200px;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.preview-empty {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
 }
 
-
-#logo {
-  transition: transform 2s;
-  width: 200px;
+.preview-caption {
+  margin-top: 10px;
+  min-height: 20px;
 }
 
-.checkbox-wrapper-30 {
-  width: fit-content;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.checkbox-wrapper-30 .checkbox {
-  --bg: #fff;
-  --brdr: #d1d6ee;
-  --brdr-actv: #1e2235;
-  --brdr-hovr: #bbc1e1;
-  --dur: calc((var(--size, 2) / 2) * 0.6s);
-  display: inline-block;
-  width: calc(var(--size, 1) * 22px);
-  position: relative;
-}
-.checkbox-wrapper-30 .checkbox:after {
-  content: "";
-  width: 100%;
-  padding-top: 65%;
-  display: block;
-}
-.checkbox-wrapper-30 .checkbox > * {
-  position: absolute;
-}
-.checkbox-wrapper-30 .checkbox input {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-  background-color: var(--bg);
-  border-radius: calc(var(--size, 1) * 4px);
-  border: calc(var(--newBrdr, var(--size, 1)) * 1px) solid;
-  color: var(--newBrdrClr, var(--brdr));
-  outline: none;
-  margin: 0;
-  padding: 0;
-  transition: all calc(var(--dur) / 3) linear;
-}
-.checkbox-wrapper-30 .checkbox input:hover,
-.checkbox-wrapper-30 .checkbox input:checked {
-  --newBrdr: calc(var(--size, 1) * 2);
-}
-.checkbox-wrapper-30 .checkbox input:hover {
-  --newBrdrClr: var(--brdr-hovr);
-}
-.checkbox-wrapper-30 .checkbox input:checked {
-  --newBrdrClr: var(--brdr-actv);
-  transition-delay: calc(var(--dur) / 1.3);
-}
-.checkbox-wrapper-30 .checkbox input:checked + svg {
-  --dashArray: 16 93;
-  --dashOffset: 109;
-}
-.checkbox-wrapper-30 .checkbox svg {
-  fill: none;
-  left: 0;
-  pointer-events: none;
-  stroke: var(--stroke, var(--border-active));
-  stroke-dasharray: var(--dashArray, 93);
-  stroke-dashoffset: var(--dashOffset, 94);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2px;
-  top: 0;
-  transition: stroke-dasharray var(--dur), stroke-dashoffset var(--dur);
-}
-.checkbox-wrapper-30 .checkbox svg,
-.checkbox-wrapper-30 .checkbox input {
-  display: block;
-  width: 15px;
-  height: 15px;
-}
-
-@media (min-width: 500px) and (max-width: 719px) {
-  .wide-kaart {
-    min-width: 400px;
+/* Smal scherm: kaartvoorbeeld boven de keuzes, minder hoog. */
+@media (max-width: 799px) {
+  .topbar {
+    padding-top: 22px;
   }
 
-  #kaarten > hr {
+  .lead-text {
+    font-size: 17px;
+  }
+
+  .steps {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .start-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 26px;
+  }
+
+  /* Onder elkaar in de volgorde van de HTML: kaarten, voorbeeld, instellingen. */
+  .preview {
+    position: static;
+  }
+
+  /* Zolang er niets gekozen is, is een leeg kader hier alleen maar ruis. */
+  .preview.empty {
     display: none;
   }
-}
 
-@media (max-width: 499px) {
-  .vertical-nesting {
-    flex-direction: column;
-  }
-
-  #kaarten > hr {
-    min-width: 100px;
-  }
-
-  .kaart {
-    min-width: 200px;
-    width: 100vw;
-    max-width: 60vw;
-  }
-
-  .wide-kaart {
-    min-width: 200px;
-    width: 80vw;
-    max-width: 100vw;
-  }
-}
-/* Fade-in animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+  .preview-frame {
+    aspect-ratio: 3 / 2;
+    padding: 10px;
   }
 }
 
-/* Fade-out animation */
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+/* Rijen die naar een andere pagina leiden: de klassikale quiz en het duel. */
+.klassikaal,
+.tegen-elkaar {
+  margin-top: 40px;
+  max-width: 560px;
 }
 
-/* Common styles for the new image */
-.fade-in-out {
-  opacity: 0; /* Start hidden */
-  animation-duration: 2s; /* Adjust duration */
-  animation-fill-mode: forwards;
+.klassikaal .row,
+.tegen-elkaar .row {
+  text-decoration: none;
+  padding: 14px 0;
 }
+
+.klassikaal .status,
+.tegen-elkaar .status {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.klassikaal .row:hover .status,
+.tegen-elkaar .row:hover .status {
+  color: var(--ink);
+}
+

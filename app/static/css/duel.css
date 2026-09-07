@@ -1,0 +1,157 @@
+/* 1-tegen-1 duel. Bouwt voort op kahoot.css; alleen wat daar niet in zit. */
+
+.duel-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .duel-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.duel-open-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.duel-open-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.duel-code-form {
+  margin-top: 18px;
+}
+
+.duel-checkline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+/* Scorebalk boven het duel: ik links, tegenstander rechts. */
+.duel-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 10px 16px;
+}
+
+.duel-side {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 160px;
+}
+
+.duel-side.them {
+  justify-content: flex-end;
+}
+
+.duel-name {
+  font-size: 14px;
+  opacity: 0.75;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.duel-score {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+}
+
+.duel-vs {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.duel-code {
+  font-size: 40px;
+  letter-spacing: 0.18em;
+  margin: 12px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.duel-countdown {
+  font-size: 72px;
+  line-height: 1;
+  margin: 12px 0;
+}
+
+.duel-final {
+  font-size: 44px;
+  margin: 8px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.duel-rating {
+  font-size: 18px;
+  margin: 4px 0 8px;
+}
+
+.duel-rating.up {
+  color: #7ddba0;
+}
+
+.duel-rating.down {
+  color: #f2857c;
+}
+
+/* De kaart en de knoppen worden met [hidden] aan- en uitgezet; zonder deze
+   regel wint hun eigen display-waarde daarvan. */
+.k-player-map[hidden],
+.k-options[hidden] {
+  display: none;
+}
+
+/* Bij meerkeuze staan de kaart en vier knoppen onder elkaar. Op een telefoon
+   past dat alleen als de kaart wat lager is. */
+.duel-mc .k-player-map svg {
+  max-height: 38vh;
+}
+
+.duel-mc .k-player-map {
+  padding: 8px;
+}
+
+@media (max-height: 740px) {
+  .duel-mc .k-player-map svg {
+    max-height: 30vh;
+  }
+}
+
+@media (max-width: 560px) {
+  .duel-bar {
+    gap: 12px;
+    padding: 8px 12px;
+  }
+
+  .duel-side {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .duel-name {
+    max-width: 90px;
+  }
+
+  .duel-score {
+    font-size: 22px;
+  }
+}

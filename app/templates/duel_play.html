@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Duel {{ duel.code }} · Topo</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/duel.css') }}" />
+    <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+  </head>
+  <body class="kahoot">
+    {% with loadingText = 'Duel laden' %}{% include('partials/loading.html') %}{% endwith %}
+
+    <div class="k-topbar">
+      <a class="k-brand" href="/">Topo</a>
+      <span class="k-pill">Duel {{ duel.code }}</span>
+      <span class="k-pill">{{ duel.mapName }}</span>
+    </div>
+
+    <!-- SCOREBALK -->
+    <div class="duel-bar" id="scorebar" hidden>
+      <div class="duel-side me">
+        <span class="duel-name" id="meName">{{ current_user.username }}</span>
+        <span class="duel-score" id="meScore">0</span>
+      </div>
+      <span class="duel-vs" id="questionCounter">vs</span>
+      <div class="duel-side them">
+        <span class="duel-score" id="themScore">0</span>
+        <span class="duel-name" id="themName">?</span>
+      </div>
+    </div>
+
+    <div class="k-player-main{% if duel.mode == 1 %} duel-mc{% endif %}">
+      <!-- WACHTEN OP TEGENSTANDER -->
+      <section id="waiting" class="k-card center">
+        <h1>Wachten op een tegenstander</h1>
+        <p class="k-muted">Stuur deze code naar een klasgenoot:</p>
+        <div class="duel-code">{{ duel.code }}</div>
+        <p class="k-status k-pulse" id="waitingText">Zodra iemand meedoet, begint het duel vanzelf.</p>
+        <div class="k-btn-row">
+          <a class="k-btn secondary" href="{{ url_for('duel.lobby') }}">Terug</a>
+        </div>
+      </section>
+
+      <!-- AFTELLEN -->
+      <section id="countdown" class="k-card center hidden">
+        <h1 id="countdownName">Tegenstander gevonden!</h1>
+        <div class="duel-countdown" id="countdownValue">3</div>
+      </section>
+
+      <!-- VRAAG -->
+      <section id="question" class="k-player-question hidden">
+        <div class="k-question-head">
+          <div class="k-timer" id="timer"><span id="timerValue">0</span></div>
+          <h1 class="k-prompt" id="prompt"></h1>
+          <span class="k-pill" id="questionNumber"></span>
+        </div>
+      </section>
+
+      <!-- De kaart staat los van de schermen hierboven: hij blijft staan
+           terwijl je op je tegenstander wacht en terwijl de uitslag van de
+           vraag in beeld is, zodat je ziet waar het antwoord lag. -->
+      <div class="k-player-map" id="mapArea" hidden>
+        {% with klikbaar = duel.mode != 1 %}{% include('partials/mapSvg.html') %}{% endwith %}
+      </div>
+      {% if duel.mode == 1 %}
+      <div class="k-options" id="options" hidden></div>
+      {% endif %}
+
+      <!-- ANTWOORD VERSTUURD -->
+      <section id="answered" class="k-card center hidden">
+        <h1>Antwoord verstuurd!</h1>
+        <p class="k-status k-pulse" id="answeredText">Wachten op je tegenstander...</p>
+      </section>
+
+      <!-- UITSLAG PER VRAAG -->
+      <section id="result" class="k-result hidden">
+        <h2 id="resultTitle"></h2>
+        <div class="k-points" id="resultPoints"></div>
+        <p id="resultCorrect"></p>
+        <p class="k-muted" id="resultOpponent"></p>
+      </section>
+
+      <!-- EINDSTAND -->
+      <section id="finished" class="k-card center hidden">
+        <h1 id="finalTitle">Klaar!</h1>
+        <div class="duel-final" id="finalScore"></div>
+        <p id="finalCorrect" class="k-muted"></p>
+        <div class="duel-rating" id="finalRating"></div>
+        <p class="k-muted" id="finalXp"></p>
+        <div class="k-btn-row">
+          <a class="k-btn primary" href="{{ url_for('duel.lobby') }}">Nog een duel</a>
+          <a class="k-btn secondary" href="{{ url_for('ranking.board', lijst='elo') }}">Ranglijst</a>
+        </div>
+      </section>
+
+      <div id="error" class="k-error hidden"></div>
+    </div>
+
+    <script>
+      const DUEL = {
+        code: "{{ duel.code }}",
+        mode: {{ duel.mode }},
+      };
+    </script>
+    <script src="{{ url_for('static', filename='js/duel.js') }}"></script>
+  </body>
+</html>

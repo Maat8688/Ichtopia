@@ -3,9 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Topo Leren</title>
+    <title>Oefenen · Topo</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/design-tokens.css') }}"
+    />
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/main.css') }}"
@@ -15,131 +19,255 @@
       href="{{ url_for('static', filename='css/learn.css') }}"
     />
     <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/account.css') }}"
+    />
+    <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
+    <link
       rel="icon"
       href="{{ url_for('static', filename='img/logo_small.png') }}"
     />
   </head>
   <body>
-    
-    <a href="/" class="button-56" role="button">Home</a>
-    <div id="finishedOverlay" class="overlay">
-      
-      <div class="popup">
-        <h2>Finished</h2>
-        <p>Score: <span id="T-Score">?</span></p>
-        <p>Total tries: <span id="T-Tries">?</span></p>
-        <p>Incorrect tries: <span id="T-Incorrect">?</span></p>
-        <p>Time: <span id="T-Time">?</span> sec</p>
-   
-        <a href="/" class="button-56" role="button">Home</a>
-
-        <button onclick="showBreakdown()">Overzicht</button>
-        <div id="QuestionBreakdown"></div>
-      </div>
-    </div>
-
-    <div id="mainContent">
-      <div id="mapContainer">
-        {% include('partials/map.html') %}
-        <div id="progressBar">
-          <div id="bar">
-            <div id="questionsCorrect"></div>
-            <div id="questionsIncorrect"></div>
-          </div>
-          <script>
-            socket.on("setProgressBar", function (data) {
-              var greenBar = document.getElementById("questionsCorrect");
-              var redBar = document.getElementById("questionsIncorrect");
-              greenBar.style.width = `${
-                data["totalCorrect"] * (100 / data["totalQuestions"])
-              }%`;
-              redBar.style.width = `${
-                data["totalIncorrect"] * (100 / data["totalQuestions"])
-              }%`;
-            });
-          </script>
-        </div>
-      </div>
-
-      <div id="gamemodeContainer">
-        {% if map.sessionMode == 1 %} {% include('partials/multipleChoise.html')
-        %} {% endif %} {% if map.sessionMode == 2 %} {%
-        include('partials/typeAwnser.html') %} {% endif %} {% if map.sessionMode
-        == 3 %} {% include('partials/clickTheCountry.html') %} {% endif %}
-      </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
     <script>
+      var sessionMode = {{ map.sessionMode }};
+      var lastAnswer = "";
+      var currentQuestionName = "";
+    </script>
+
+    {% with loadingText = 'Kaart laden' %}{% include('partials/loading.html') %}{% endwith %}
+
+    <header class="page topbar">
+      <h1 id="sessionTitle">Oefenen</h1>
+      <div class="topbar-right">
+        <span id="progressText" class="accent"></span>
+        <a href="/" class="link">stoppen</a>
+      </div>
+    </header>
+
+    <div class="page">
+      <div class="progress" id="progressBar">
+        <span id="questionsCorrect"></span>
+      </div>
+      <p class="verbinding" id="verbinding" hidden>
+        Geen verbinding met de server. Je antwoorden komen even niet aan &mdash;
+        wacht tot deze melding weg is.
+      </p>
+    </div>
+
+    <main class="page learn">
+      <section class="map" id="mapContainer" aria-label="Kaart">
+        {% include('partials/map.html') %}
+      </section>
+
+      <aside class="panel" id="gamemodeContainer">
+        <div id="questionArea">
+          <p class="panel-label" id="questionCounter">Vraag 1</p>
+          {% if map.sessionMode != 3 %}
+          <p class="question" id="questionText">Kijk naar de kaart.</p>
+          {% endif %}
+
+          {% if map.sessionMode == 1 %}
+            {% include('partials/multipleChoise.html') %}
+          {% endif %}
+          {% if map.sessionMode == 2 %}
+            {% include('partials/typeAwnser.html') %}
+          {% endif %}
+          {% if map.sessionMode == 3 %}
+            {% include('partials/clickTheCountry.html') %}
+          {% endif %}
+
+          <p class="feedback" id="feedback" hidden></p>
+        </div>
+
+        <div id="finished" hidden>
+          <h2>Klaar</h2>
+          <div class="rule-list">
+            <div><span>Goed beantwoord</span><span id="T-Score" class="accent">?</span></div>
+            <div><span>Pogingen</span><span id="T-Tries">?</span></div>
+            <div><span>Fout</span><span id="T-Incorrect">?</span></div>
+            <div><span>Tijd</span><span id="T-Time">?</span></div>
+          </div>
+
+          <!-- Alleen zichtbaar als je ingelogd bent; zonder account is er geen XP. -->
+          <div id="xpBlok" hidden>
+            <p class="feedback ok" id="xpTekst"></p>
+            <div class="level-bar"><span id="xpBalk" style="width: 0%"></span></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="link" onclick="showBreakdown()">overzicht per vraag</button>
+            <a href="/" class="btn btn-primary">Naar start</a>
+          </div>
+          <div id="QuestionBreakdown" hidden></div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="page">
+        <p>Gemaakt door Floris, Joël en Sami · geen account nodig</p>
+      </div>
+    </footer>
+
+    <script>
+      var mapName = "";
+      try {
+        mapName = sessionStorage.getItem("topo.map") || "";
+      } catch (e) {}
+
+      if (mapName) {
+        document.getElementById("sessionTitle").textContent = mapName + " · oefenen";
+        document.title = mapName + " · oefenen";
+      }
+
+      var questionCount = 0;
+      var feedback = document.getElementById("feedback");
+      var questionText = document.getElementById("questionText");
+
+      var questionByCategory = {
+        Steden: "Welke stad is dit?",
+        Hoofdsteden: "Welke hoofdstad is dit?",
+        Plaatsen: "Welke plaats is dit?",
+        Gebergten: "Welk gebergte is dit?",
+        Landen: "Welk land is dit?",
+        Provincies: "Welke provincie is dit?",
+        Wateren: "Welk water is dit?",
+        Gebieden: "Welk gebied is dit?",
+      };
+
+      function displayName(id) {
+        return String(id).replace(/[_]/g, " ");
+      }
+
+      function formatTime(seconds) {
+        seconds = Number(seconds) || 0;
+        var minutes = Math.floor(seconds / 60);
+        var rest = seconds % 60;
+        if (minutes === 0) {
+          return rest + " s";
+        }
+        return minutes + " min " + rest + " s";
+      }
+
+      function showFeedback(text, ok) {
+        feedback.innerHTML = "";
+        var strong = document.createElement("strong");
+        strong.textContent = ok ? "Goed." : "Fout.";
+        feedback.appendChild(strong);
+        feedback.appendChild(document.createTextNode(" " + text));
+        feedback.classList.toggle("ok", ok);
+        feedback.hidden = false;
+      }
+
+      socket.on("question", function (data) {
+        questionCount += 1;
+        document.getElementById("questionCounter").textContent = "Vraag " + questionCount;
+
+        if (sessionMode === 3) {
+          currentQuestionName = displayName(data.question);
+        } else if (questionText) {
+          var element = document.getElementById(data.question);
+          var text = "Wat is dit?";
+          Object.keys(questionByCategory).forEach(function (category) {
+            if (element && element.classList.contains(category)) {
+              text = questionByCategory[category];
+            }
+          });
+          questionText.textContent = text;
+        }
+      });
+
+      socket.on("setProgressBar", function (data) {
+        var known = data["totalCorrect"];
+        var total = data["totalQuestions"];
+        document.getElementById("questionsCorrect").style.width =
+          (total ? (known * 100) / total : 0) + "%";
+        document.getElementById("progressText").textContent = known + " van " + total + " gekend";
+
+        if (mapName) {
+          try {
+            var saved = JSON.parse(localStorage.getItem("topo.progress") || "{}");
+            saved[mapName] = { known: known, total: total };
+            localStorage.setItem("topo.progress", JSON.stringify(saved));
+          } catch (e) {}
+        }
+      });
+
+      socket.on("questionCorrect", function () {
+        if (sessionMode === 3) {
+          showFeedback("Dat is " + currentQuestionName + ".", true);
+        } else if (lastAnswer) {
+          showFeedback("Dit is " + lastAnswer + ".", true);
+        } else {
+          showFeedback("", true);
+        }
+      });
+
+      socket.on("questionIncorrect", function () {
+        var text = "Je krijgt hem straks nog een keer.";
+        if (sessionMode === 3) {
+          text = "Dat was niet " + currentQuestionName + ". " + text;
+        } else if (lastAnswer) {
+          text = "Dit is niet " + lastAnswer + ". " + text;
+        }
+        showFeedback(text, false);
+      });
+
       socket.on("finished", function (data) {
-        var overlay = document.getElementById("finishedOverlay");
-        overlay.classList.add("show");
-        var scoreSpan = document.getElementById("T-Score");
-        var triesSpan = document.getElementById("T-Tries");
-        var incorrectSpan = document.getElementById("T-Incorrect");
-        var timeSpan = document.getElementById("T-Time");
-        var QuestionBreakdown = document.getElementById("QuestionBreakdown");
-       
+        var overview = data["Overvieuw"];
+        document.getElementById("T-Score").textContent = overview["score"];
+        document.getElementById("T-Tries").textContent = overview["totalGuesses"];
+        document.getElementById("T-Incorrect").textContent = overview["totalErrors"];
+        document.getElementById("T-Time").textContent = formatTime(overview["time"]);
 
-        // const loadingScreen = document.querySelector(".loadingScreen");
-        // window.addEventListener("load", function () {
-        //   loadingScreen.style.display = "none";
-        // });
-        scoreSpan.textContent = data["Overvieuw"]["score"];
-        triesSpan.textContent = data["Overvieuw"]["totalGuesses"];
-        incorrectSpan.textContent = data["Overvieuw"]["totalErrors"];
-        timeSpan.textContent = data["Overvieuw"]["time"];
-
-        data["Overvieuw"]["questionBreakdown"].forEach(function (question) {
-          var questionElement = document.createElement("div");
-          questionElement.classList.add("question");
-          questionElement.innerHTML = `
-            <h3>${question["name"]}</h3>
-            <p>Tries: ${question["tries"]}</p>
-            <p>Correct: ${question["timesCorrect"]}</p>
-          `;
-          QuestionBreakdown.appendChild(questionElement);
+        var breakdown = document.getElementById("QuestionBreakdown");
+        var list = document.createElement("div");
+        list.className = "rule-list";
+        overview["questionBreakdown"].forEach(function (question) {
+          var row = document.createElement("div");
+          var name = document.createElement("span");
+          name.textContent = displayName(question["name"]);
+          var stats = document.createElement("span");
+          stats.className = "muted";
+          stats.textContent = question["tries"] + " pogingen · " + question["timesCorrect"] + " goed";
+          row.appendChild(name);
+          row.appendChild(stats);
+          list.appendChild(row);
         });
+        breakdown.innerHTML = "";
+        breakdown.appendChild(list);
 
-        var questionsElement = document.getElementById("questions");
-        var questionElements = questionsElement.getElementsByTagName("g");
+        var questionElements = document.getElementById("questions").getElementsByTagName("g");
         Array.from(questionElements).forEach(function (element) {
           element.classList.remove("active");
         });
+        var marker = document.getElementById("marker");
+        if (marker) {
+          marker.setAttribute("visibility", "hidden");
+        }
+
+        var xp = data["xp"];
+        if (xp && xp["earned"] > 0) {
+          var tekst = "+" + xp["earned"] + " XP · level " + xp["level"];
+          if (!xp["levelProgress"]["max"]) {
+            tekst += " · nog " + xp["levelProgress"]["toNext"] + " XP tot level " + (xp["level"] + 1);
+          }
+          if (xp["capped"]) {
+            tekst += " (je hebt vandaag het maximum aan XP gehaald)";
+          }
+          document.getElementById("xpTekst").textContent = tekst;
+          document.getElementById("xpBalk").style.width = xp["levelProgress"]["percent"] + "%";
+          document.getElementById("xpBlok").hidden = false;
+        }
+
+        document.getElementById("questionArea").hidden = true;
+        document.getElementById("finished").hidden = false;
       });
 
-
-      correctSound.onerror = () => console.log('Correct sound file could not be loaded.');
-      incorrectSound.onerror = () => console.log('Incorrect sound file could not be loaded.');
-
-      socket.on("questionCorrect", function(data) {
-        // const mapContainer = document.getElementById("mapContainer");
-        // mapContainer.classList.add("correct-answer");
-        // setTimeout(() => mapContainer.classList.remove("correct-answer"), 1000);
-
-        // Play correct sound and trigger confetti
-        correctSound.play().catch(error => console.log("Error playing sound:", error));
-        console.log("Correct answer received! Triggering confetti...");
-        confetti({
-          particleCount: 100,
-          spread: 60,
-          origin: { x: 0.5, y: 0.5 },
-          angle: 60,
-          startVelocity: 50,
-          ticks: 200
-        });
-      });
-
-      socket.on("questionIncorrect", function(data) {
-        const mapContainer = document.getElementById("mapContainer");
-        mapContainer.classList.add("incorrect-answer");
-        setTimeout(() => mapContainer.classList.remove("incorrect-answer"), 1000);
-
-
-        // Shake effect
-        const mainContent = document.getElementById("mainContent");
-        mainContent.classList.add("shake");
-        setTimeout(() => mainContent.classList.remove("shake"), 500);
-      });
+      function showBreakdown() {
+        var breakdown = document.getElementById("QuestionBreakdown");
+        breakdown.hidden = !breakdown.hidden;
+      }
     </script>
   </body>
 </html>

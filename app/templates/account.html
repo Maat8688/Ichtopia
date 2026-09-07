@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mijn account · Topo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}">
+</head>
+<body>
+
+<header class="page topbar">
+    <h1><a href="{{ url_for('main.index') }}">Topo</a></h1>
+    <span class="muted">Ichthus · 2026–27</span>
+</header>
+
+<main class="page">
+    <div class="account-form">
+        <h2>Mijn account</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p class="feedback{% if category == 'success' %} ok{% endif %}">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <div class="level-line">
+            <strong>Level {{ current_user.level }}</strong>
+            <span class="muted">{{ current_user.xp }} XP{% if not current_user.levelProgress.max %} ·
+                nog {{ current_user.levelProgress.toNext }} tot level {{ current_user.level + 1 }}{% endif %}</span>
+        </div>
+        <div class="level-bar"><span style="width: {{ current_user.levelProgress.percent }}%"></span></div>
+
+        <div class="rule-list">
+            <div class="row"><span class="name">Naam</span>
+                <span class="status">{{ current_user.username }}</span></div>
+            <div class="row"><span class="name">E-mail</span>
+                <span class="status">{{ current_user.email }}</span></div>
+            <div class="row"><span class="name">Soort account</span>
+                <span class="status">{{ 'Docent' if current_user.isTeacher else 'Leerling' }}</span></div>
+            <div class="row"><span class="name">Elo</span>
+                <span class="status">{{ current_user.rating }} · {{ current_user.ratingTitle }}</span></div>
+            <div class="row"><span class="name">Duels</span>
+                <span class="status">{{ current_user.duels_won }} gewonnen, {{ current_user.duels_lost }} verloren,
+                    {{ current_user.duels_drawn }} gelijk</span></div>
+            <div class="row"><span class="name">Aangemaakt op</span>
+                <span class="status">{{ current_user.created_at.strftime('%d-%m-%Y') if current_user.created_at else 'onbekend' }}</span></div>
+        </div>
+
+        {% if duels %}
+        <p class="section-label duel-history">Laatste duels</p>
+        <div class="rule-list">
+            {% for match in duels %}
+            {% set mine, theirs = match.scoreFor(current_user.id) %}
+            {% set result = match.resultFor(current_user.id) %}
+            {% set change = match.ratingChangeFor(current_user.id) %}
+            <div class="row">
+                <span class="name"><span class="row-title">{{ match.opponentOf(current_user.id).username }}</span>
+                    <span class="row-note">{{ match.map_name }} · {{ mine }}–{{ theirs }}{% if not match.rated %} · telde niet mee{% endif %}</span></span>
+                <span class="status {{ 'won' if result == 'gewonnen' else ('lost' if result == 'verloren' else '') }}">
+                    {{ result }}{% if match.rated %} ({{ '+' if change >= 0 else '' }}{{ change }}){% endif %}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <p class="muted form-footnote">
+            <a class="link" href="{{ url_for('duel.lobby') }}">Duel spelen</a> ·
+            <a class="link" href="{{ url_for('ranking.board') }}">Ranglijst</a>
+        </p>
+
+        {% if current_user.isTeacher %}
+        <p class="muted form-footnote">Als docent kun je meteen een
+            <a class="link" href="{{ url_for('kahoot.host') }}">klassikale quiz</a> starten.</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('auth.logout') }}" class="logout-form">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+            <div class="actions actions-end">
+                <a class="link" href="{{ url_for('main.index') }}">Naar de startpagina</a>
+                <button type="submit" class="btn">Uitloggen</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <div class="page">
+        <p>Gemaakt door Floris, Joël en Sami · een account is niet verplicht</p>
+    </div>
+</footer>
+
+</body>
+</html>

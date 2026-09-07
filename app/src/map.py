@@ -2,10 +2,24 @@ from __future__ import annotations
 import werkzeug.security
 import hashlib
 import random
+import unicodedata
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
 from datetime import datetime
+
+def normalizeAnswer(text) -> str:
+    """Maak een antwoord vergelijkbaar met de goede antwoorden.
+
+    Hoofdletters, accenten, spaties, streepjes, apostroffen en punten doen er
+    niet toe. "den haag", "Den-Haag" en "Den Haag" worden alle drie "denhaag",
+    en "Slovenie" wordt hetzelfde als "Slovenië". Zo hoeft niet elke schrijfwijze
+    los in de kaart te staan.
+    """
+    text = unicodedata.normalize('NFD', str(text))
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    return ''.join(c for c in text.lower() if c.isalnum())
+
 
 class SessionGamemode(Enum):
     MULTIPLECHOICE = 1
@@ -33,7 +47,7 @@ class mapSession():
         self.backgroundElements = backgroundElements
         self.foregroundElements = foregroundElements
         self.viewBox = viewBox
-        self.currentQuestionIndex = random.randint(0, len(questions) - 1)
+        self.currentQuestionIndex = random.randint(0, len(questions) - 1) if questions else -1
         self.score = 0
         self.finished = False
         self.antiCheat = True
@@ -133,13 +147,14 @@ class mapSession():
         self.currentQuestion.tries += 1
 
         if hashed:
-            possibleAwnsers = [self.hash(awnser) for awnser in possibleAwnsers]
+            # Bij aanwijzen stuurt de browser de id van het gebied door (gehasht),
+            # dus de id telt hier altijd mee, ook als er <awnser>-regels zijn.
+            awnser = str(awnser)
+            possibleAwnsers = [self.hash(a) for a in possibleAwnsers + [self.currentQuestion.id]]
         else:
-            awnser = awnser.upper()
-            possibleAwnsers = [awnser.upper() for awnser in possibleAwnsers]
-        
-        print(awnser, file=sys.stderr)
-        print(possibleAwnsers, file=sys.stderr)
+            awnser = normalizeAnswer(awnser)
+            possibleAwnsers = [normalizeAnswer(a) for a in possibleAwnsers]
+
         if awnser in possibleAwnsers:
             self.score += 1
             self.currentQuestion.timesCorrect += 1
@@ -159,7 +174,7 @@ class mapSession():
         
 
     @staticmethod
-    def fromSVG(file:str, sessionMode:SessionGamemode|str=SessionGamemode.MULTIPLECHOICE, includeQuestions:list[str]=[]) -> mapSession:
+    def fromSVG(file:str, sessionMode:SessionGamemode|str=SessionGamemode.MULTIPLECHOICE, includeQuestions:list[str]=[], niveau:str=None) -> mapSession:
         with open(file, 'r') as f:
             svg = f.read()
         
@@ -169,12 +184,15 @@ class mapSession():
         backgroundElements = []
         foregroundElements = []
         #loop trough all g in map
-        print(includeQuestions, file=sys.stderr)
         for g in mapElement.find_all('g'):
             if g.get('class') == None:
                 backgroundElements.append(str(g))
             elif "question" in g.get('class'):
                 if g.get('category') != None and g.get('category') not in includeQuestions:
+                    continue
+                # Kaarten met een niveau-kenmerk (havo/vwo) alleen de vragen van
+                # dat niveau. Vormen zonder kenmerk horen bij allebei.
+                if niveau and g.get('niveau') and niveau not in g.get('niveau').split():
                     continue
                 answers = []
                 for awnser in g.find_all('awnser'):
@@ -219,4 +237,13 @@ class mapQuestion():
 
     @property
     def allAnswers(self):
-        return self.answers + [self.id]
+        # Staan er <awnser>-regels in de kaart, dan gelden alleen die. Het id is
+        # dan puur een naam om de vorm mee aan te wijzen, zodat twee vormen
+        # dezelfde naam mogen hebben (Sao Paulo is een stad en een deelstaat).
+        return self.answers if self.answers else [self.id]
+
+    @property
+    def displayName(self) -> str:
+        """De naam die de leerling te zien krijgt: de eerste <awnser> uit de
+        kaart, en anders het id."""
+        return self.answers[0] if self.answers else self.id

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Docent inloggen · Topo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+  </head>
+  <body class="kahoot">
+    <div class="k-topbar">
+      <a class="k-brand" href="/">Topo</a>
+      <span class="k-pill">Klassikale quiz</span>
+    </div>
+
+    <div class="k-main">
+      <form class="k-card center" method="POST" autocomplete="off">
+        <h1>Alleen voor docenten</h1>
+        <p class="k-muted">
+          Om een klassikale quiz te hosten heb je de docentcode nodig, of een
+          <a href="{{ url_for('auth.login') }}">docentaccount</a>.
+          Leerlingen doen mee via <a href="{{ url_for('kahoot.join') }}">Meedoen</a>.
+        </p>
+
+        {% if error %}
+        <div class="k-error">{{ error }}</div>
+        {% endif %}
+
+        {% if configured %}
+        <label class="k-label" for="code">Docentcode</label>
+        <input class="k-input" type="password" id="code" name="code" required autofocus />
+        <input type="hidden" name="next" value="{{ next }}" />
+        <div class="k-btn-row">
+          <a class="k-btn secondary" href="/">Terug</a>
+          <button class="k-btn primary" type="submit">Inloggen</button>
+        </div>
+        {% else %}
+        <div class="k-btn-row">
+          <a class="k-btn secondary" href="/">Terug</a>
+        </div>
+        {% endif %}
+      </form>
+    </div>
+    <footer>
+      <div class="page">
+        <p>Gemaakt door Floris, Joël en Sami · geen account nodig</p>
+      </div>
+    </footer>
+  </body>
+</html>
