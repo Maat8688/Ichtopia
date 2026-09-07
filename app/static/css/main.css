@@ -390,7 +390,9 @@ main.error > * {
   font-family: var(--serif);
   font-size: 72px;
   line-height: 1;
-  color: var(--rule);
+  /* Een tint donkerder dan de lijnkleur: het cijfer is versiering, maar zo is
+     het ook leesbaar op een scherm in een licht lokaal. */
+  color: #8C8271;
   margin-bottom: 8px;
 }
 
