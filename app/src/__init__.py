@@ -18,7 +18,9 @@ app = Flask(
 )
 
 # ---------------- LOGGING SETUP ----------------
-LOG_DIR = "/app/log"  # matches Docker volume: -v ./logs:/app/logs
+# In Docker staat de app in /app. Lokaal mag je er met LOG_DIR een andere
+# map van maken, want /app bestaat daar niet.
+LOG_DIR = os.getenv("LOG_DIR", "/app/log")  # matches Docker volume: -v ./logs:/app/logs
 os.makedirs(LOG_DIR, exist_ok=True)
 
 log_path = os.path.join(LOG_DIR, "access.log")
