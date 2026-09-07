@@ -56,8 +56,9 @@ def teacherRequired(view):
 
 
 def clientIp() -> str:
-    # Bewust geen X-Forwarded-For: die header kan een leerling zelf verzinnen
-    # om de rem op het gokken te omzeilen. De app draait zonder proxy ervoor.
+    # Staat er een proxy voor (TRUST_PROXY), dan heeft die het echte adres hier
+    # al ingevuld. Zelf X-Forwarded-For lezen doen we niet: die header kan een
+    # leerling verzinnen om de rem op het gokken te omzeilen.
     return request.remote_addr or 'unknown'
 
 
@@ -168,6 +169,43 @@ def hostGame(pin):
     joinUrl = url_for('kahoot.join', _external=True)
     return render_template('kahoot_host.html', game=game, map=game.map,
                            hostToken=game.hostToken, joinUrl=joinUrl)
+
+
+@kahoot.route('/statistieken')
+@teacherRequired
+def statistieken():
+    """Hoeveel mensen zijn er nu bezig? Alleen te zien met de docentcode."""
+    return render_template('statistieken.html', **verzamelStatistieken())
+
+
+@kahoot.route('/statistieken.json')
+@teacherRequired
+def statistiekenJson():
+    """Dezelfde cijfers als de pagina, om zelf iets mee te doen."""
+    return verzamelStatistieken()
+
+
+def verzamelStatistieken() -> dict:
+    from . import sessionManager
+    oefenen = sessionManager.stats()
+    quizzen = []
+    for game in list(kahootManager.games.values()):
+        if game.state == 'finished':
+            continue
+        quizzen.append({
+            'pin': game.pin,
+            'kaart': game.mapName,
+            'spelers': sum(1 for p in game.players.values() if p.connected),
+            'stand': game.state,
+            'vraag': game.currentIndex + 1,
+            'vragen': len(game.questions),
+        })
+    quizzen.sort(key=lambda q: -q['spelers'])
+    return {
+        'oefenen': oefenen,
+        'quizzen': quizzen,
+        'inQuiz': sum(q['spelers'] for q in quizzen),
+    }
 
 
 @kahoot.route('/join')

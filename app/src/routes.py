@@ -111,6 +111,7 @@ def setupSockets(socketio: SocketIO):
     @socketio.on('answerQuestion')
     def answerQuestion(data): # expects {'awnser': str, 'hashed': bool, 'sessionToken': str}
         session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session.touch()
         questionId = session.hash(session.currentQuestion.id) 
 
         if session.awnserQuestion(data['awnser'], data['hashed']):
@@ -141,6 +142,7 @@ def setupSockets(socketio: SocketIO):
     @socketio.on('getQuestion')
     def getQuestion(data): # expects {'sessionToken': str}
         session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session.touch()
         if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
         elif session.sessionMode == 2:
@@ -151,4 +153,5 @@ def setupSockets(socketio: SocketIO):
     @socketio.on('getProgressbar')
     def getProgressbar(data):
         session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session.touch()
         emit('setProgressBar', session.getProgresBar())

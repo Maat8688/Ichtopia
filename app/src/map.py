@@ -3,6 +3,7 @@ import werkzeug.security
 import hashlib
 import random
 import unicodedata
+import os
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
@@ -41,6 +42,28 @@ class SessionManager():
     def deleteSession(self, id:str):
         del self.sessions[id]
 
+    def stats(self, window:int=300) -> dict:
+        """Wie is er nu bezig? Actief = in de laatste `window` seconden iets gedaan.
+
+        De teller kijkt naar oefensessies, niet naar browservensters. Wie de
+        kaart openzet en een kwartier niets doet, telt niet meer mee.
+        """
+        now = datetime.now()
+        perMap = {}
+        active = 0
+        for session in list(self.sessions.values()):
+            if (now - session.lastSeen).total_seconds() > window:
+                continue
+            active += 1
+            name = session.mapName or 'onbekend'
+            perMap[name] = perMap.get(name, 0) + 1
+        return {
+            'active': active,
+            'perMap': dict(sorted(perMap.items(), key=lambda kv: -kv[1])),
+            'started': len(self.sessions),
+            'window': window,
+        }
+
 class mapSession():
     def __init__(self, questions:list[mapQuestion], backgroundElements:list, foregroundElements:list, viewBox:tuple=(0, 0, 1000, 1000), sessionMode:SessionGamemode=SessionGamemode.MULTIPLECHOICE):
         self.questions = questions
@@ -52,8 +75,14 @@ class mapSession():
         self.finished = False
         self.antiCheat = True
         self.startTimestamp = datetime.now()
+        self.lastSeen = self.startTimestamp
+        self.mapName = None
         self.sessionMode = sessionMode
         self.correctThreshold = 0.5
+
+    def touch(self):
+        """Onthoud dat er zojuist nog iemand met deze sessie bezig was."""
+        self.lastSeen = datetime.now()
 
     def getViewBox(self):
         return ' '.join(map(str, self.viewBox))
@@ -224,7 +253,9 @@ class mapSession():
         elif sessionMode == 'ClickTheCountry':
             sessionMode = 3 #SessionGamemode.CLICKTHECOUNTRY
 
-        return mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
+        newSession = mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
+        newSession.mapName = os.path.splitext(os.path.basename(file))[0]
+        return newSession
     
 class mapQuestion():
     def __init__(self, id:str, answers:list, svg:str, category:str=None):

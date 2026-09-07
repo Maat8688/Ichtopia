@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="15" />
+    <title>Wie is er bezig? · Topo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+    <style>
+      .telling {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+        margin: 18px 0 26px;
+      }
+
+      .telling div {
+        border: 0.5px solid var(--rule);
+        border-top: 3px solid var(--atlas);
+        background: var(--paper-2);
+        padding: 14px 20px;
+        min-width: 150px;
+      }
+
+      .telling .getal {
+        display: block;
+        font-family: var(--serif);
+        font-size: 40px;
+        line-height: 1.1;
+        color: var(--ink);
+      }
+
+      .telling span.bij {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .stat h2 {
+        font-size: 17px;
+        margin: 26px 0 8px;
+      }
+
+      .stat table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 620px;
+      }
+
+      .stat th,
+      .stat td {
+        text-align: left;
+        padding: 7px 12px 7px 0;
+        border-bottom: 0.5px solid var(--rule);
+        font-size: 15px;
+      }
+
+      .stat th {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .stat td.aantal {
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat .leeg {
+        color: var(--muted);
+        font-size: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page topbar">
+      <h1>Wie is er bezig?</h1>
+      <div class="topbar-right">
+        <a href="{{ url_for('kahoot.host') }}" class="link">nieuwe quiz</a>
+        <a href="/" class="link">naar start</a>
+      </div>
+    </header>
+
+    <main class="page stat">
+      <div class="telling">
+        <div>
+          <span class="getal">{{ oefenen.active }}</span>
+          aan het oefenen
+          <span class="bij">actief in de laatste {{ oefenen.window // 60 }} minuten</span>
+        </div>
+        <div>
+          <span class="getal">{{ inQuiz }}</span>
+          in een klassikale quiz
+          <span class="bij">{{ quizzen | length }} quiz{{ '' if quizzen | length == 1 else 'zen' }} bezig</span>
+        </div>
+      </div>
+
+      <h2>Oefenen, per kaart</h2>
+      {% if oefenen.perMap %}
+      <table>
+        <tr><th>Kaart</th><th>Nu bezig</th></tr>
+        {% for kaart, aantal in oefenen.perMap.items() %}
+        <tr><td>{{ kaart }}</td><td class="aantal">{{ aantal }}</td></tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p class="leeg">Op dit moment oefent er niemand.</p>
+      {% endif %}
+
+      <h2>Klassikale quizzen</h2>
+      {% if quizzen %}
+      <table>
+        <tr><th>Pin</th><th>Kaart</th><th>Leerlingen</th><th>Vraag</th></tr>
+        {% for quiz in quizzen %}
+        <tr>
+          <td>{{ quiz.pin }}</td>
+          <td>{{ quiz.kaart }}</td>
+          <td class="aantal">{{ quiz.spelers }}</td>
+          <td class="aantal">
+            {% if quiz.stand == 'lobby' %}wachtkamer{% else %}{{ quiz.vraag }} van {{ quiz.vragen }}{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p class="leeg">Er loopt nu geen quiz.</p>
+      {% endif %}
+
+      <h2>Sinds de server draait</h2>
+      <table>
+        <tr><td>Oefensessies begonnen</td><td class="aantal">{{ oefenen.started }}</td></tr>
+      </table>
+      <p class="leeg">Deze pagina ververst zichzelf elke 15 seconden.</p>
+    </main>
+
+    <footer>
+      <div class="page">
+        <p>Alleen zichtbaar met de docentcode</p>
+      </div>
+    </footer>
+  </body>
+</html>
