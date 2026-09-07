@@ -304,6 +304,31 @@
   #questions > g.Hoofdsteden,
   #questions > g.Plaatsen {
     fill: var(--ink);
+    stroke: var(--ink);
+  }
+
+  #questions > g.Steden > path,
+  #questions > g.Hoofdsteden > path,
+  #questions > g.Plaatsen > path {
+    /* De kleur erft de stip van de groep hierboven, zodat hij de stand
+       (gekend, fout, gevraagd) vanzelf blijft volgen. */
+    stroke: inherit;
+    stroke-width: 0;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Op een telefoon is de kaart zo klein dat een stadsstip maar twee of drie
+     pixels meet: je ziet hem niet en je raakt hem niet met je vinger. Deze
+     omtrek schaalt niet mee met de kaart, dus hij geeft elke stip dezelfde
+     maat op het scherm. Op een groot scherm is dat niet nodig; daar blijft
+     de kaart zoals hij was. */
+  @media (max-width: 820px) {
+    #questions > g.Steden > path,
+    #questions > g.Hoofdsteden > path,
+    #questions > g.Plaatsen > path {
+      stroke-width: 4.5;
+    }
   }
 
   #questions > g.Landen,
@@ -357,8 +382,10 @@
   }
 
   #questions > g.Steden:hover:not(.active),
-  #questions > g.Hoofdsteden:hover:not(.active) {
+  #questions > g.Hoofdsteden:hover:not(.active),
+  #questions > g.Plaatsen:hover:not(.active) {
     fill: var(--atlas);
+    stroke: var(--atlas);
   }
 
   #questions > g.Gebieden:hover:not(.active) {
@@ -373,9 +400,11 @@
   }
 
   #questions > g.Steden[state="Correct"],
-  #questions > g.Hoofdsteden[state="Correct"] {
+  #questions > g.Hoofdsteden[state="Correct"],
+  #questions > g.Plaatsen[state="Correct"] {
     fill: var(--atlas);
     fill-opacity: 1;
+    stroke: var(--atlas);
   }
 
   #questions > g[state="Incorrect"] {
@@ -384,9 +413,11 @@
   }
 
   #questions > g.Steden[state="Incorrect"],
-  #questions > g.Hoofdsteden[state="Incorrect"] {
+  #questions > g.Hoofdsteden[state="Incorrect"],
+  #questions > g.Plaatsen[state="Incorrect"] {
     fill: var(--pen);
     fill-opacity: 1;
+    stroke: var(--pen);
   }
 
   /* Huidige vraag: rode pen */
@@ -402,10 +433,13 @@
   }
 
   #questions > g.Steden.active,
-  #questions > g.Hoofdsteden.active {
+  #questions > g.Hoofdsteden.active,
+  #questions > g.Plaatsen.active {
     fill: var(--pen);
     fill-opacity: 1;
-    stroke: none;
+    /* Geen 'stroke: none': juist bij de gevraagde plaats moet de stip
+       zichtbaar blijven, ook op een klein scherm. */
+    stroke: var(--pen);
   }
 
   /* Met het toetsenbord aanwijzen: laat zien waar je bent. */
