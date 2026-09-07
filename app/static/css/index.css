@@ -161,23 +161,27 @@
   }
 }
 
-/* Met de klas: twee rijen die naar de klassikale quiz leiden. */
-.klassikaal {
+/* Rijen die naar een andere pagina leiden: de klassikale quiz en het duel. */
+.klassikaal,
+.tegen-elkaar {
   margin-top: 40px;
   max-width: 560px;
 }
 
-.klassikaal .row {
+.klassikaal .row,
+.tegen-elkaar .row {
   text-decoration: none;
   padding: 14px 0;
 }
 
-.klassikaal .status {
+.klassikaal .status,
+.tegen-elkaar .status {
   color: var(--muted);
   font-size: 15px;
 }
 
-.klassikaal .row:hover .status {
+.klassikaal .row:hover .status,
+.tegen-elkaar .row:hover .status {
   color: var(--ink);
 }
 

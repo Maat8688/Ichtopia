@@ -81,6 +81,34 @@ button {
   white-space: nowrap;
 }
 
+/* Op een telefoon past de hele rij er niet naast de titel. Zonder deze regels
+   schuift wat rechts staat het scherm uit - eerst de naam, en bij een langere
+   naam ook de links zelf. Het jaartal is versiering en mag hier weg; de links
+   mogen op een tweede regel. */
+@media (max-width: 620px) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .topbar-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .topbar-right .muted:first-child {
+    display: none;
+  }
+
+  .topbar-right a {
+    max-width: 45vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .accent {
   color: var(--atlas);
 }

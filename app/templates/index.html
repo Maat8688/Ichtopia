@@ -145,11 +145,25 @@
           </a>
         </div>
       </section>
+
+      <section class="tegen-elkaar">
+        <p class="section-label">Tegen elkaar</p>
+        <div class="rule-list">
+          <a class="row" href="{{ url_for('duel.lobby') }}">
+            <span class="name"><span class="row-title">Duel spelen</span><span class="row-note">1 tegen 1 tegen een klasgenoot{% if not current_user.is_authenticated %} · hiervoor log je in{% endif %}</span></span>
+            <span class="status">→</span>
+          </a>
+          <a class="row" href="{{ url_for('ranking.board') }}">
+            <span class="name"><span class="row-title">Ranglijst</span><span class="row-note">levels en elo</span></span>
+            <span class="status">→</span>
+          </a>
+        </div>
+      </section>
     </main>
 
     <footer>
       <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · geen account nodig</p>
+        <p>Gemaakt door Floris, Joël en Sami · een account is niet verplicht</p>
       </div>
     </footer>
 

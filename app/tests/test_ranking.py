@@ -107,6 +107,14 @@ check('elo-lijst is nog leeg', 'nog geen enkel duel' in page)
 check('ranglijst mag ook zonder inloggen',
       app.test_client().get('/ranglijst').status_code == 200)
 
+# De ingang naar een duel moet op de startpagina staan, ook zonder inloggen:
+# een linkje in de kopbalk alleen is op een telefoon niet te vinden.
+startIngelogd = clientA.get('/').get_data(as_text=True)
+startUitgelogd = app.test_client().get('/').get_data(as_text=True)
+check('startpagina wijst de weg naar een duel', 'href="/duel"' in startIngelogd)
+check('die rij staat er ook als je niet ingelogd bent', 'href="/duel"' in startUitgelogd)
+check('startpagina wijst de weg naar de ranglijst', 'href="/ranglijst"' in startUitgelogd)
+
 # ----------------------------------------------------------------------
 # Een heel duel spelen
 # ----------------------------------------------------------------------
