@@ -1,0 +1,13 @@
+# Vul hier je eigen domeinnaam in, op de regel hieronder. Caddy vraagt op die
+# naam een certificaat aan bij Let's Encrypt en stuurt http vanzelf door naar
+# https. De naam moet wel al naar dit adres wijzen, anders mislukt de aanvraag.
+JOUW-DOMEIN.NL {
+	# Alles doorgeven aan de app. De websockets van de klassikale quiz gaan
+	# hier vanzelf doorheen, daar is niets extra's voor nodig.
+	reverse_proxy web:80
+
+	# Zo zie je in de logs wie er langskwam.
+	log {
+		output file /data/toegang.log
+	}
+}

@@ -51,6 +51,16 @@ werkzeug_logger.addHandler(file_handler)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(32).hex()
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Staat er een proxy voor de app die https afhandelt (Caddy), dan komt het
+# verkeer hier binnen als gewoon http. Zonder deze regels denkt Flask dat de
+# site op http draait en wordt de meedoen-link op het digibord een http-link.
+if os.getenv('TRUST_PROXY'):
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+    # De inlogcookie van de docent hoort dan alleen over https verstuurd te worden.
+    app.config['SESSION_COOKIE_SECURE'] = True
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
