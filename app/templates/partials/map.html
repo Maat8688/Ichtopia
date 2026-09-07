@@ -44,20 +44,40 @@
   });
 
   // Ringmarker om de gevraagde stad. Voor landen en gebieden wordt de
-  // omtrek zelf in rode pen getekend (zie .active hierboven).
+  // omtrek zelf in rode pen getekend (zie .active hierboven) - maar bij een
+  // land als Monaco of Luxemburg is die omtrek een paar pixels groot en zie
+  // je niet dat er iets oplicht. Daar komt dus dezelfde ring omheen.
+  var RING_ONDER = 26; // pixels op het scherm
+
   socket.on('question', function(data) {
     var marker = document.getElementById('marker');
     var element = document.getElementById(data.question);
-    if (element && ['Steden','Hoofdsteden','Plaatsen'].some(function(c){return element.classList.contains(c)})) {
-      var box = element.getBBox();
-      var viewBox = document.getElementById('map').viewBox.baseVal;
-      var padding = Math.max(viewBox.width, viewBox.height) * 0.012;
-      marker.setAttribute('cx', box.x + box.width / 2);
-      marker.setAttribute('cy', box.y + box.height / 2);
-      marker.setAttribute('r', Math.max(box.width, box.height) / 2 + padding);
-      marker.setAttribute('visibility', 'visible');
-    } else {
+    if (!element) {
+      // Bij aanwijzen op de kaart staat hier de naam en niet een gebied:
+      // dan zou een ring het antwoord weggeven.
       marker.setAttribute('visibility', 'hidden');
+      return;
     }
+
+    var stad = ['Steden','Hoofdsteden','Plaatsen'].some(function(c){
+      return element.classList.contains(c);
+    });
+    var opScherm = element.getBoundingClientRect();
+    var klein = Math.max(opScherm.width, opScherm.height) < RING_ONDER;
+
+    if (!stad && !klein) {
+      marker.setAttribute('visibility', 'hidden');
+      return;
+    }
+
+    var box = element.getBBox();
+    var viewBox = document.getElementById('map').viewBox.baseVal;
+    var maat = Math.max(viewBox.width, viewBox.height);
+    var straal = Math.max(box.width, box.height) / 2 + maat * 0.012;
+    marker.setAttribute('cx', box.x + box.width / 2);
+    marker.setAttribute('cy', box.y + box.height / 2);
+    // Ondergrens, anders is de ring om Monaco zelf ook nog onzichtbaar.
+    marker.setAttribute('r', Math.max(straal, maat * 0.02));
+    marker.setAttribute('visibility', 'visible');
   });
 </script>
