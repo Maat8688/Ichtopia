@@ -110,6 +110,13 @@
       g.classList.add("active");
       sendAnswer(g.getAttribute("id"), true);
     });
+    // Een <g> is geen knop, dus Enter en spatie moeten we zelf afvangen.
+    g.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        g.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+    });
   });
 
   // ------------------------------------------------------------------

@@ -360,6 +360,18 @@ a.btn {
     width: 100%;
     animation: none;
   }
+
+  /* En verder overal: geen animaties en geen overgangen. Dat raakt onder meer
+     het knipperen in de lobby van de klassikale quiz en het inkleuren van de
+     kaart. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Foutpagina's (404, 500) */

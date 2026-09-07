@@ -1,4 +1,4 @@
-{% include('partials/mapSvg.html') %}
+{% with klikbaar = (map.sessionMode == 3) %}{% include('partials/mapSvg.html') %}{% endwith %}
 
 <script>
   urlParams = new URLSearchParams(window.location.search);
