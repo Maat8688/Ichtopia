@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz {{ game.pin }} · Topo</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
+    <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
+    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+  </head>
+  <body class="kahoot bord">
+    {% with loadingText = 'Quiz laden' %}{% include('partials/loading.html') %}{% endwith %}
+    <div class="k-topbar">
+      <a class="k-brand" href="/">Topo</a>
+      <span id="questionCounter" class="k-pill hidden"></span>
+      <span class="k-pill big">PIN {{ game.pin }}</span>
+    </div>
+
+    <div class="k-main">
+      <!-- LOBBY -->
+      <section id="lobby" class="k-lobby">
+        <div class="k-card k-join-info">
+          <h2>Doe mee!</h2>
+          <p>Ga op je laptop naar</p>
+          <div class="k-url">{{ joinUrl }}</div>
+          <p>en vul de pincode in:</p>
+          <div class="k-pin">{{ game.pin }}</div>
+          <p class="k-muted">
+            {{ game.mapName }} &middot; {{ game.categories | join(', ') }} &middot;
+            {{ game.questions | length }} vragen &middot; {{ game.seconds }} sec per vraag
+          </p>
+        </div>
+        <div class="k-card">
+          <h2>Spelers (<span id="playerCount">0</span>)</h2>
+          <p class="k-muted">Klik op een naam om die speler te verwijderen.</p>
+          <div id="playerList" class="k-players">
+            <p class="k-muted k-pulse">Wachten op spelers...</p>
+          </div>
+          <div class="k-btn-row">
+            <button id="startBtn" class="k-btn primary" disabled>Start de quiz</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VRAAG -->
+      <section id="question" class="k-board hidden">
+        <div class="k-question-head">
+          <div class="k-timer" id="timer"><span id="timerValue">0</span></div>
+          <h1 class="k-prompt" id="prompt"></h1>
+          <div class="k-answered">
+            <strong id="answeredCount">0</strong>
+            <span>antwoorden</span>
+          </div>
+        </div>
+        <div class="k-board-body" id="boardBody">
+          <div class="k-map-wrap">
+            {% include('partials/mapSvg.html') %}
+          </div>
+          <div class="k-options" id="options"></div>
+        </div>
+        <div class="k-btn-row">
+          <button id="skipBtn" class="k-btn">Stop de tijd</button>
+        </div>
+      </section>
+
+      <!-- ONTHULLING + SCOREBORD -->
+      <section id="reveal" class="k-board hidden">
+        <h1 class="k-reveal-title">Het goede antwoord was <span id="correctAnswer"></span></h1>
+        <div class="k-board-body reveal">
+          <div class="k-map-wrap k-reveal-map">
+            {% include('partials/mapSvg.html') %}
+          </div>
+          <div class="k-card">
+            <h2>Antwoorden</h2>
+            <div class="k-chart" id="chart"></div>
+            <p class="k-muted" id="noAnswer"></p>
+          </div>
+          <div class="k-card">
+            <h2>Scorebord</h2>
+            <ol class="k-leaderboard" id="leaderboard"></ol>
+          </div>
+        </div>
+        <div class="k-btn-row">
+          <button id="nextBtn" class="k-btn primary">Volgende vraag</button>
+        </div>
+      </section>
+
+      <!-- EINDSTAND -->
+      <section id="finished" class="k-board hidden">
+        <h1 class="k-reveal-title">Eindstand</h1>
+        <div class="k-podium" id="podium"></div>
+        <div class="k-card k-final-list">
+          <ol class="k-leaderboard" id="finalLeaderboard"></ol>
+        </div>
+        <div class="k-btn-row">
+          <a class="k-btn primary" href="{{ url_for('kahoot.host') }}">Nieuwe quiz</a>
+          <a class="k-btn secondary" href="/">Home</a>
+        </div>
+      </section>
+
+      <div id="error" class="k-error hidden"></div>
+    </div>
+
+    <script>
+      const KAHOOT = {
+        pin: "{{ game.pin }}",
+        token: "{{ hostToken }}",
+        mode: {{ game.mode }},
+      };
+    </script>
+    <script src="{{ url_for('static', filename='js/kahoot_host.js') }}"></script>
+  </body>
+</html>

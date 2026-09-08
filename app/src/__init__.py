@@ -2,7 +2,8 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+from werkzeug.exceptions import HTTPException
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -17,7 +18,9 @@ app = Flask(
 )
 
 # ---------------- LOGGING SETUP ----------------
-LOG_DIR = "/app/log"  # matches Docker volume: -v ./logs:/app/logs
+# In Docker staat de app in /app. Lokaal mag je er met LOG_DIR een andere
+# map van maken, want /app bestaat daar niet.
+LOG_DIR = os.getenv("LOG_DIR", "/app/log")  # matches Docker volume: -v ./logs:/app/logs
 os.makedirs(LOG_DIR, exist_ok=True)
 
 log_path = os.path.join(LOG_DIR, "access.log")
@@ -45,7 +48,25 @@ werkzeug_logger.setLevel(logging.INFO)
 werkzeug_logger.addHandler(file_handler)
 # ------------------------------------------------
 
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(32).hex()
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Staat er een proxy voor de app die https afhandelt (Caddy), dan komt het
+# verkeer hier binnen als gewoon http. Zonder deze regels denkt Flask dat de
+# site op http draait en wordt de meedoen-link op het digibord een http-link.
+if os.getenv('TRUST_PROXY'):
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+    # De inlogcookie van de docent hoort dan alleen over https verstuurd te worden.
+    app.config['SESSION_COOKIE_SECURE'] = True
+
+# Statische bestanden een uur laten bewaren door de browser. Zonder dit vraagt
+# hij elke pagina opnieuw of het plaatje nog klopt: geen extra bytes, wel een
+# extra rondje naar de server per bestand. Een uur, zodat een nieuwe versie na
+# een update vanzelf wordt opgepikt.
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -58,6 +79,13 @@ with app.app_context():
     from .routes import main, setupSockets
     app.register_blueprint(main)
     setupSockets(socketio)
+
+    from .kahoot_routes import kahoot, setupKahootSockets
+    app.register_blueprint(kahoot)
+    setupKahootSockets(socketio)
+
+    from .errors import registerErrorHandlers
+    registerErrorHandlers(app)
 
     from .models import db, User
     db.init_app(app)

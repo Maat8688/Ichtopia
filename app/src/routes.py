@@ -5,6 +5,7 @@ import sys
 from . import sessionManager
 from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
+from .kahoot import MAP_FILES
 
 main = Blueprint('main', __name__)
 
@@ -12,13 +13,14 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        print(request.form, file=sys.stderr)
-        if request.form.get('KaartInput') == 'Nederland':
-            newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
-        elif request.form.get('KaartInput') == 'Europa':
-            newSession = mapSession.fromSVG('data/maps/Europa.svg', request.form.get('mode'), request.form.getlist('questions'))
-        elif request.form.get('KaartInput') == 'Wereld':
-            newSession = mapSession.fromSVG('data/maps/Wereld.svg', request.form.get('mode'), request.form.getlist('questions'))
+        kaart = request.form.get('KaartInput')
+        if kaart not in MAP_FILES:
+            return redirect(url_for('main.index'))
+        niveau = request.form.get('niveau') or None
+        newSession = mapSession.fromSVG(MAP_FILES[kaart], request.form.get('mode'),
+                                        request.form.getlist('questions'), niveau)
+        if not newSession.questions:
+            return redirect(url_for('main.index'))
         id = sessionManager.createSession(newSession)
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
@@ -59,17 +61,6 @@ def learn():
     else:
         return redirect(url_for('main.index'))
     
-
-@main.route('/host')
-def host():
-    print('host', file=sys.stderr)
-    return 'host'
-
-@main.route('/join')
-def join():
-    print('join', file=sys.stderr)
-    return 'join'
-
 
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
@@ -112,6 +103,20 @@ def join():
 
 
 def setupSockets(socketio: SocketIO):
+    def haalSessie(data):
+        """De sessie bij dit token, of None als hij is opgeruimd.
+
+        Sessies worden na een paar uur stilte weggegooid, anders loopt het
+        geheugen van de server vol. Wie daarna nog een antwoord instuurt,
+        krijgt een melding in plaats van een pagina die niets meer doet.
+        """
+        session = sessionManager.getSession((data or {}).get('sessionToken'))
+        if session is None:
+            emit('sessieVerlopen')
+            return None
+        session.touch()
+        return session
+
     @socketio.on('message')
     def handle_message(data):
         print('received message: ' + data)
@@ -119,7 +124,9 @@ def setupSockets(socketio: SocketIO):
 
     @socketio.on('answerQuestion')
     def answerQuestion(data): # expects {'awnser': str, 'hashed': bool, 'sessionToken': str}
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session = haalSessie(data)
+        if session is None:
+            return
         questionId = session.hash(session.currentQuestion.id) 
 
         if session.awnserQuestion(data['awnser'], data['hashed']):
@@ -145,19 +152,23 @@ def setupSockets(socketio: SocketIO):
         elif session.sessionMode == 2:
             emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
-            emit('question', {'question': session.currentQuestion.id})
+            emit('question', {'question': session.currentQuestion.displayName})
 
     @socketio.on('getQuestion')
     def getQuestion(data): # expects {'sessionToken': str}
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session = haalSessie(data)
+        if session is None:
+            return
         if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
         elif session.sessionMode == 2:
             emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
-            emit('question', {'question': session.currentQuestion.id})
+            emit('question', {'question': session.currentQuestion.displayName})
 
     @socketio.on('getProgressbar')
     def getProgressbar(data):
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session = haalSessie(data)
+        if session is None:
+            return
         emit('setProgressBar', session.getProgresBar())

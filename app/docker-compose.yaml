@@ -1,5 +1,21 @@
 # Flask app with SQL database
 services:
+  # Caddy staat vooraan en handelt https af. Hij vraagt het certificaat bij
+  # Let's Encrypt aan, installeert het en vernieuwt het vanzelf. Alleen deze
+  # container heeft poort 80 en 443 nodig; de app zit erachter.
+  caddy:
+    image: caddy:2
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data          # hier bewaart Caddy de certificaten
+      - caddy_config:/config
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    restart: always
+
   web:
     build:
       context: .
@@ -7,34 +23,57 @@ services:
     volumes:
       - .:/app
       - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt 
-      - ./certs:/certs:ro 
       - ./logs:/app/logs
 
-    ports:
-      - "443:443"
-      - "80:80"
+    # Geen ports meer: Caddy is het enige dat van buiten bereikbaar is en
+    # praat binnen het netwerk met deze container.
+    expose:
+      - "80"
     depends_on:
       - db
     environment:
       - FLASK_APP=src.__init__:app
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/main
+      - SECRET_KEY=${SECRET_KEY}
+      - KAHOOT_HOST_CODE=${KAHOOT_HOST_CODE}
+      # De app staat achter Caddy. Hiermee weet hij dat de bezoeker via https
+      # binnenkomt, zodat de meedoen-link op het digibord ook https wordt.
+      - TRUST_PROXY=1
     restart: always
-    command: flask run --host=0.0.0.0 --port=80 
+    # Gunicorn in plaats van `flask run`, want dat is de ontwikkelserver van
+    # Flask en niet bedoeld om echt te draaien.
+    #
+    # --workers 1 is geen zuinigheid maar een eis: de oefensessies en de
+    # lopende quizzen staan in het geheugen van het proces. Bij twee workers
+    # zou een leerling de ene keer bij zijn eigen quiz uitkomen en de andere
+    # keer niet. Meer tegelijk aankunnen gaat hier via --threads.
+    #
+    # Elke open verbinding bezet een thread, dus --threads is het maximum
+    # aantal leerlingen dat tegelijk kan meedoen. 100 is ruim twee klassen
+    # en kost ongeveer 85 MB.
+    command: >
+      gunicorn
+      --worker-class gthread
+      --workers 1
+      --threads 100
+      --timeout 120
+      --bind 0.0.0.0:80
+      --access-logfile -
+      src.__init__:app
 
   
   db:
-    image: postgres:16
+    image: postgres:17
     container_name: postgres_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: main
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
 
   postgres_data:
+  caddy_data:
+  caddy_config:
