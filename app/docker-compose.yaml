@@ -40,7 +40,26 @@ services:
       # binnenkomt, zodat de meedoen-link op het digibord ook https wordt.
       - TRUST_PROXY=1
     restart: always
-    command: flask run --host=0.0.0.0 --port=80
+    # Gunicorn in plaats van `flask run`, want dat is de ontwikkelserver van
+    # Flask en niet bedoeld om echt te draaien.
+    #
+    # --workers 1 is geen zuinigheid maar een eis: de oefensessies en de
+    # lopende quizzen staan in het geheugen van het proces. Bij twee workers
+    # zou een leerling de ene keer bij zijn eigen quiz uitkomen en de andere
+    # keer niet. Meer tegelijk aankunnen gaat hier via --threads.
+    #
+    # Elke open verbinding bezet een thread, dus --threads is het maximum
+    # aantal leerlingen dat tegelijk kan meedoen. 100 is ruim twee klassen
+    # en kost ongeveer 85 MB.
+    command: >
+      gunicorn
+      --worker-class gthread
+      --workers 1
+      --threads 100
+      --timeout 120
+      --bind 0.0.0.0:80
+      --access-logfile -
+      src.__init__:app
 
   
   db:

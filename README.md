@@ -46,3 +46,21 @@ is van buiten bereikbaar; de app en de database zitten erachter.
    In die logs zie je of het certificaat gelukt is. Poort 80 en 443 moeten van
    buiten open staan: Let's Encrypt controleert via poort 80 of de server echt
    bij de domeinnaam hoort.
+
+## Hoe de site draait
+
+Voor de app staat Caddy (https), daarachter draait Gunicorn met de Flask-app,
+en daarnaast Postgres. Zie `app/docker-compose.yaml`.
+
+Gunicorn draait met **een enkele worker** en veel threads. Dat is geen
+zuinigheid: de oefensessies en de lopende klassikale quizzen staan in het
+geheugen van het proces. Met twee workers zou een leerling de ene keer bij
+zijn eigen quiz uitkomen en de andere keer bij een leeg proces.
+
+Meer mensen tegelijk gaat dus via `--threads`, niet via `--workers`. Elke
+open verbinding bezet een thread, dus dat getal is het maximum aantal
+deelnemers dat tegelijk kan meedoen. Gemeten: 70 leerlingen tegelijk in een
+quiz kost ongeveer 85 MB.
+
+Wil je ooit wel meerdere workers, dan moet die gedeelde toestand eerst naar
+buiten het proces (Redis of de database).
