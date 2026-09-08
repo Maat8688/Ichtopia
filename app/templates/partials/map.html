@@ -29,6 +29,16 @@
     vraagStandOp();
   });
   socket.on('disconnect', function () { toonVerbinding(true); });
+
+  // De server ruimt oefensessies op die uren stilliggen. Zeg dat dan, anders
+  // klikt een leerling op een pagina waar niets meer gebeurt.
+  socket.on('sessieVerlopen', function () {
+    var melding = document.getElementById('verbinding');
+    if (melding) {
+      melding.textContent = 'Deze oefening is verlopen omdat hij lang stil heeft gelegen. Ga terug naar de startpagina om opnieuw te beginnen.';
+      melding.hidden = false;
+    }
+  });
   socket.on('connect_error', function () { toonVerbinding(true); });
 
   // En meteen, want de verbinding kan al openstaan voordat dit script draait.

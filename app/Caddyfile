@@ -2,6 +2,10 @@
 # naam een certificaat aan bij Let's Encrypt en stuurt http vanzelf door naar
 # https. De naam moet wel al naar dit adres wijzen, anders mislukt de aanvraag.
 JOUW-DOMEIN.NL {
+	# Kaarten zijn tekst en tekst comprimeert enorm: de wereldkaart gaat van
+	# 898 kB naar 159 kB. Zonder deze regel pakt Caddy niets in.
+	encode zstd gzip
+
 	# Alles doorgeven aan de app. De websockets van de klassikale quiz gaan
 	# hier vanzelf doorheen, daar is niets extra's voor nodig.
 	reverse_proxy web:80

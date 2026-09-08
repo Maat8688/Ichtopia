@@ -103,6 +103,20 @@ def learn():
 
 
 def setupSockets(socketio: SocketIO):
+    def haalSessie(data):
+        """De sessie bij dit token, of None als hij is opgeruimd.
+
+        Sessies worden na een paar uur stilte weggegooid, anders loopt het
+        geheugen van de server vol. Wie daarna nog een antwoord instuurt,
+        krijgt een melding in plaats van een pagina die niets meer doet.
+        """
+        session = sessionManager.getSession((data or {}).get('sessionToken'))
+        if session is None:
+            emit('sessieVerlopen')
+            return None
+        session.touch()
+        return session
+
     @socketio.on('message')
     def handle_message(data):
         print('received message: ' + data)
@@ -110,8 +124,9 @@ def setupSockets(socketio: SocketIO):
 
     @socketio.on('answerQuestion')
     def answerQuestion(data): # expects {'awnser': str, 'hashed': bool, 'sessionToken': str}
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
-        session.touch()
+        session = haalSessie(data)
+        if session is None:
+            return
         questionId = session.hash(session.currentQuestion.id) 
 
         if session.awnserQuestion(data['awnser'], data['hashed']):
@@ -141,8 +156,9 @@ def setupSockets(socketio: SocketIO):
 
     @socketio.on('getQuestion')
     def getQuestion(data): # expects {'sessionToken': str}
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
-        session.touch()
+        session = haalSessie(data)
+        if session is None:
+            return
         if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
         elif session.sessionMode == 2:
@@ -152,6 +168,7 @@ def setupSockets(socketio: SocketIO):
 
     @socketio.on('getProgressbar')
     def getProgressbar(data):
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
-        session.touch()
+        session = haalSessie(data)
+        if session is None:
+            return
         emit('setProgressBar', session.getProgresBar())

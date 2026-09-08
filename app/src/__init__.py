@@ -61,6 +61,12 @@ if os.getenv('TRUST_PROXY'):
     # De inlogcookie van de docent hoort dan alleen over https verstuurd te worden.
     app.config['SESSION_COOKIE_SECURE'] = True
 
+# Statische bestanden een uur laten bewaren door de browser. Zonder dit vraagt
+# hij elke pagina opnieuw of het plaatje nog klopt: geen extra bytes, wel een
+# extra rondje naar de server per bestand. Een uur, zodat een nieuwe versie na
+# een update vanzelf wordt opgepikt.
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

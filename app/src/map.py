@@ -4,6 +4,7 @@ import hashlib
 import random
 import unicodedata
 import os
+import threading
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
@@ -27,20 +28,51 @@ class SessionGamemode(Enum):
     FILLINTHEBLANK = 2
     CLICKTHECOUNTRY = 3
 
+# Een oefensessie blijft in het geheugen staan zolang iemand ermee bezig is.
+# Zonder opruimen groeit dat tot de server omvalt: een sessie op de wereldkaart
+# kost ongeveer 1,6 MB, en op een machine van 1 GB is het na een paar honderd
+# sessies op. Een les duurt een lesuur, dus drie uur stilte is ruim genoeg om
+# een sessie als verlaten te beschouwen.
+MAX_SESSIE_LEEFTIJD = 3 * 60 * 60   # seconden zonder iets te doen
+# 250 sessies x ~1,6 MB is ongeveer 400 MB in het ergste geval. Dat past op een
+# server van 1 GB met Postgres en Caddy ernaast. Staat de site op een grotere
+# machine, dan mag dit getal omhoog.
+MAX_SESSIES = 250                   # harde bovengrens, wat er ook gebeurt
+
+
 class SessionManager():
     def __init__(self):
         self.sessions = {}
-    
+        self.lock = threading.Lock()
+
     def createSession(self, session:mapSession) -> str:
         id = werkzeug.security.generate_password_hash(str(datetime.now()))
-        self.sessions[id] = session
+        with self.lock:
+            self.sessions[id] = session
+            self.opruimen()
         return id
-    
-    def getSession(self, id:str) -> mapSession:
-        return self.sessions[id]
-    
+
+    def opruimen(self):
+        """Gooi weg wat niemand meer gebruikt. Wordt aangeroepen met de lock vast."""
+        nu = datetime.now()
+        for sleutel, sessie in list(self.sessions.items()):
+            if (nu - sessie.lastSeen).total_seconds() > MAX_SESSIE_LEEFTIJD:
+                del self.sessions[sleutel]
+
+        # Mocht er ooit een stormloop zijn: de oudste gaan er als eerste uit.
+        overschot = len(self.sessions) - MAX_SESSIES
+        if overschot > 0:
+            oudste = sorted(self.sessions.items(), key=lambda kv: kv[1].lastSeen)
+            for sleutel, _ in oudste[:overschot]:
+                del self.sessions[sleutel]
+
+    def getSession(self, id:str) -> mapSession | None:
+        """None als de sessie niet (meer) bestaat; de aanroeper vangt dat af."""
+        return self.sessions.get(id)
+
     def deleteSession(self, id:str):
-        del self.sessions[id]
+        with self.lock:
+            self.sessions.pop(id, None)
 
     def stats(self, window:int=300) -> dict:
         """Wie is er nu bezig? Actief = in de laatste `window` seconden iets gedaan.
