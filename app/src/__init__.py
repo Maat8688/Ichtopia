@@ -1,10 +1,11 @@
 import os
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, render_template, request
 from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -19,17 +20,22 @@ app = Flask(
 )
 
 # ---------------- LOGGING SETUP ----------------
-LOG_DIR = "/app/log"  # matches Docker volume: -v ./logs:/app/logs
-os.makedirs(LOG_DIR, exist_ok=True)
-
+LOG_DIR = os.getenv("LOG_DIR", "/app/log")
 log_path = os.path.join(LOG_DIR, "access.log")
 
-file_handler = RotatingFileHandler(
-    log_path,
-    maxBytes=5_000_000,   # 5 MB per file
-    backupCount=5,
-    encoding="utf-8",
-)
+try:
+    os.makedirs(LOG_DIR, exist_ok=True)
+    file_handler = RotatingFileHandler(
+        log_path,
+        maxBytes=5_000_000,   # 5 MB per file
+        backupCount=5,
+        encoding="utf-8",
+    )
+except OSError as e:
+    # Bijvoorbeeld een log-map van root terwijl de app als gewone gebruiker
+    # draait. Dan liever zonder logbestand opstarten dan helemaal niet.
+    print(f"Kan {log_path} niet openen ({e}); log alleen naar de console.")
+    file_handler = logging.StreamHandler()
 file_handler.setLevel(logging.INFO)
 
 # Log the Werkzeug-style access lines as plain text
@@ -50,8 +56,8 @@ werkzeug_logger.addHandler(file_handler)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(32).hex()
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-# De app zelf luistert op poort 80 (http), dus de cookie mag niet standaard
-# https-only zijn. Draait er ooit een https-proxy voor: zet COOKIE_SECURE=1.
+# In docker-compose zit Caddy (https) voor de app en staat COOKIE_SECURE=1, zodat
+# de inlogcookie nooit over gewoon http gaat. Lokaal zonder https: laat hem uit.
 app.config['SESSION_COOKIE_SECURE'] = os.getenv('COOKIE_SECURE', '0') == '1'
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 app.config['REMEMBER_COOKIE_SAMESITE'] = 'Lax'
@@ -60,7 +66,18 @@ app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=30)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-socketio = SocketIO(app)
+# Bewust 'threading': de app draait onder gunicorn met een worker en meerdere
+# threads (zie docker-compose.yaml). Alle quizzen en duels staan in het geheugen
+# van dat ene proces, dus meer workers zou ze over processen verspreiden.
+socketio = SocketIO(app, async_mode='threading')
+
+# Achter een proxy (Caddy) is remote_addr altijd het adres van de proxy. Met
+# TRUST_PROXY=1 nemen we het echte adres over uit X-Forwarded-For, maar alleen
+# de laatste hop: die heeft Caddy zelf gezet en kan een bezoeker niet vervalsen.
+# Zonder proxy ervoor moet dit uit blijven, anders kan iedereen zijn IP
+# verzinnen en zo om de rem op wachtwoorden raden heen.
+if os.getenv('TRUST_PROXY', '0') == '1':
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 migrate = Migrate()
 login_manager = LoginManager(app)
 sessionManager = SessionManager()
@@ -91,6 +108,21 @@ with app.app_context():
     @socketio.on('disconnect')
     def onDisconnect(*args):
         dispatchDisconnect(request.sid)
+
+    @app.after_request
+    def logRequest(response):
+        # De ontwikkelserver van Werkzeug schrijft zelf al zo'n regel; onder
+        # gunicorn doen we het hier, in hetzelfde formaat, zodat monitor.py de
+        # log kan blijven lezen. Met het echte IP dankzij ProxyFix.
+        if not request.environ.get('SERVER_SOFTWARE', '').startswith('Werkzeug'):
+            path = request.environ.get('RAW_URI') or request.full_path.rstrip('?')
+            app.logger.info('%s - - [%s] "%s %s %s" %s -',
+                            request.remote_addr or '-',
+                            datetime.now().strftime('%d/%b/%Y %H:%M:%S'),
+                            request.method, path,
+                            request.environ.get('SERVER_PROTOCOL', 'HTTP/1.1'),
+                            response.status_code)
+        return response
 
     from .errors import registerErrorHandlers
     registerErrorHandlers(app)

@@ -1,25 +1,25 @@
 ## Docker file for flask app
 FROM python:3.12-slim
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Eerst alleen de requirements, zodat pip install gecached blijft bij codewijzigingen.
+COPY requirements.txt /app
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY src /app/src
 COPY static /app/static
 COPY templates /app/templates
-COPY requirements.txt /app
-COPY .env /app
+COPY data /app/data
+COPY migrations /app/migrations
+# Geen .env in de image: de geheimen komen bij het starten binnen via
+# docker-compose (environment). Zo staan ze niet in elke kopie van de image.
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Niet als root draaien.
+RUN useradd --create-home --uid 1000 app \
+    && mkdir -p /app/log && chown -R app:app /app
+USER app
 
-# Make ports available to the world outside this container
-EXPOSE 5000
-EXPOSE 80
+EXPOSE 8000
 
-# Define environment variable
-ENV NAME World
-
-# Run app/src/app.py when the container launches
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=80"]
+CMD ["gunicorn", "src:app", "--worker-class", "gthread", "--workers", "1", "--threads", "100", "--bind", "0.0.0.0:8000", "--timeout", "120"]

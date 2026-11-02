@@ -118,7 +118,14 @@ check('startpagina wijst de weg naar de ranglijst', 'href="/ranglijst"' in start
 # ----------------------------------------------------------------------
 # Een heel duel spelen
 # ----------------------------------------------------------------------
+zonderToken = clientA.post('/duel/nieuw', data={
+    'KaartInput': 'Europa', 'mode': 'MultipleChoise', 'questions': ['Landen'],
+})
+check('duel aanmaken zonder csrf-token wordt geweigerd',
+      zonderToken.status_code == 200 and 'verlopen' in zonderToken.get_data(as_text=True))
+
 response = clientA.post('/duel/nieuw', data={
+    'csrfToken': csrf(clientA.get('/duel').get_data(as_text=True)),
     'KaartInput': 'Europa', 'mode': 'MultipleChoise', 'questions': ['Landen'],
     'questionCount': 3, 'seconds': 30, 'open': '1',
 })
@@ -136,6 +143,7 @@ check('meerkeuzeduel toont de kaart (er is geen digibord om naar te kijken)',
 
 # Aanwijzen op de kaart heeft de hele kaart in de pagina nodig.
 klikDuel = clientB.post('/duel/nieuw', data={
+    'csrfToken': csrf(clientB.get('/duel').get_data(as_text=True)),
     'KaartInput': 'Nederland', 'mode': 'ClickTheCountry', 'questions': ['Provincies'],
     'questionCount': 3, 'seconds': 30,
 })

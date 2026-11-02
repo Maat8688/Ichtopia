@@ -27,12 +27,41 @@ Wachtwoorden staan als hash in de database (werkzeug, scrypt). Formulieren zijn
 beveiligd met een CSRF-token en na vijf mislukte inlogpogingen is een IP-adres
 vijf minuten geblokkeerd.
 
-Omgevingsvariabelen:
+## Online zetten
+
+`docker compose up -d --build` start drie containers:
+
+- **caddy** - het enige wat van buiten bereikbaar is (poort 80 en 443). Regelt
+  https met een certificaat van Let's Encrypt en stuurt door naar de app.
+- **web** - de app onder gunicorn (een worker, 100 threads). Een worker is
+  bewust: quizzen, duels en oefensessies staan in het geheugen van dat proces.
+- **db** - Postgres, alleen bereikbaar voor de app (geen open poort).
+
+Kopieer `app/.env.example` naar `app/.env` en vul alles in. Zet `DOMAIN` op de
+echte domeinnaam; die moet in DNS al naar de server wijzen en poort 80 en 443
+moeten open staan, anders krijgt Caddy geen certificaat.
+
+`.env` gaat niet mee in de Docker-image; compose geeft de waarden bij het
+starten door. Zet hem dus ook nooit in git.
+
+Andere instellingen (in docker-compose al goed gezet):
 
 ```
-DATABASE_URL=postgresql://gebruiker:wachtwoord@db:5432/main
-COOKIE_SECURE=1   # alleen als er https voor de app zit; standaard uit
+COOKIE_SECURE=1   # cookies alleen over https; lokaal zonder https: 0
+TRUST_PROXY=1     # echte IP van bezoekers uit X-Forwarded-For van Caddy halen.
+                  # Alleen aanzetten als er echt een proxy voor zit, anders kan
+                  # iedereen zijn IP verzinnen en om de inlogrem heen.
+MAX_PRACTICE_SESSIONS=400            # oefensessies tegelijk in het geheugen
+PRACTICE_SESSION_IDLE_SECONDS=3600   # daarna verloopt een ongebruikte sessie
 ```
+
+Een oefensessie met de wereldkaart kost een paar MB geheugen en iedereen kan er
+een starten, dus er zit een maximum op (de langst niet gebruikte gaat eruit) en
+per IP mogen er hooguit 200 per tien minuten bij. Dat is ruim voor een klas
+achter een schoolnetwerk.
+
+`src/monitor.py` leest `log/access.log` en stuurt alerts via ntfy of Discord.
+Zet daarvoor `NTFY_TOPIC` en/of `DISCORD_WEBHOOK_URL` in `.env`; leeg is uit.
 
 ## Punten, levels en duels
 
@@ -99,4 +128,5 @@ python tests/test_names.py       # het naamfilter
 python tests/test_auth.py        # registreren, inloggen, afgeschermde pagina's
 python tests/test_ranking.py     # XP, levels, elo, ranglijst en een heel duel
 python tests/test_migraties.py   # upgrade op een oude en op een verse database
+python tests/test_security.py    # sessiegrenzen, rem, csrf, X-Forwarded-For
 ```

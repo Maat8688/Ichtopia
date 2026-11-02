@@ -17,6 +17,7 @@
 
     <div class="k-main">
       <form class="k-card center" method="POST" autocomplete="off">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
         <h1>Alleen voor docenten</h1>
         <p class="k-muted">
           Om een klassikale quiz te hosten heb je de docentcode nodig, of een

@@ -17,7 +17,7 @@ from .kahoot import (
 )
 from .models import AccountType, User, db
 from .progress import XP_DAILY_CAP, quizXp
-from .security import safeUrl
+from .security import csrfValid, safeUrl
 from .sockets import registerDisconnect
 
 kahoot = Blueprint('kahoot', __name__)
@@ -60,7 +60,8 @@ def teacherRequired(view):
 
 def clientIp() -> str:
     # Bewust geen X-Forwarded-For: die header kan een leerling zelf verzinnen
-    # om de rem op het gokken te omzeilen. De app draait zonder proxy ervoor.
+    # om de rem op het gokken te omzeilen. Achter Caddy zet ProxyFix
+    # remote_addr al op het echte adres (zie TRUST_PROXY in __init__.py).
     return request.remote_addr or 'unknown'
 
 
@@ -137,7 +138,9 @@ def hostLogin():
                  'van de server en herstart de app.')
     elif request.method == 'POST':
         ip = clientIp()
-        if loginBlocked(ip):
+        if not csrfValid():
+            error = 'Het formulier is verlopen. Probeer het opnieuw.'
+        elif loginBlocked(ip):
             error = 'Te veel foute pogingen. Probeer het over een paar minuten opnieuw.'
         elif secrets.compare_digest(request.form.get('code', '').strip(), hostCode()):
             session[TEACHER_SESSION_KEY] = True
@@ -160,7 +163,9 @@ def hostLogout():
 @teacherRequired
 def host():
     error = None
-    if request.method == 'POST':
+    if request.method == 'POST' and not csrfValid():
+        error = 'Het formulier is verlopen. Probeer het opnieuw.'
+    elif request.method == 'POST':
         try:
             game = kahootManager.createGame(
                 mapName=request.form.get('KaartInput', ''),

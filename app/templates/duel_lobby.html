@@ -74,6 +74,7 @@
 
         <!-- NIEUW DUEL -->
         <form class="k-card" method="POST" action="{{ url_for('duel.create') }}" id="duelForm">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
           <h1>Nieuw duel</h1>
           <p class="k-muted">Jullie krijgen dezelfde vragen tegelijk. Sneller goed
             antwoorden levert meer punten op; de winnaar pakt elo van de ander af.</p>

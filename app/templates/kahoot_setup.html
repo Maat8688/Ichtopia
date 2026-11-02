@@ -18,6 +18,7 @@
 
     <div class="k-main">
       <form class="k-card" method="POST" id="setupForm">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
         <h1>Nieuwe klassikale quiz</h1>
         <p class="k-muted">
           Deel je scherm met de klas. Leerlingen gaan op hun laptop naar

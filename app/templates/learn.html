@@ -177,6 +177,12 @@
         }
       });
 
+      socket.on("sessionExpired", function () {
+        // Te lang niets gedaan: de server heeft deze oefening opgeruimd.
+        alert("Deze oefening is verlopen omdat je een tijd niets hebt gedaan. Je kunt een nieuwe starten.");
+        window.location.href = "/";
+      });
+
       socket.on("setProgressBar", function (data) {
         var known = data["totalCorrect"];
         var total = data["totalQuestions"];

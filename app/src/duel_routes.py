@@ -17,6 +17,7 @@ from .duel import (DEFAULT_QUESTIONS, DEFAULT_SECONDS, Duel, DuelManager, DuelPl
 from .kahoot import MAP_CATEGORIES, MAP_FILES, MAP_NIVEAUS
 from .models import DuelMatch, User, db
 from .progress import XP_DAILY_CAP, duelXp, newRating
+from .security import csrfValid
 from .sockets import registerDisconnect
 
 duel = Blueprint('duel', __name__)
@@ -66,6 +67,8 @@ def lobby():
 @login_required
 def create():
     try:
+        if not csrfValid():
+            raise ValueError('Het formulier is verlopen. Probeer het opnieuw.')
         newDuel = duelManager.createDuel(
             creator=playerFromUser(current_user),
             mapName=request.form.get('KaartInput', ''),

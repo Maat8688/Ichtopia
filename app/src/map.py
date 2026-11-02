@@ -1,8 +1,12 @@
 from __future__ import annotations
-import werkzeug.security
 import hashlib
+import os
 import random
+import secrets
+import threading
+import time
 import unicodedata
+from collections import OrderedDict
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
@@ -27,19 +31,72 @@ class SessionGamemode(Enum):
     CLICKTHECOUNTRY = 3
 
 class SessionManager():
-    def __init__(self):
-        self.sessions = {}
-    
+    """Houdt de oefensessies bij, in het geheugen van dit proces.
+
+    Een sessie met de wereldkaart kost al snel een paar MB, en iedereen kan er
+    zonder account een aanmaken. Zonder grens kan een script de server dus
+    vullen tot hij omvalt. Daarom:
+
+    - verloopt een sessie die `maxIdle` seconden niet gebruikt is;
+    - zijn er nooit meer dan `maxSessions` tegelijk: is de pot vol, dan gaat de
+      sessie die het langst niet gebruikt is eruit. Wie aan het oefenen is
+      raakt zijn sessie bij elk antwoord aan en blijft dus het langst staan.
+    """
+
+    def __init__(self, maxSessions: int | None = None, maxIdle: int | None = None):
+        self.maxSessions = maxSessions or int(os.getenv('MAX_PRACTICE_SESSIONS', '400'))
+        self.maxIdle = maxIdle or int(os.getenv('PRACTICE_SESSION_IDLE_SECONDS', str(60 * 60)))
+        # Op volgorde van laatst gebruikt: vooraan het oudste.
+        self.sessions: OrderedDict[str, mapSession] = OrderedDict()
+        self._lastUsed: dict[str, float] = {}
+        self._lock = threading.Lock()
+
+    def _purgeExpired(self, now: float):
+        for id in list(self.sessions.keys()):
+            if now - self._lastUsed.get(id, 0) <= self.maxIdle:
+                break   # de rest is recenter gebruikt
+            self.sessions.pop(id, None)
+            self._lastUsed.pop(id, None)
+
     def createSession(self, session:mapSession) -> str:
-        id = werkzeug.security.generate_password_hash(str(datetime.now()))
-        self.sessions[id] = session
+        id = secrets.token_urlsafe(24)
+        now = time.time()
+        with self._lock:
+            self._purgeExpired(now)
+            while len(self.sessions) >= self.maxSessions:
+                oldId, _ = self.sessions.popitem(last=False)
+                self._lastUsed.pop(oldId, None)
+            self.sessions[id] = session
+            self._lastUsed[id] = now
         return id
-    
+
+    def findSession(self, id) -> mapSession | None:
+        """De sessie bij dit token, of None als hij niet (meer) bestaat."""
+        if not isinstance(id, str):
+            return None
+        now = time.time()
+        with self._lock:
+            session = self.sessions.get(id)
+            if session is None:
+                return None
+            if now - self._lastUsed.get(id, 0) > self.maxIdle:
+                self.sessions.pop(id, None)
+                self._lastUsed.pop(id, None)
+                return None
+            self.sessions.move_to_end(id)
+            self._lastUsed[id] = now
+            return session
+
     def getSession(self, id:str) -> mapSession:
-        return self.sessions[id]
-    
+        session = self.findSession(id)
+        if session is None:
+            raise KeyError(id)
+        return session
+
     def deleteSession(self, id:str):
-        del self.sessions[id]
+        with self._lock:
+            self.sessions.pop(id, None)
+            self._lastUsed.pop(id, None)
 
 class mapSession():
     def __init__(self, questions:list[mapQuestion], backgroundElements:list, foregroundElements:list, viewBox:tuple=(0, 0, 1000, 1000), sessionMode:SessionGamemode=SessionGamemode.MULTIPLECHOICE):

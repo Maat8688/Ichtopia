@@ -84,8 +84,10 @@ class AttemptLimiter:
 
 
 def clientIp() -> str:
-    # Bewust geen X-Forwarded-For: die header kan een bezoeker zelf verzinnen
-    # om de rem te omzeilen. De app draait zonder proxy ervoor.
+    # Hier bewust geen X-Forwarded-For lezen: die header kan een bezoeker zelf
+    # verzinnen om de rem te omzeilen. Achter Caddy zet ProxyFix (TRUST_PROXY=1,
+    # zie __init__.py) remote_addr al op het echte adres, alleen uit de hop die
+    # Caddy zelf heeft toegevoegd.
     return request.remote_addr or 'unknown'
 
 

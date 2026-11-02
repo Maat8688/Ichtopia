@@ -18,6 +18,11 @@ MESSAGES = {
         'Dat kan hier niet',
         'Deze pagina verwacht een andere actie. Ga terug en probeer het opnieuw.',
     ),
+    429: (
+        'Even rustig aan',
+        'Er kwamen vanaf dit netwerk net heel veel verzoeken binnen. Wacht een paar minuten '
+        'en probeer het dan opnieuw.',
+    ),
     500: (
         'Er ging iets mis',
         'De server liep vast. Probeer het straks nog eens, of ga terug naar de startpagina.',
