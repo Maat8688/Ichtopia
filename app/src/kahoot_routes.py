@@ -15,6 +15,7 @@ from .kahoot import (
     KahootManager, KahootGame, MAP_CATEGORIES, MAP_FILES,
     MODE_MULTIPLECHOICE, MODE_CLICKTHECOUNTRY,
 )
+from .gebruik import legQuiz
 from .models import AccountType
 
 kahoot = Blueprint('kahoot', __name__)
@@ -155,6 +156,7 @@ def host():
             error = str(e) or 'Er ging iets mis bij het aanmaken van de quiz.'
         else:
             rememberHost(game)
+            legQuiz('quiz_aangemaakt', game)
             return redirect(url_for('kahoot.hostGame', pin=game.pin))
     return render_template('kahoot_setup.html', categories=MAP_CATEGORIES,
                            maps=list(MAP_FILES.keys()), error=error)
@@ -174,15 +176,33 @@ def hostGame(pin):
 @kahoot.route('/statistieken')
 @teacherRequired
 def statistieken():
-    """Hoeveel mensen zijn er nu bezig? Alleen te zien met de docentcode."""
-    return render_template('statistieken.html', **verzamelStatistieken())
+    """Wie is er nu bezig, en hoe is de site de afgelopen tijd gebruikt?
+    Alleen te zien met de docentcode."""
+    from .gebruik import bovenkantPad, kolommen, overzicht
+    data = overzicht(request.args.get('periode', '30'))
+    grafieken = {
+        'bezoekers': kolommen(data['perDag'], ['bezoekers']),
+        'sessies': kolommen(data['perDag'], ['afgerond', 'nietAfgerond']),
+        'weekdag': kolommen(data['perWeekdag'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
+        'uur': kolommen(data['perUur'], ['aantal'], breedte=720, hoogte=180, labelElke=2),
+        'treffers': kolommen(data['perTreffers'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
+        'duur': kolommen(data['perDuur'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
+        'quizGrootte': kolommen(data['quizGrootte'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
+    }
+    return render_template('statistieken.html', **verzamelStatistieken(), stats=data,
+                           grafieken=grafieken, pad=bovenkantPad)
 
 
 @kahoot.route('/statistieken.json')
 @teacherRequired
 def statistiekenJson():
-    """Dezelfde cijfers als de pagina, om zelf iets mee te doen."""
-    return verzamelStatistieken()
+    """Dezelfde cijfers als de pagina, om zelf iets mee te doen.
+    Met ?alleen=nu alleen wie er nu bezig is (dat ververst de pagina zelf)."""
+    nu = verzamelStatistieken()
+    if request.args.get('alleen') == 'nu':
+        return nu
+    from .gebruik import overzicht
+    return {**nu, 'overzicht': overzicht(request.args.get('periode', '30'))}
 
 
 def verzamelStatistieken() -> dict:
@@ -243,6 +263,8 @@ def setupKahootSockets(socketio: SocketIO):
             sendReveal(game)
 
     def startNextQuestion(game: KahootGame):
+        if game.currentIndex == -1:
+            legQuiz('quiz_gestart', game, spelers=sum(1 for p in game.players.values() if p.connected))
         if game.nextQuestion():
             socketio.emit('kahootQuestion', game.questionPayload(forHost=True), to=hostRoom(game.pin))
             socketio.emit('kahootQuestion', game.questionPayload(forHost=False), to=playerRoom(game.pin))
@@ -250,6 +272,9 @@ def setupKahootSockets(socketio: SocketIO):
             socketio.start_background_task(questionTimer, game, game.questionRun)
         else:
             game.finish()
+            if not getattr(game, 'geteld', False):
+                game.geteld = True
+                legQuiz('quiz_klaar', game, spelers=len(game.players))
             leaderboard = game.leaderboard()
             socketio.emit('kahootFinished', {'leaderboard': leaderboard}, to=hostRoom(game.pin))
             for player in game.players.values():

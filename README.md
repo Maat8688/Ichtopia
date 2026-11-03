@@ -64,3 +64,24 @@ quiz kost ongeveer 85 MB.
 
 Wil je ooit wel meerdere workers, dan moet die gedeelde toestand eerst naar
 buiten het proces (Redis of de database).
+
+## Statistieken
+
+`/statistieken` (alleen met de docentcode) laat zien wie er nu bezig is, en
+daaronder hoe de site de afgelopen 7, 30 of 90 dagen of sinds het begin is
+gebruikt: bezoekers per dag, per dag van de week en per uur, een
+warmtekaart van de week, welke kaarten, vraagvormen, onderdelen en niveaus,
+hoeveel er meteen goed was, hoe lang een sessie duurt, de moeilijkste
+plekken, de klassikale quizzen en welke apparaten. Elke grafiek is ook als
+tabel te openen. Dezelfde cijfers staan in `/statistieken.json`.
+
+Wat er wordt bijgehouden staat in de tabel `gebruik` (`src/models.py`,
+vastgelegd en opgeteld in `src/gebruik.py`). Er gaan geen namen,
+e-mailadressen of IP-adressen in. Om verschillende bezoekers op een dag te
+kunnen tellen krijgt iedereen per dag een code, gemaakt met een geheim dat
+elke dag nieuw is en alleen in het geheugen staat; morgen, en na een
+herstart, is dezelfde leerling niet meer te herkennen. De tabel wordt bij het
+opstarten vanzelf aangemaakt, en het tellen begint vanaf dat moment: van de
+tijd daarvoor is niets bewaard.
+
+Testen: `python tests/test_statistieken.py` (vanuit `app`).

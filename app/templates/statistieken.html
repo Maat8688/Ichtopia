@@ -1,80 +1,76 @@
+{#- Kolomgrafiek. `g` komt uit gebruik.kolommen(); `reeksen` is een lijst van
+    (sleutel, naam, klasse) van onder naar boven. Elke kolom heeft een
+    onzichtbaar vlak over de hele hoogte voor de tooltip, zodat je niet precies
+    op een dunne kolom hoeft te mikken. -#}
+{% macro kolomgrafiek(g, reeksen, titel, eenheid='') -%}
+<div class="grafiek-schuif">
+<svg class="grafiek {{ 'breed' if g.breedte > 400 else 'smal' }}" viewBox="0 0 {{ g.breedte }} {{ g.hoogte }}" role="img" aria-label="{{ titel }}">
+  {% for lijn in g.lijnen %}
+  <line class="raster" x1="{{ g.links }}" x2="{{ g.rechts }}" y1="{{ lijn.y }}" y2="{{ lijn.y }}" />
+  <text class="as" x="{{ g.links - 6 }}" y="{{ lijn.y + 4 }}" text-anchor="end">{{ lijn.tekst }}</text>
+  {% endfor %}
+  {% for k in g.kolommen %}
+    {% for stuk in k.stukken %}
+    {% set klasse = (reeksen | selectattr(0, 'equalto', stuk.sleutel) | first)[2] %}
+    <path class="kolom {{ klasse }}" d="{{ pad(stuk.x, stuk.y, stuk.b, stuk.h, stuk.rond) }}" />
+    {% endfor %}
+    {% if k.label %}<text class="as" x="{{ k.midden }}" y="{{ g.onder + 17 }}" text-anchor="middle">{{ k.label }}</text>{% endif %}
+    <rect class="raak" x="{{ k.vakX }}" y="0" width="{{ k.vakB }}" height="{{ g.onder }}" tabindex="0"
+          data-tip-titel="{{ k.item.naam or k.item.label }}"
+          data-tip-regels="{% for sleutel, naam, klasse in reeksen %}{{ naam }}: {{ k.item[sleutel] }}{{ eenheid }}{% if not loop.last %}|{% endif %}{% endfor %}" />
+  {% endfor %}
+  <line class="basis" x1="{{ g.links }}" x2="{{ g.rechts }}" y1="{{ g.onder }}" y2="{{ g.onder }}" />
+</svg>
+</div>
+{%- endmacro %}
+
+{#- Liggende balken voor een rangorde, grootste bovenaan. -#}
+{% macro balken(rijen, eenheid='', leeg='Nog geen gegevens.') -%}
+{% if rijen %}
+<ol class="balken">
+  {% for r in rijen %}
+  <li tabindex="0" data-tip-titel="{{ r.naam }}" data-tip-regels="{{ r.aantal }}{{ eenheid }}">
+    <span class="balk-naam">{{ r.naam }}</span>
+    <span class="balk-spoor"><span class="balk" style="width: {{ (r.deel * 100) | round(1) }}%"></span></span>
+    <span class="balk-waarde">{{ r.aantal }}</span>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p class="leeg">{{ leeg }}</p>
+{% endif %}
+{%- endmacro %}
+
+{#- Tabelweergave onder een grafiek: dezelfde cijfers zonder te hoeven aanwijzen. -#}
+{% macro alsTabel(items, kolommen) -%}
+<details class="tabel">
+  <summary>Als tabel</summary>
+  <table>
+    <tr>{% for kop, sleutel in kolommen %}<th>{{ kop }}</th>{% endfor %}</tr>
+    {% for item in items %}
+    <tr>{% for kop, sleutel in kolommen %}<td{% if not loop.first %} class="getal"{% endif %}>{{ item[sleutel] if item[sleutel] is not none else '–' }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </table>
+</details>
+{%- endmacro %}
+
+{%- macro of(waarde, achter='', leeg='–') -%}{% if waarde is none %}{{ leeg }}{% else %}{{ waarde | string | replace('.', ',') }}{{ achter }}{% endif %}{%- endmacro %}
+
 <!DOCTYPE html>
 <html lang="nl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="15" />
-    <title>Wie is er bezig? · Topo</title>
+    <title>Statistieken · Topo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/statistieken.css') }}" />
     <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
-    <style>
-      .telling {
-        display: flex;
-        gap: 28px;
-        flex-wrap: wrap;
-        margin: 18px 0 26px;
-      }
-
-      .telling div {
-        border: 0.5px solid var(--rule);
-        border-top: 3px solid var(--atlas);
-        background: var(--paper-2);
-        padding: 14px 20px;
-        min-width: 150px;
-      }
-
-      .telling .getal {
-        display: block;
-        font-family: var(--serif);
-        font-size: 40px;
-        line-height: 1.1;
-        color: var(--ink);
-      }
-
-      .telling span.bij {
-        font-size: 13px;
-        color: var(--muted);
-      }
-
-      .stat h2 {
-        font-size: 17px;
-        margin: 26px 0 8px;
-      }
-
-      .stat table {
-        border-collapse: collapse;
-        width: 100%;
-        max-width: 620px;
-      }
-
-      .stat th,
-      .stat td {
-        text-align: left;
-        padding: 7px 12px 7px 0;
-        border-bottom: 0.5px solid var(--rule);
-        font-size: 15px;
-      }
-
-      .stat th {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--muted);
-      }
-
-      .stat td.aantal {
-        font-variant-numeric: tabular-nums;
-      }
-
-      .stat .leeg {
-        color: var(--muted);
-        font-size: 15px;
-      }
-    </style>
+    <script src="{{ url_for('static', filename='js/statistieken.js') }}" defer></script>
   </head>
   <body>
     <header class="page topbar">
-      <h1>Wie is er bezig?</h1>
+      <h1>Statistieken</h1>
       <div class="topbar-right">
         <a href="{{ url_for('kahoot.host') }}" class="link">nieuwe quiz</a>
         <a href="/" class="link">naar start</a>
@@ -82,56 +78,257 @@
     </header>
 
     <main class="page stat">
-      <div class="telling">
-        <div>
-          <span class="getal">{{ oefenen.active }}</span>
-          aan het oefenen
-          <span class="bij">actief in de laatste {{ oefenen.window // 60 }} minuten</span>
+      {# ---------------------------------------------------------- Nu #}
+      <section class="nu" id="nu" data-bron="{{ url_for('kahoot.statistiekenJson', alleen='nu') }}">
+        <h2>Nu bezig</h2>
+        <div class="tegels">
+          <div class="tegel">
+            <span class="tegel-label">Aan het oefenen</span>
+            <span class="tegel-waarde" id="nuOefenen">{{ oefenen.active }}</span>
+            <span class="tegel-bij">iets gedaan in de laatste {{ oefenen.window // 60 }} minuten</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">In een klassikale quiz</span>
+            <span class="tegel-waarde" id="nuQuiz">{{ inQuiz }}</span>
+            <span class="tegel-bij" id="nuQuizBij">{{ quizzen | length }} quiz{{ '' if quizzen | length == 1 else 'zen' }} bezig</span>
+          </div>
+          <div class="tegel breed">
+            <span class="tegel-label">Kaarten waarop nu geoefend wordt</span>
+            <span class="tegel-lijst" id="nuKaarten">
+              {% for kaart, aantal in oefenen.perMap.items() %}{{ kaart }} ({{ aantal }}){% if not loop.last %} · {% endif %}{% else %}niemand{% endfor %}
+            </span>
+          </div>
         </div>
-        <div>
-          <span class="getal">{{ inQuiz }}</span>
-          in een klassikale quiz
-          <span class="bij">{{ quizzen | length }} quiz{{ '' if quizzen | length == 1 else 'zen' }} bezig</span>
+        <p class="voetnoot">Dit blok ververst zichzelf elke 15 seconden.</p>
+      </section>
+
+      {# ---------------------------------------------------------- Periode #}
+      <nav class="filters" aria-label="Periode">
+        <span class="filter-label">Periode</span>
+        {% for sleutel, naam in stats.periodes %}
+        <a class="filter{% if sleutel == stats.periode %} aan{% endif %}" href="{{ url_for('kahoot.statistieken', periode=sleutel) }}"{% if sleutel == stats.periode %} aria-current="true"{% endif %}>{{ naam }}</a>
+        {% endfor %}
+        <span class="filter-bereik">{{ stats.van }} t/m {{ stats.tot }}</span>
+      </nav>
+
+      {% if stats.leeg %}
+      <p class="melding">In deze periode is nog niets bijgehouden. Vanaf nu telt elk bezoek, elke oefensessie en
+        elke klassikale quiz mee; kom over een paar dagen terug.</p>
+      {% endif %}
+
+      {# ---------------------------------------------------------- Kerncijfers #}
+      {% set t = stats.tegels %}
+      <section>
+        <div class="tegels kern">
+          <div class="tegel">
+            <span class="tegel-label">Bezoekers</span>
+            <span class="tegel-waarde">{{ t.bezoekers }}</span>
+            <span class="tegel-bij">gemiddeld {{ of(t.bezoekersPerDag) }} per dag</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Pagina's bekeken</span>
+            <span class="tegel-waarde">{{ t.weergaven }}</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Oefensessies</span>
+            <span class="tegel-waarde">{{ t.gestart }}</span>
+            <span class="tegel-bij">{{ t.afgerond }} afgemaakt{% if t.afgerondPct is not none %} ({{ t.afgerondPct }}%){% endif %}</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Meteen goed</span>
+            <span class="tegel-waarde">{{ of(t.treffers, '%') }}</span>
+            <span class="tegel-bij">van de antwoorden in afgemaakte sessies</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Duur van een sessie</span>
+            <span class="tegel-waarde">{{ of(t.duur, ' min') }}</span>
+            <span class="tegel-bij">mediaan, afgemaakte sessies</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Klassikale quizzen</span>
+            <span class="tegel-waarde">{{ t.quizzen }}</span>
+            <span class="tegel-bij">{{ t.quizLeerlingen }} keer meegedaan{% if t.quizGemiddeld %}, {{ of(t.quizGemiddeld) }} per quiz{% endif %}</span>
+          </div>
         </div>
+      </section>
+
+      {# ---------------------------------------------------------- Per dag #}
+      <section class="kaart-vak">
+        <h2>Bezoekers per dag</h2>
+        <p class="uitleg">Verschillende bezoekers op een dag. Wie op één dag vaker komt, telt die dag één keer.</p>
+        {{ kolomgrafiek(grafieken.bezoekers, [('bezoekers', 'Bezoekers', 'r1')], 'Bezoekers per dag') }}
+        {{ alsTabel(stats.perDag, [('Dag', 'naam'), ('Bezoekers', 'bezoekers'), ("Pagina's", 'weergaven')]) }}
+      </section>
+
+      <section class="kaart-vak">
+        <h2>Oefensessies per dag</h2>
+        <p class="legenda">
+          <span><i class="r1"></i>afgemaakt</span>
+          <span><i class="r2"></i>niet afgemaakt</span>
+        </p>
+        {{ kolomgrafiek(grafieken.sessies, [('afgerond', 'Afgemaakt', 'r1'), ('nietAfgerond', 'Niet afgemaakt', 'r2')], 'Oefensessies per dag') }}
+        {{ alsTabel(stats.perDag, [('Dag', 'naam'), ('Begonnen', 'gestart'), ('Afgemaakt', 'afgerond'), ('Klassikale quizzen', 'quizzen')]) }}
+      </section>
+
+      {# ---------------------------------------------------------- Wanneer #}
+      <div class="twee">
+        <section class="kaart-vak">
+          <h2>Per dag van de week</h2>
+          <p class="uitleg">Bekeken pagina's{% if stats.drukstDag %}. Drukste dag: {{ stats.drukstDag.naam }}{% endif %}.</p>
+          {{ kolomgrafiek(grafieken.weekdag, [('aantal', "Pagina's", 'r1')], 'Per dag van de week') }}
+          {{ alsTabel(stats.perWeekdag, [('Dag', 'naam'), ("Pagina's", 'aantal')]) }}
+        </section>
+        <section class="kaart-vak">
+          <h2>Per uur van de dag</h2>
+          <p class="uitleg">Bekeken pagina's{% if stats.drukstUur %}. Drukste uur: {{ stats.drukstUur.naam }}{% endif %}.</p>
+          {{ kolomgrafiek(grafieken.uur, [('aantal', "Pagina's", 'r1')], 'Per uur van de dag') }}
+          {{ alsTabel(stats.perUur, [('Uur', 'naam'), ("Pagina's", 'aantal')]) }}
+        </section>
       </div>
 
-      <h2>Oefenen, per kaart</h2>
-      {% if oefenen.perMap %}
-      <table>
-        <tr><th>Kaart</th><th>Nu bezig</th></tr>
-        {% for kaart, aantal in oefenen.perMap.items() %}
-        <tr><td>{{ kaart }}</td><td class="aantal">{{ aantal }}</td></tr>
-        {% endfor %}
-      </table>
-      {% else %}
-      <p class="leeg">Op dit moment oefent er niemand.</p>
-      {% endif %}
+      <section class="kaart-vak">
+        <h2>Week in uren</h2>
+        <p class="uitleg">Hoe donkerder het vakje, hoe meer pagina's er op dat uur werden bekeken.</p>
+        <div class="warmte" role="img" aria-label="Bekeken pagina's per dag van de week en per uur">
+          <span></span>
+          {% for u in range(24) %}<span class="warmte-uur">{% if u % 3 == 0 %}{{ u }}{% endif %}</span>{% endfor %}
+          {% for rij in stats.heatmap %}
+          <span class="warmte-dag">{{ rij.dag }}</span>
+          {% for c in rij.cellen %}<span class="cel s{{ c.stap }}" tabindex="0" data-tip-titel="{{ rij.naam }} {{ c.uur }}:00 – {{ c.uur + 1 }}:00" data-tip-regels="{{ c.aantal }} pagina's"></span>{% endfor %}
+          {% endfor %}
+        </div>
+        <p class="schaal"><span>minder</span><i class="cel s0"></i><i class="cel s1"></i><i class="cel s2"></i><i class="cel s3"></i><i class="cel s4"></i><i class="cel s5"></i><span>meer</span></p>
+      </section>
 
-      <h2>Klassikale quizzen</h2>
-      {% if quizzen %}
-      <table>
-        <tr><th>Pin</th><th>Kaart</th><th>Leerlingen</th><th>Vraag</th></tr>
-        {% for quiz in quizzen %}
-        <tr>
-          <td>{{ quiz.pin }}</td>
-          <td>{{ quiz.kaart }}</td>
-          <td class="aantal">{{ quiz.spelers }}</td>
-          <td class="aantal">
-            {% if quiz.stand == 'lobby' %}wachtkamer{% else %}{{ quiz.vraag }} van {{ quiz.vragen }}{% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-      {% else %}
-      <p class="leeg">Er loopt nu geen quiz.</p>
-      {% endif %}
+      {# ---------------------------------------------------------- Kaarten #}
+      <section class="kaart-vak">
+        <h2>Kaarten</h2>
+        {% if stats.kaarten %}
+        <div class="tabel-scroll">
+        <table class="kaarten">
+          <tr><th>Kaart</th><th>Oefensessies</th><th class="getal">Afgemaakt</th><th class="getal">Meteen goed</th><th class="getal">Duur (mediaan)</th><th class="getal">Klassikaal</th></tr>
+          {% for k in stats.kaarten %}
+          <tr>
+            <td>{{ k.naam }}</td>
+            <td><span class="mini-balk"><span style="width: {{ (k.deel * 100) | round(1) }}%"></span></span><span class="mini-getal">{{ k.gestart }}</span></td>
+            <td class="getal">{{ of(k.afgerondPct, '%') }}</td>
+            <td class="getal">{{ of(k.treffers, '%') }}</td>
+            <td class="getal">{{ of(k.duur, ' min') }}</td>
+            <td class="getal">{{ k.quizzen }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        </div>
+        {% else %}
+        <p class="leeg">Nog geen oefensessies of quizzen in deze periode.</p>
+        {% endif %}
+      </section>
 
-      <h2>Sinds de server draait</h2>
-      <table>
-        <tr><td>Oefensessies begonnen</td><td class="aantal">{{ oefenen.started }}</td></tr>
-      </table>
-      <p class="leeg">Deze pagina ververst zichzelf elke 15 seconden.</p>
+      <div class="drie">
+        <section class="kaart-vak">
+          <h2>Vraagvorm</h2>
+          {{ balken(stats.vormen, ' sessies') }}
+        </section>
+        <section class="kaart-vak">
+          <h2>Niveau</h2>
+          {{ balken(stats.niveaus, ' sessies', leeg='Alleen Zuid-Amerika heeft havo en vwo; nog niet geoefend.') }}
+        </section>
+        <section class="kaart-vak">
+          <h2>Apparaat</h2>
+          {{ balken(stats.apparaten, ' bezoekers') }}
+        </section>
+      </div>
+
+      <section class="kaart-vak">
+        <h2>Onderdelen</h2>
+        <p class="uitleg">Hoe vaak elk onderdeel in een oefensessie zat. Een sessie kan meer onderdelen hebben.</p>
+        {{ balken(stats.onderdelen, ' sessies') }}
+      </section>
+
+      {# ---------------------------------------------------------- Hoe ging het #}
+      <div class="twee gelijk">
+        <section class="kaart-vak">
+          <h2>Hoeveel was meteen goed?</h2>
+          <p class="uitleg">Afgemaakte sessies, verdeeld naar het deel van de antwoorden dat in één keer goed was.</p>
+          {{ kolomgrafiek(grafieken.treffers, [('aantal', 'Sessies', 'r1')], 'Hoeveel was meteen goed') }}
+          {{ alsTabel(stats.perTreffers, [('Meteen goed', 'naam'), ('Sessies', 'aantal')]) }}
+        </section>
+        <section class="kaart-vak">
+          <h2>Hoe lang duurt een sessie?</h2>
+          <p class="uitleg">Afgemaakte sessies, van begin tot de laatste goede vraag.</p>
+          {{ kolomgrafiek(grafieken.duur, [('aantal', 'Sessies', 'r1')], 'Hoe lang duurt een sessie') }}
+          {{ alsTabel(stats.perDuur, [('Duur', 'naam'), ('Sessies', 'aantal')]) }}
+        </section>
+      </div>
+
+      <section class="kaart-vak">
+        <h2>Moeilijkste plekken</h2>
+        <p class="uitleg">Waar het in afgemaakte sessies het vaakst eerst fout ging.</p>
+        {% if stats.moeilijkst %}
+        <div class="tabel-scroll">
+        <table class="kaarten">
+          <tr><th>Plek</th><th>Kaart</th><th>Keer fout</th><th class="getal">Van de sessies</th><th class="getal">Extra pogingen</th></tr>
+          {% for r in stats.moeilijkst %}
+          <tr>
+            <td>{{ r.plek }}</td>
+            <td>{{ r.kaart }}</td>
+            <td><span class="mini-balk"><span style="width: {{ (r.deel * 100) | round(1) }}%"></span></span><span class="mini-getal">{{ r.keer }}</span></td>
+            <td class="getal">{{ of(r.pct, '%') }}</td>
+            <td class="getal">{{ r.extra }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        </div>
+        {% else %}
+        <p class="leeg">Nog geen afgemaakte sessies met fouten.</p>
+        {% endif %}
+      </section>
+
+      {# ---------------------------------------------------------- Klassikaal #}
+      <section class="kaart-vak">
+        <h2>Klassikale quizzen</h2>
+        <div class="tegels klein">
+          <div class="tegel">
+            <span class="tegel-label">Gespeeld</span>
+            <span class="tegel-waarde">{{ t.quizzen }}</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Leerlingen per quiz</span>
+            <span class="tegel-waarde">{{ of(t.quizGemiddeld) }}</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Tot het eind gespeeld</span>
+            <span class="tegel-waarde">{{ of(t.quizAfgemaakt, '%') }}</span>
+          </div>
+          <div class="tegel">
+            <span class="tegel-label">Aangemaakt, niet gestart</span>
+            <span class="tegel-waarde">{{ t.quizNietGestart }}</span>
+          </div>
+        </div>
+        <div class="twee binnen">
+          <div>
+            <h3>Hoeveel leerlingen deden mee</h3>
+            {{ kolomgrafiek(grafieken.quizGrootte, [('aantal', 'Quizzen', 'r1')], 'Hoeveel leerlingen deden mee') }}
+            {{ alsTabel(stats.quizGrootte, [('Leerlingen', 'label'), ('Quizzen', 'aantal')]) }}
+          </div>
+          <div>
+            <h3>Met welke kaart</h3>
+            {{ balken(stats.quizKaarten, ' quizzen', leeg='Nog geen klassikale quiz gespeeld.') }}
+          </div>
+        </div>
+      </section>
+
+      <section class="kaart-vak">
+        <h2>Pagina's</h2>
+        {{ balken(stats.paginas, ' keer bekeken') }}
+      </section>
+
+      <p class="privacy">Wat hier staat, is geteld zonder namen, e-mailadressen of IP-adressen. Een bezoeker krijgt per
+        dag een code die de volgende dag niet meer te herkennen is, dus je kunt zien hoeveel mensen er waren, maar
+        niet wie. De ruwe cijfers staan ook in <a class="link" href="{{ url_for('kahoot.statistiekenJson', periode=stats.periode) }}">statistieken.json</a>.</p>
     </main>
+
+    <div class="tip" id="tip" role="status" hidden><strong id="tipWaarde"></strong><span id="tipTitel"></span></div>
 
     <footer>
       <div class="page">

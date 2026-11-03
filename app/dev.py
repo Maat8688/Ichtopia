@@ -27,6 +27,11 @@ flask_sqlalchemy.SQLAlchemy.create_all = lambda self, *args, **kwargs: None
 
 from src import app, socketio  # noqa: E402  (pas importeren als alles klaarstaat)
 
+# Alleen de tabel voor /statistieken wel aanmaken: die past prima in sqlite.
+from src.models import Gebruik, db  # noqa: E402
+with app.app_context():
+    Gebruik.__table__.create(db.engine, checkfirst=True)
+
 if __name__ == '__main__':
     poort = int(os.getenv('PORT', '5000'))
     print(f'Topo draait op http://127.0.0.1:{poort}')

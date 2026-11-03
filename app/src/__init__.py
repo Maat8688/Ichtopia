@@ -87,6 +87,10 @@ with app.app_context():
     from .errors import registerErrorHandlers
     registerErrorHandlers(app)
 
+    # Elke bekeken pagina tellen voor /statistieken (zie gebruik.py).
+    from .gebruik import registreerBezoeken
+    registreerBezoeken(app)
+
     from .models import db, User
     db.init_app(app)
     db.create_all()

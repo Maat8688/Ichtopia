@@ -6,6 +6,7 @@ from . import sessionManager
 from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
 from .kahoot import MAP_FILES
+from .gebruik import legKlaar, legSessie
 
 main = Blueprint('main', __name__)
 
@@ -21,7 +22,9 @@ def index():
                                         request.form.getlist('questions'), niveau)
         if not newSession.questions:
             return redirect(url_for('main.index'))
+        newSession.niveau = niveau
         id = sessionManager.createSession(newSession)
+        legSessie('oefenen_start', newSession)
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
 
@@ -143,8 +146,12 @@ def setupSockets(socketio: SocketIO):
         if session.nextQuestion():
             # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
             send(f"Finished with a score of {session.score}/{session.totalGuesses}")
-            print(session.getFinishedData(), file=sys.stderr)
-            emit('finished', {"Overvieuw": session.getFinishedData()})
+            uitslag = session.getFinishedData()
+            # Een keer tellen, ook als er daarna nog een antwoord binnenkomt.
+            if not getattr(session, 'geteld', False):
+                session.geteld = True
+                legKlaar(session, uitslag)
+            emit('finished', {"Overvieuw": uitslag})
             return
 
         if session.sessionMode == 1:
