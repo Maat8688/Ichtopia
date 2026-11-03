@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 import secrets
 import statistics
@@ -111,11 +112,12 @@ def legSessie(soort: str, sessie, **velden):
     """Een oefensessie die begint of klaar is, met wat erbij hoort."""
     try:
         bezoeker, apparaat = bezoekerCode(), apparaatSoort(request.headers.get('User-Agent'))
+        plek = waarVandaan()
     except RuntimeError:            # buiten een verzoek, bijvoorbeeld in een test
-        bezoeker, apparaat = None, None
+        bezoeker, apparaat, plek = None, None, {}
     onderdelen = sorted({q.category for q in sessie.questions if q.category})
     leg(soort,
-        bezoeker=bezoeker, apparaat=apparaat,
+        bezoeker=bezoeker, apparaat=apparaat, **plek,
         kaart=sessie.mapName, vorm=VORMEN.get(sessie.sessionMode, str(sessie.sessionMode)),
         onderdelen=','.join(onderdelen)[:200], niveau=getattr(sessie, 'niveau', None),
         vragen=len(sessie.questions), **velden)
@@ -140,6 +142,41 @@ def legQuiz(soort: str, game, spelers: int | None = None):
         vragen=len(game.questions), spelers=spelers)
 
 
+def waarVandaan() -> dict:
+    """Land, provincie en of het op school is, voor dit verzoek. Het IP-adres
+    wordt alleen hier gebruikt om op te zoeken en daarna vergeten."""
+    from . import locatie
+    ip = request.remote_addr
+    land, provincie = locatie.zoekOp(ip)
+    return {'land': land, 'provincie': provincie, 'school': locatie.opSchool(ip)}
+
+
+# Kolommen die er later bij zijn gekomen: (naam, type in SQL).
+LATERE_KOLOMMEN = [('land', 'VARCHAR(2)'), ('provincie', 'VARCHAR(20)'), ('school', 'BOOLEAN')]
+
+
+def zorgVoorKolommen():
+    """Voeg ontbrekende kolommen toe aan een tabel gebruik die er al was.
+
+    db.create_all() maakt wel nieuwe tabellen, maar past een bestaande niet
+    aan. Gaat het mis, dan start de site toch; het tellen van de plek werkt
+    dan alleen niet."""
+    from . import app
+    from .models import db
+    try:
+        from sqlalchemy import inspect, text
+        inspectie = inspect(db.engine)
+        if not inspectie.has_table('gebruik'):
+            return
+        bestaand = {k['name'] for k in inspectie.get_columns('gebruik')}
+        with db.engine.begin() as verbinding:
+            for naam, soort in LATERE_KOLOMMEN:
+                if naam not in bestaand:
+                    verbinding.execute(text(f'ALTER TABLE gebruik ADD COLUMN {naam} {soort}'))
+    except Exception:
+        app.logger.warning('Kolommen van gebruik niet bijgewerkt', exc_info=True)
+
+
 def registreerBezoeken(app):
     """Na elk verzoek: was het een echte pagina, dan tellen we hem."""
     @app.after_request
@@ -150,7 +187,8 @@ def registreerBezoeken(app):
                 naam = paginaNaam(request.path)
                 if naam:
                     leg('bezoek', pagina=naam, bezoeker=bezoekerCode(),
-                        apparaat=apparaatSoort(request.headers.get('User-Agent')))
+                        apparaat=apparaatSoort(request.headers.get('User-Agent')),
+                        **waarVandaan())
         except Exception:
             app.logger.warning('Bezoek niet geteld', exc_info=True)
         return response
@@ -313,7 +351,9 @@ def overzicht(periode: str = '30') -> dict:
         apparaten[soort or 'onbekend'] += 1
 
     bezoekersTotaal = sum(len(v) for v in bezoekersPerDag.values())
+    plekken = plekOverzicht(bezoeken, gestart, eersteDag if dagen else None)
     return {
+        'plekken': plekken,
         'periode': periode if periode in PERIODES else '30',
         'periodes': [('7', '7 dagen'), ('30', '30 dagen'), ('90', '90 dagen'), ('alles', 'Alles')],
         'van': _dagLabel(eersteDag), 'tot': _dagLabel(vandaag), 'aantalDagen': len(alleDagen),
@@ -354,6 +394,106 @@ def overzicht(periode: str = '30') -> dict:
                          'aantal': sum(1 for q in quizStart if q.spelers and van <= q.spelers < tot)}
                         for naam, van, tot in [('1–5', 1, 6), ('6–15', 6, 16), ('16–25', 16, 26),
                                                ('26–35', 26, 36), ('> 35', 36, 10 ** 6)]],
+    }
+
+
+# Onder deze grens tonen we geen exact aantal, zodat een enkele leerling uit
+# een kleine provincie niet herkenbaar is.
+KLEIN = 5
+
+
+def _toon(aantal: int) -> str:
+    if aantal == 0:
+        return '0'
+    return f'< {KLEIN}' if aantal < KLEIN else str(aantal)
+
+
+def _provincieStap(n: int, hoogste: int) -> int:
+    """Kleurstap 0-5. Onder KLEIN altijd stap 1; daarboven logaritmisch, want
+    meestal is er een provincie (die van de school) die veel groter is en dan
+    zou de rest anders allemaal dezelfde lichte kleur krijgen."""
+    if n == 0:
+        return 0
+    if n < KLEIN:
+        return 1
+    if hoogste <= KLEIN:
+        return 5
+    deel = math.log(n / KLEIN) / math.log(hoogste / KLEIN)
+    return min(5, 2 + int(3.999 * deel))
+
+
+def plekOverzicht(bezoeken, gestart, beginPeriode=None) -> dict:
+    """Provincies en landen. Bezoekers = verschillende bezoekers per dag."""
+    from . import locatie
+    from .models import Gebruik, db
+
+    perProvincie = defaultdict(set)
+    perLand = defaultdict(set)
+    school, elders, onbekend = set(), set(), set()
+    for b in bezoeken:
+        sleutel = (b.lokaal.date(), b.bezoeker)
+        if not b.bezoeker:
+            continue
+        if b.school:
+            school.add(sleutel)
+            continue
+        if b.school is False:
+            elders.add(sleutel)
+        if b.land == 'NL' and b.provincie:
+            perProvincie[b.provincie].add(sleutel)
+        elif b.land and b.land != 'NL':
+            perLand[b.land].add(sleutel)
+        else:
+            onbekend.add(sleutel)
+    sessiesPerProvincie = Counter(s.provincie for s in gestart if s.provincie and not s.school)
+
+    # Wanneer kwam er voor het eerst iemand uit een provincie? Over alle tijd,
+    # niet alleen de gekozen periode: zo zie je wanneer een provincie erbij kwam.
+    eerste = {}
+    try:
+        for provincie, tijd in (db.session.query(Gebruik.provincie, db.func.min(Gebruik.tijd))
+                                .filter(Gebruik.provincie.isnot(None))
+                                .filter(db.or_(Gebruik.school.is_(None), Gebruik.school.is_(False)))
+                                .group_by(Gebruik.provincie).all()):
+            eerste[provincie] = _lokaal(tijd).date()
+    except Exception:
+        pass
+
+    hoogste = max((len(v) for v in perProvincie.values()), default=0)
+    vormen = locatie.provincieVormen()
+    provincies = []
+    for vorm in vormen['provincies']:
+        naam = vorm['naam']
+        n = len(perProvincie.get(naam, ()))
+        stap = _provincieStap(n, hoogste)
+        provincies.append({
+            'naam': naam, 'paden': vorm['paden'], 'aantal': n, 'tekst': _toon(n), 'stap': stap,
+            'sessies': sessiesPerProvincie.get(naam, 0), 'sessiesTekst': _toon(sessiesPerProvincie.get(naam, 0)),
+            'eerste': _dagLabel(eerste[naam]) if naam in eerste else None,
+            'eersteDatum': eerste[naam].isoformat() if naam in eerste else '',
+            'nieuw': bool(naam in eerste and beginPeriode and eerste[naam] >= beginPeriode),
+        })
+    gerangschikt = sorted(provincies, key=lambda p: (-p['aantal'], p['naam']))
+
+    landen = [{'naam': locatie.landNaam(code), 'aantal': len(v), 'tekst': _toon(len(v))}
+              for code, v in perLand.items()]
+    landen.sort(key=lambda r: (-r['aantal'], r['naam']))
+    hoogsteLand = landen[0]['aantal'] if landen else 0
+    for r in landen:
+        r['deel'] = r['aantal'] / hoogsteLand if hoogsteLand else 0
+
+    return {
+        'beschikbaar': locatie.beschikbaar(),
+        'schoolIngesteld': bool(locatie._schoolNetwerken()),
+        'viewBox': vormen['viewBox'],
+        'provincies': provincies,
+        'gerangschikt': gerangschikt,
+        'metBezoekers': sum(1 for p in provincies if p['aantal']),
+        'landen': landen,
+        'school': len(school), 'schoolTekst': _toon(len(school)),
+        'elders': len(elders), 'eldersTekst': _toon(len(elders)),
+        'onbekend': len(onbekend),
+        'klein': KLEIN,
     }
 
 

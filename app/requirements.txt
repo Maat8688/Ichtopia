@@ -14,3 +14,4 @@ beautifulsoup4
 lxml
 gunicorn
 tzdata
+maxminddb

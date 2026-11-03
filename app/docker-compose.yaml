@@ -36,6 +36,10 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/main
       - SECRET_KEY=${SECRET_KEY}
       - KAHOOT_HOST_CODE=${KAHOOT_HOST_CODE}
+      # Het IP-adres (of de reeks) van het schoolnetwerk, voor /statistieken:
+      # wie op school zit telt dan apart en niet mee voor een provincie.
+      # Leeg laten mag. Voorbeeld in .env: SCHOOL_NETWERK=145.97.12.34
+      - SCHOOL_NETWERK=${SCHOOL_NETWERK:-}
       # De app staat achter Caddy. Hiermee weet hij dat de bezoeker via https
       # binnenkomt, zodat de meedoen-link op het digibord ook https wordt.
       - TRUST_PROXY=1

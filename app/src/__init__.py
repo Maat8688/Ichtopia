@@ -94,6 +94,10 @@ with app.app_context():
     from .models import db, User
     db.init_app(app)
     db.create_all()
+    # create_all voegt geen kolommen toe aan een tabel die al bestaat; dat
+    # doen we voor de tabel gebruik zelf (zie gebruik.py).
+    from .gebruik import zorgVoorKolommen
+    zorgVoorKolommen()
     migrate.init_app(app, db)
 
     @login_manager.user_loader

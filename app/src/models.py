@@ -63,6 +63,11 @@ class Gebruik(db.Model):
     duur = db.Column(db.Integer)                 # seconden
     spelers = db.Column(db.Integer)
     fout = db.Column(db.Text)                    # JSON: {plek: extra pogingen}
+    # Waar vandaan, opgezocht bij het bezoek (locatie.py). Het IP-adres zelf
+    # wordt niet bewaard.
+    land = db.Column(db.String(2))
+    provincie = db.Column(db.String(20))
+    school = db.Column(db.Boolean)               # op het schoolnetwerk (als SCHOOL_NETWERK is ingesteld)
 
     def __repr__(self):
         return f'<Gebruik {self.soort} {self.tijd}>'

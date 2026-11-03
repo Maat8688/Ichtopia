@@ -367,6 +367,80 @@
   margin-left: 4px;
 }
 
+/* Provincies */
+.plek {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.nl {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin-bottom: 6px;
+}
+
+.nl .prov path {
+  stroke: #fffdf8;
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.nl .prov {
+  outline: none;
+}
+
+.nl .prov.s0 path { fill: var(--w0); }
+.nl .prov.s1 path { fill: var(--w1); }
+.nl .prov.s2 path { fill: var(--w2); }
+.nl .prov.s3 path { fill: var(--w3); }
+.nl .prov.s4 path { fill: var(--w4); }
+.nl .prov.s5 path { fill: var(--w5); }
+
+.nl .prov:hover path,
+.nl .prov:focus-visible path {
+  stroke: var(--ink);
+  stroke-width: 2px;
+}
+
+table.provtabel th,
+table.provtabel td {
+  padding-right: 10px;
+}
+
+tr.stil td {
+  color: var(--muted);
+}
+
+.nieuw {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 11px;
+  line-height: 18px;
+  vertical-align: 1px;
+}
+
+.stat code {
+  font-size: 12px;
+  background: var(--paper-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+@media (max-width: 899px) {
+  .plek {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Tabellen */
 .tabel-scroll {
   overflow-x: auto;

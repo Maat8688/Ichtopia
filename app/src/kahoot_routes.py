@@ -202,7 +202,10 @@ def statistiekenJson():
     if request.args.get('alleen') == 'nu':
         return nu
     from .gebruik import overzicht
-    return {**nu, 'overzicht': overzicht(request.args.get('periode', '30'))}
+    data = overzicht(request.args.get('periode', '30'))
+    for provincie in data['plekken']['provincies'] + data['plekken']['gerangschikt']:
+        provincie.pop('paden', None)          # de vormen van de kaart horen niet bij de cijfers
+    return {**nu, 'overzicht': data}
 
 
 def verzamelStatistieken() -> dict:

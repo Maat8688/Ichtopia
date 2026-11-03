@@ -200,6 +200,81 @@
         <p class="schaal"><span>minder</span><i class="cel s0"></i><i class="cel s1"></i><i class="cel s2"></i><i class="cel s3"></i><i class="cel s4"></i><i class="cel s5"></i><span>meer</span></p>
       </section>
 
+      {# ---------------------------------------------------------- Waar vandaan #}
+      {% set pl = stats.plekken %}
+      <section class="kaart-vak" id="provincies">
+        <h2>Waar komen bezoekers vandaan?</h2>
+        {% if not pl.beschikbaar %}
+        <p class="melding">De locatiedatabase staat nog niet op de server, dus er wordt nog geen provincie
+          bijgehouden. Haal hem op met <code>docker compose exec web python geo_bijwerken.py</code>
+          (en daarna elke maand opnieuw).</p>
+        {% endif %}
+        <p class="uitleg">Verschillende bezoekers per dag, per provincie{% if pl.schoolIngesteld %}, zonder wie op het
+          schoolnetwerk zat{% endif %}. Onder de {{ pl.klein }} staat er &lsquo;&lt; {{ pl.klein }}&rsquo;, zodat
+          niemand herkenbaar is.{% if pl.metBezoekers %} Bezoekers uit {{ pl.metBezoekers }} van de 12
+          provincies.{% endif %}</p>
+        <div class="plek">
+          <div>
+            <svg class="nl" viewBox="{{ pl.viewBox }}" role="img" aria-label="Bezoekers per provincie">
+              {% for p in pl.provincies %}
+              <g class="prov s{{ p.stap }}" tabindex="0" data-tip-titel="{{ p.naam }}"
+                 data-tip-regels="{{ p.tekst }} bezoekers|{{ p.sessiesTekst }} oefensessies{% if p.eerste %}|voor het eerst: {{ p.eerste }}{% endif %}">{{ p.paden | safe }}</g>
+              {% endfor %}
+            </svg>
+            <p class="schaal"><span>geen</span><i class="cel s0"></i><i class="cel s1"></i><i class="cel s2"></i><i class="cel s3"></i><i class="cel s4"></i><i class="cel s5"></i><span>meeste</span></p>
+          </div>
+          <div class="tabel-scroll">
+            <table class="provtabel">
+              <tr><th>Provincie</th><th class="getal">Bezoekers</th><th class="getal">Sessies</th><th>Voor het eerst</th></tr>
+              {% for p in pl.gerangschikt %}
+              <tr{% if not p.aantal and not p.eerste %} class="stil"{% endif %}>
+                <td>{{ p.naam }}{% if p.nieuw %} <span class="nieuw">nieuw</span>{% endif %}</td>
+                <td class="getal">{{ p.tekst }}</td>
+                <td class="getal">{{ p.sessiesTekst }}</td>
+                <td>{{ p.eerste or '–' }}</td>
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+
+        <div class="twee gelijk binnen">
+          <div>
+            <h3>Buiten Nederland</h3>
+            {% if pl.landen %}
+            <ol class="balken">
+              {% for r in pl.landen %}
+              <li tabindex="0" data-tip-titel="{{ r.naam }}" data-tip-regels="{{ r.tekst }} bezoekers">
+                <span class="balk-naam">{{ r.naam }}</span>
+                <span class="balk-spoor"><span class="balk" style="width: {{ (r.deel * 100) | round(1) }}%"></span></span>
+                <span class="balk-waarde">{{ r.tekst }}</span>
+              </li>
+              {% endfor %}
+            </ol>
+            {% else %}
+            <p class="leeg">Nog niemand van buiten Nederland.</p>
+            {% endif %}
+          </div>
+          <div>
+            <h3>Op school of ergens anders</h3>
+            {% if pl.schoolIngesteld %}
+            <div class="tegels klein">
+              <div class="tegel"><span class="tegel-label">Op het schoolnetwerk</span><span class="tegel-waarde">{{ pl.schoolTekst }}</span></div>
+              <div class="tegel"><span class="tegel-label">Ergens anders</span><span class="tegel-waarde">{{ pl.eldersTekst }}</span></div>
+            </div>
+            {% else %}
+            <p class="leeg">Zet het IP-adres van de school in <code>SCHOOL_NETWERK</code> (in <code>.env</code>), dan
+              telt wie op school oefent apart en tellen alleen de bezoekers van thuis mee voor de provincies.
+              Anders komt iedereen die op school zit uit op de provincie van het schoolnetwerk.</p>
+            {% endif %}
+            {% if pl.onbekend %}<p class="leeg">Van {{ pl.onbekend }} {{ 'bezoeker' if pl.onbekend == 1 else 'bezoekers' }} was de plek niet te bepalen.</p>{% endif %}
+          </div>
+        </div>
+        <p class="voetnoot">De provincie is een schatting op basis van het IP-adres en klopt vooral bij
+          thuisinternet; mobiel internet komt vaak uit bij de provider. Het IP-adres zelf wordt niet bewaard.
+          IP-locatie: <a class="link" href="https://db-ip.com">IP Geolocation by DB-IP</a> (CC BY 4.0).</p>
+      </section>
+
       {# ---------------------------------------------------------- Kaarten #}
       <section class="kaart-vak">
         <h2>Kaarten</h2>

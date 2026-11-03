@@ -84,4 +84,33 @@ herstart, is dezelfde leerling niet meer te herkennen. De tabel wordt bij het
 opstarten vanzelf aangemaakt, en het tellen begint vanaf dat moment: van de
 tijd daarvoor is niets bewaard.
 
-Testen: `python tests/test_statistieken.py` (vanuit `app`).
+### Provincies
+
+Op `/statistieken` staat ook een kaart met de provincies waar bezoekers
+vandaan komen, met per provincie de datum van het eerste bezoek. Zo zie je
+wanneer er leerlingen uit een nieuwe provincie bij komen.
+
+De provincie wordt bij elk bezoek opgezocht in een database die op de server
+zelf staat (DB-IP 'IP to City Lite', gratis, CC BY 4.0). Het IP-adres wordt
+daarna weggegooid; in de tabel komen alleen land en provincie. Aantallen onder
+de 5 staan op de pagina als '< 5'.
+
+De database ophalen, en daarna elke maand opnieuw (herstarten hoeft niet):
+
+```
+docker compose exec web python geo_bijwerken.py
+```
+
+Iedereen op het schoolnetwerk komt uit op één provincie. Zet daarom het
+IP-adres van de school in `.env`, dan tellen die bezoeken apart:
+
+```
+SCHOOL_NETWERK=145.97.12.34
+```
+
+Meerdere adressen of reeksen mogen, met komma's: `145.97.12.0/24,2001:db8::/48`.
+Het adres van de school vind je door op school naar bijvoorbeeld
+https://ifconfig.me te gaan.
+
+Testen: `python tests/test_statistieken.py` en `python tests/test_locatie.py`
+(vanuit `app`; de tweede heeft `pip install mmdb-writer` nodig).

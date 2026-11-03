@@ -161,3 +161,6 @@ cython_debug/
 
 # lokale testdatabase
 app/dev.db
+
+# Locatiedatabase voor /statistieken (geo_bijwerken.py), te groot voor git
+app/data/geo/
