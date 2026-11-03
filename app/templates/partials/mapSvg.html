@@ -268,35 +268,50 @@
 
 <style>
   /* Kaartdata naar het palet. De inline kleuren uit de SVG-bestanden
-     worden hier overschreven, de bestanden zelf blijven ongewijzigd. */
-  #map [style*="fill:#d4edfc"] { fill: var(--paper-2) !important; }
+     worden hier overschreven, de bestanden zelf blijven ongewijzigd.
+     Rustig gehouden: zee blauw, land zand, grenzen grijs. Kleur is er alleen
+     voor wat iets betekent: rood is de vraag, groen ken je, roze had je fout. */
+  #map [style*="fill:#d4edfc"] { fill: var(--zee) !important; }
   #map [style*="fill:#fffbdb"],
   #map [style*="fill:#ecf3da"],
   #map [style*="fill:#e4eab9"],
-  #map [style*="fill:#ffffff"] { fill: var(--paper) !important; }
+  #map [style*="fill:#ffffff"] { fill: var(--zand) !important; }
+  /* Land onder de vragen (buurlanden, de rest van de wereld) iets lichter en
+     grijzer, zodat je ziet wat bij de toets hoort en wat niet. */
+  #background [style*="fill:#fffbdb"],
+  #background [style*="fill:#ecf3da"],
+  #background [style*="fill:#e4eab9"],
+  #background [style*="fill:#ffffff"] { fill: #ece7db !important; }
   #map [style*="fill:#1a1a18"] { fill: var(--ink) !important; }
   #map [style*="fill:#9c9c9c"] { fill: var(--rule) !important; }
-  #map [style*="stroke:#009ee3"] { stroke: var(--atlas) !important; }
+  #map [style*="stroke:#009ee3"] { stroke: var(--rivier) !important; }
   #map [style*="stroke:#d2050c"],
-  #map [style*="stroke:#1a1a18"] { stroke: var(--ink) !important; }
+  #map [style*="stroke:#1a1a18"] { stroke: var(--grens) !important; }
   #map [style*="stroke:#575656"] { stroke: var(--rule) !important; }
 
-  /* Achtergrond van de gegenereerde kaarten (Amerika). De oudere kaarten
-     dragen hun eigen stijl inline mee en trekken zich hier niets van aan. */
+  /* Achtergrond van de gegenereerde kaarten (Amerika). */
   #background .zee {
-    fill: #dde7e9;
+    fill: var(--zee);
   }
 
   #background path {
-    fill: var(--paper-2);
-    stroke: var(--rule);
+    fill: var(--zand);
+    stroke: var(--grens);
     stroke-width: 0.6;
+  }
+
+  /* Landen en provincies die nu niet gevraagd worden: gewoon land. */
+  #background .decor path {
+    fill: var(--zand);
+    stroke: var(--grens);
+    stroke-width: 0.6;
+    pointer-events: none;
   }
 
   /* Vraagelementen */
   #questions > g {
     cursor: pointer;
-    fill: var(--paper);
+    fill: var(--zand);
     transition: fill 0.2s ease, fill-opacity 0.2s ease;
   }
 
@@ -308,14 +323,14 @@
 
   #questions > g.Landen,
   #questions > g.Provincies {
-    fill: var(--paper-2);
-    stroke: var(--ink);
+    fill: var(--zand);
+    stroke: var(--grens);
     stroke-width: 0.6;
   }
 
   #questions > g.Gebergten {
-    fill: #c9bfa4;
-    fill-opacity: 0.75;
+    fill: #c9b48a;
+    fill-opacity: 0.7;
   }
 
   /* Een oceaan die nog niet gevraagd is laat de zee eronder gewoon zien. */
@@ -338,13 +353,13 @@
 
   #questions > g.Wateren path.lijn {
     fill: none;
-    stroke: var(--atlas);
+    stroke: #5d9ec6;
     stroke-width: 1.6;
     stroke-linecap: round;
   }
 
   #questions > g.Wateren {
-    fill: var(--paper-2);
+    fill: var(--zee);
   }
 
   #questions > g.Gebieden {
@@ -353,12 +368,13 @@
   }
 
   #questions > g:hover:not(.active) {
-    fill: var(--track);
+    fill: #e6d6b0;
   }
 
   #questions > g.Steden:hover:not(.active),
-  #questions > g.Hoofdsteden:hover:not(.active) {
-    fill: var(--atlas);
+  #questions > g.Hoofdsteden:hover:not(.active),
+  #questions > g.Plaatsen:hover:not(.active) {
+    fill: var(--bol);
   }
 
   #questions > g.Gebieden:hover:not(.active) {
@@ -366,35 +382,41 @@
     fill-opacity: 0.16;
   }
 
-  /* Stand: gekend in atlasblauwgroen, fout in rode pen */
+  /* Stand: gekend in groen, fout gehad in roze */
   #questions > g[state="Correct"] {
-    fill: var(--atlas);
-    fill-opacity: 0.28;
+    fill: var(--gekend);
+    fill-opacity: 1;
   }
 
   #questions > g.Steden[state="Correct"],
-  #questions > g.Hoofdsteden[state="Correct"] {
-    fill: var(--atlas);
-    fill-opacity: 1;
+  #questions > g.Hoofdsteden[state="Correct"],
+  #questions > g.Plaatsen[state="Correct"] {
+    fill: var(--bol);
   }
 
   #questions > g[state="Incorrect"] {
-    fill: var(--pen);
-    fill-opacity: 0.28;
-  }
-
-  #questions > g.Steden[state="Incorrect"],
-  #questions > g.Hoofdsteden[state="Incorrect"] {
-    fill: var(--pen);
+    fill: var(--roze);
     fill-opacity: 1;
   }
 
-  /* Huidige vraag: rode pen */
+  #questions > g.Steden[state="Incorrect"],
+  #questions > g.Hoofdsteden[state="Incorrect"],
+  #questions > g.Plaatsen[state="Incorrect"] {
+    fill: var(--pen);
+    fill-opacity: .55;
+  }
+
+  #questions > g.Gebieden[state="Correct"],
+  #questions > g.Gebieden[state="Incorrect"] {
+    fill-opacity: .7;
+  }
+
+  /* Huidige vraag: rood, met een donkere rand */
   #questions > g.active {
     fill: var(--pen);
-    fill-opacity: 0.2;
-    stroke: var(--pen);
-    stroke-width: 2;
+    fill-opacity: 1;
+    stroke: var(--ink);
+    stroke-width: 1.4;
   }
 
   #questions > g.active > path {
@@ -402,7 +424,8 @@
   }
 
   #questions > g.Steden.active,
-  #questions > g.Hoofdsteden.active {
+  #questions > g.Hoofdsteden.active,
+  #questions > g.Plaatsen.active {
     fill: var(--pen);
     fill-opacity: 1;
     stroke: none;
@@ -414,8 +437,8 @@
   }
 
   #questions > g:focus-visible {
-    fill: var(--track);
-    stroke: var(--atlas);
+    fill: #e6d6b0;
+    stroke: var(--bol);
     stroke-width: 3;
   }
 

@@ -1,0 +1,13 @@
+<header class="page topbar">
+  {% include 'partials/brand.html' %}
+  <nav class="topbar-right">
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('duel.lobby') }}">Duel</a>
+    <a href="{{ url_for('ranking.board') }}">Ranglijst</a>
+    <a class="me" href="{{ url_for('auth.account') }}"><span class="me-letter">{{ current_user.username[:1]|upper }}</span>{{ current_user.username }} <span class="me-level">lvl {{ current_user.level }}</span></a>
+    {% else %}
+    <a href="{{ url_for('ranking.board') }}">Ranglijst</a>
+    <a class="me" href="{{ url_for('auth.login') }}"><span class="me-letter">?</span>Inloggen</a>
+    {% endif %}
+  </nav>
+</header>

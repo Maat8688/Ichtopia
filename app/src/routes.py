@@ -33,7 +33,27 @@ def index():
             return redirect(url_for('main.index'))
         id = sessionManager.createSession(newSession)
         return redirect(url_for('main.learn', sessionToken=id))
-    return render_template('index.html')
+    return render_template('index.html', **homeNotes())
+
+
+def homeNotes() -> dict:
+    """Wat er op de kladblaadjes van de startpagina staat: een duel dat op een
+    tegenstander wacht, en de top drie van de elo-ranglijst."""
+    # Hier geimporteerd: duel_routes en ranking laden na dit bestand.
+    from .duel_routes import duelManager
+    from .ranking import eloBoard, ownEloRank
+
+    me = current_user if current_user.is_authenticated else None
+    openDuels = duelManager.openDuels(exceptUserId=me.id if me else None)
+    top = eloBoard(limit=3)
+    myRank = ownEloRank(me) if me else 0
+    return {
+        'openDuel': openDuels[0] if openDuels else None,
+        'openDuelCount': len(openDuels),
+        'topElo': top,
+        'myEloRank': myRank,
+        'meInTop': any(row['id'] == me.id for row in top) if me else False,
+    }
 
 @main.route('/learn')
 def learn():

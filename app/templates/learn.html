@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Oefenen · Topo</title>
+    <title>Oefenen · Ichtopia</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/socketio.js') }}"></script>
     <link
@@ -25,7 +25,7 @@
     <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
     <link
       rel="icon"
-      href="{{ url_for('static', filename='img/logo_small.png') }}"
+      href="{{ url_for('static', filename='img/logo-96.png') }}"
     />
   </head>
   <body>
@@ -38,17 +38,13 @@
     {% with loadingText = 'Kaart laden' %}{% include('partials/loading.html') %}{% endwith %}
 
     <header class="page topbar">
-      <h1 id="sessionTitle">Oefenen</h1>
-      <div class="topbar-right">
-        <span id="progressText" class="accent"></span>
-        <a href="/" class="link">stoppen</a>
-      </div>
+      {% include 'partials/brand.html' %}
+      <nav class="topbar-right">
+        <a href="/">Stoppen</a>
+      </nav>
     </header>
 
     <div class="page">
-      <div class="progress" id="progressBar">
-        <span id="questionsCorrect"></span>
-      </div>
       <p class="verbinding" id="verbinding" hidden>
         Geen verbinding met de server. Je antwoorden komen even niet aan &mdash;
         wacht tot deze melding weg is.
@@ -56,12 +52,21 @@
     </div>
 
     <main class="page learn">
-      <section class="map" id="mapContainer" aria-label="Kaart">
-        {% include('partials/map.html') %}
+      <section class="kaart-kolom">
+        <div class="map" id="mapContainer" aria-label="Kaart">
+          <p class="kaartblad-titel"><b id="sessionTitle">Oefenen</b> <span>{{ {1: 'meerkeuze', 2: 'naam typen', 3: 'aanwijzen'}[map.sessionMode] }}</span></p>
+          {% include('partials/map.html') %}
+        </div>
+        <div class="legenda" aria-hidden="true">
+          <span><i class="l-vraag"></i>deze vraag</span>
+          <span><i class="l-goed"></i>gekend</span>
+          <span><i class="l-fout"></i>fout gehad</span>
+          <span><i class="l-open"></i>nog te doen</span>
+        </div>
       </section>
 
       <aside class="panel" id="gamemodeContainer">
-        <div id="questionArea">
+        <div class="vraag" id="questionArea">
           <p class="panel-label" id="questionCounter">Vraag 1</p>
           {% if map.sessionMode != 3 %}
           <p class="question" id="questionText">Kijk naar de kaart.</p>
@@ -76,17 +81,16 @@
           {% if map.sessionMode == 3 %}
             {% include('partials/clickTheCountry.html') %}
           {% endif %}
-
-          <p class="feedback" id="feedback" hidden></p>
         </div>
+        <p class="feedback" id="feedback" hidden></p>
 
-        <div id="finished" hidden>
-          <h2>Klaar</h2>
-          <div class="rule-list">
-            <div><span>Goed beantwoord</span><span id="T-Score" class="accent">?</span></div>
-            <div><span>Pogingen</span><span id="T-Tries">?</span></div>
-            <div><span>Fout</span><span id="T-Incorrect">?</span></div>
-            <div><span>Tijd</span><span id="T-Time">?</span></div>
+        <div class="vraag" id="finished" hidden>
+          <h2>Klaar!</h2>
+          <div class="uitslag">
+            <div><span>Goed beantwoord</span><b id="T-Score">?</b></div>
+            <div><span>Pogingen</span><b id="T-Tries">?</b></div>
+            <div><span>Fout</span><b id="T-Incorrect">?</b></div>
+            <div><span>Tijd</span><b id="T-Time">?</b></div>
           </div>
 
           <!-- Alleen zichtbaar als je ingelogd bent; zonder account is er geen XP. -->
@@ -96,16 +100,23 @@
           </div>
           <div class="actions">
             <button type="button" class="link" onclick="showBreakdown()">overzicht per vraag</button>
-            <a href="/" class="btn btn-primary">Naar start</a>
+            <a href="/" class="btn btn-primary">Nog een keer</a>
           </div>
           <div id="QuestionBreakdown" hidden></div>
+        </div>
+
+        <div class="voortgang">
+          <p><span>Gekend</span><span id="progressText"></span></p>
+          <div class="progress" id="progressBar">
+            <span id="questionsCorrect"></span>
+          </div>
         </div>
       </aside>
     </main>
 
     <footer>
       <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · geen account nodig</p>
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum</p>
       </div>
     </footer>
 
@@ -116,8 +127,8 @@
       } catch (e) {}
 
       if (mapName) {
-        document.getElementById("sessionTitle").textContent = mapName + " · oefenen";
-        document.title = mapName + " · oefenen";
+        document.getElementById("sessionTitle").textContent = mapName;
+        document.title = mapName + " oefenen · Ichtopia";
       }
 
       var questionCount = 0;
@@ -152,7 +163,7 @@
       function showFeedback(text, ok) {
         feedback.innerHTML = "";
         var strong = document.createElement("strong");
-        strong.textContent = ok ? "Goed." : "Fout.";
+        strong.textContent = ok ? "Goed!" : "Niet goed.";
         feedback.appendChild(strong);
         feedback.appendChild(document.createTextNode(" " + text));
         feedback.classList.toggle("ok", ok);
@@ -188,7 +199,7 @@
         var total = data["totalQuestions"];
         document.getElementById("questionsCorrect").style.width =
           (total ? (known * 100) / total : 0) + "%";
-        document.getElementById("progressText").textContent = known + " van " + total + " gekend";
+        document.getElementById("progressText").textContent = known + " van " + total;
 
         if (mapName) {
           try {
@@ -228,9 +239,10 @@
 
         var breakdown = document.getElementById("QuestionBreakdown");
         var list = document.createElement("div");
-        list.className = "rule-list";
+        list.className = "overzicht";
         overview["questionBreakdown"].forEach(function (question) {
           var row = document.createElement("div");
+          row.className = "regel";
           var name = document.createElement("span");
           name.textContent = displayName(question["name"]);
           var stats = document.createElement("span");

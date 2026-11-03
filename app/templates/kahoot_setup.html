@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Klassikale quiz starten · Topo</title>
+    <title>Klassikale quiz starten · Ichtopia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
-    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}" />
   </head>
   <body class="kahoot">
     <div class="k-topbar">
-      <a class="k-brand" href="/">Topo</a>
+      {% include 'partials/brand.html' %}
       <span class="k-pill">Docent</span>
       <a class="k-btn secondary" href="{{ url_for('kahoot.hostLogout') }}">Uitloggen</a>
     </div>

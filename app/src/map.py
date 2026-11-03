@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import hashlib
 import os
 import random
@@ -23,6 +24,26 @@ def normalizeAnswer(text) -> str:
     text = unicodedata.normalize('NFD', str(text))
     text = ''.join(c for c in text if not unicodedata.combining(c))
     return ''.join(c for c in text.lower() if c.isalnum())
+
+
+# Vlakken die land vormen. Worden ze niet gevraagd, dan blijven ze als
+# achtergrond op de kaart staan.
+DECOR_CATEGORIES = ('Landen', 'Provincies')
+
+
+def decorFrom(g) -> str:
+    """Kopie van een vraaggroep als stille achtergrond: geen id (dat hoort bij
+    de vraag), geen antwoorden en niet aanklikbaar."""
+    decor = copy.copy(g)
+    for attr in ('id', 'category', 'niveau'):
+        decor.attrs.pop(attr, None)
+    decor['class'] = 'decor'
+    for awnser in decor.find_all('awnser'):
+        awnser.decompose()
+    for path in decor.find_all('path'):
+        path.attrs.pop('id', None)
+        path.attrs['style'] = ''
+    return str(decor)
 
 
 class SessionGamemode(Enum):
@@ -245,11 +266,17 @@ class mapSession():
             if g.get('class') == None:
                 backgroundElements.append(str(g))
             elif "question" in g.get('class'):
-                if g.get('category') != None and g.get('category') not in includeQuestions:
-                    continue
+                overslaan = g.get('category') != None and g.get('category') not in includeQuestions
                 # Kaarten met een niveau-kenmerk (havo/vwo) alleen de vragen van
                 # dat niveau. Vormen zonder kenmerk horen bij allebei.
                 if niveau and g.get('niveau') and niveau not in g.get('niveau').split():
+                    overslaan = True
+                if overslaan:
+                    # Een land of provincie die niet gevraagd wordt, is nog wel
+                    # land. Zonder deze vorm zou je bij alleen 'Steden' de zee
+                    # zien waar Nederland hoort te liggen.
+                    if g.get('category') in DECOR_CATEGORIES:
+                        backgroundElements.append(decorFrom(g))
                     continue
                 answers = []
                 for awnser in g.find_all('awnser'):

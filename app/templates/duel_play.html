@@ -3,20 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Duel {{ duel.code }} · Topo</title>
+    <title>Duel {{ duel.code }} · Ichtopia</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/duel.css') }}" />
     <script src="{{ url_for('static', filename='js/loading.js') }}" defer></script>
-    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}" />
   </head>
   <body class="kahoot">
     {% with loadingText = 'Duel laden' %}{% include('partials/loading.html') %}{% endwith %}
 
     <div class="k-topbar">
-      <a class="k-brand" href="/">Topo</a>
+      {% include 'partials/brand.html' %}
       <span class="k-pill">Duel {{ duel.code }}</span>
       <span class="k-pill">{{ duel.mapName }}</span>
     </div>

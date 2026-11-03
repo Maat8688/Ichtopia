@@ -3,20 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Duel · Topo</title>
+    <title>Duel · Ichtopia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/duel.css') }}" />
-    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}" />
   </head>
   <body class="kahoot">
-    <div class="k-topbar">
-      <a class="k-brand" href="/">Topo</a>
-      <span class="k-pill">Duel</span>
-      <span class="k-pill">{{ current_user.username }} · {{ current_user.rating }} elo</span>
-      <a class="k-btn secondary" href="{{ url_for('ranking.board', lijst='elo') }}">Ranglijst</a>
-    </div>
+    {% include 'partials/nav.html' %}
 
     <div class="k-main">
       {% if error %}

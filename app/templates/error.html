@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title }} · Topo</title>
+    <title>{{ title }} · Ichtopia</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/design-tokens.css') }}"
@@ -14,14 +14,11 @@
     />
     <link
       rel="icon"
-      href="{{ url_for('static', filename='img/logo_small.png') }}"
+      href="{{ url_for('static', filename='img/logo-96.png') }}"
     />
   </head>
   <body>
-    <header class="page topbar">
-      <h1>Topo</h1>
-      <span class="muted">Ichthus · 2026–27</span>
-    </header>
+{% include 'partials/nav.html' %}
 
     <main class="page error">
       <p class="error-code" aria-hidden="true">{{ code }}</p>

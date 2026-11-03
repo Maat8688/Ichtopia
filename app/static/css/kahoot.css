@@ -794,6 +794,427 @@ button.k-option:active {
 }
 
 /* ---------------------------------------------------------------------
+   Ichtopia-stijl. Hierboven staat de opbouw; hier krijgen de onderdelen
+   dezelfde vorm als op de rest van de site: papier met een rand, witte
+   keuzevakjes met een vinkje, groene knoppen. Staat voor het digibord-blok,
+   zodat de grote maten daar nog steeds winnen.
+   --------------------------------------------------------------------- */
+.k-topbar {
+  align-items: center;
+  max-width: 1180px;
+  padding: 20px 24px 18px;
+}
+
+.k-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: #fff;
+  border: 1.5px solid var(--rule);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.k-pill.big {
+  font-family: var(--sans);
+  border-color: var(--ink);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.k-main,
+.k-player-main {
+  max-width: 1180px;
+  padding: 4px 24px 48px;
+}
+
+.k-player-main {
+  max-width: 640px;
+}
+
+form.k-card,
+.k-main > .k-card,
+.k-card.center,
+.k-lobby .k-card,
+.duel-columns > .k-card,
+.k-board-body .k-card,
+.k-final-list {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 22px 24px 24px;
+}
+
+.k-card h1,
+.k-board h1,
+.k-card h2 {
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+.k-card h1,
+.k-board h1 {
+  font-size: 24px;
+}
+
+.k-muted,
+.k-status {
+  font-size: 14px;
+}
+
+.k-label {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 16px 0 5px;
+}
+
+.k-input {
+  padding: 10px 12px;
+  border: 1.5px solid var(--rule);
+  background: #fff;
+  border-radius: var(--radius);
+}
+
+.k-input:focus {
+  border-color: var(--bol);
+  box-shadow: 0 0 0 3px rgba(29, 110, 80, .18);
+}
+
+.k-input::placeholder {
+  color: #9aa1a8;
+}
+
+.k-input.pin {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 32px;
+  padding: 8px 12px;
+}
+
+.k-error {
+  padding: 10px 12px;
+  border: 1.5px solid var(--pen);
+  border-radius: var(--radius);
+  background: #fbe3dc;
+  color: #7a2a20;
+  font-size: 14px;
+}
+
+.k-btn {
+  font: 500 15px var(--sans);
+  background: #fff;
+  border-radius: var(--radius);
+}
+
+.k-btn:hover {
+  background: var(--gekozen);
+}
+
+.k-btn.primary {
+  background: var(--bol);
+  border-color: var(--bol);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 0 var(--bol-donker);
+}
+
+.k-btn.primary:hover {
+  background: #23805e;
+  border-color: #23805e;
+}
+
+.k-btn.secondary {
+  background: #fff;
+  border-color: var(--rule);
+  color: var(--ink);
+}
+
+.k-btn:disabled,
+.k-btn.primary:disabled {
+  background: var(--paper-2);
+  border-color: var(--rule);
+  color: var(--muted);
+  box-shadow: none;
+}
+
+/* Keuzes: vakjes met een rondje dat een vinkje krijgt */
+.k-choice-grid {
+  border-top: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.k-choice {
+  border-bottom: 0;
+}
+
+.k-choice label {
+  padding: 8px 12px;
+  background: #fff;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  font-weight: 500;
+}
+
+.k-choice label:hover {
+  border-color: var(--ink);
+}
+
+.k-choice label::after {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--rule);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.k-choice input:checked + label {
+  border: 2px solid var(--ink);
+  background: var(--gekozen);
+  padding: 7.5px 11.5px;
+}
+
+.k-choice input:checked + label::after {
+  border-color: var(--ink);
+  box-shadow: none;
+  background: var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 13px no-repeat;
+}
+
+.k-choice label small {
+  font-weight: 400;
+}
+
+.k-choice label img {
+  width: 46px;
+  height: 38px;
+  object-fit: cover;
+  padding: 0;
+  background: var(--zee);
+  border-radius: 3px;
+}
+
+/* Lobby */
+.k-url {
+  font-family: var(--sans);
+  font-weight: 500;
+}
+
+.k-pin {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--bol);
+}
+
+.k-player-chip {
+  background: #fff;
+  border: 1.5px solid var(--rule);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-weight: 500;
+}
+
+.k-player-chip:hover {
+  border-color: var(--pen);
+  background: #fbe3dc;
+}
+
+/* Vraag */
+.k-question-head {
+  border-bottom: 1.5px dashed var(--rule);
+}
+
+.k-prompt,
+.k-reveal-title {
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+.k-reveal-title span {
+  color: var(--bol);
+}
+
+.k-timer {
+  font-family: var(--sans);
+  font-weight: 600;
+  background: #fff;
+}
+
+.k-timer.urgent {
+  background: #fbe3dc;
+}
+
+.k-answered strong {
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+.k-map-wrap,
+.k-player-map {
+  background: var(--zee);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Antwoorden. Elke optie heeft een vaste kleur, op het bord en op de
+   telefoon hetzelfde, zodat je ziet welke knop bij welk antwoord hoort. */
+.k-option {
+  align-items: center;
+  font: 500 17px var(--sans);
+  padding: 11px 14px;
+  border: 1.5px solid var(--rule);
+  background: #fff;
+  border-radius: var(--radius);
+}
+
+button.k-option:hover {
+  border-color: var(--ink);
+  background: var(--gekozen);
+}
+
+.k-option .k-shape {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper-2);
+}
+
+[data-color="0"] .k-shape { background: var(--geel); }
+[data-color="1"] .k-shape { background: var(--roze); }
+[data-color="2"] .k-shape { background: var(--lichtgroen); }
+[data-color="3"] .k-shape { background: var(--zee); }
+
+#map #questions > g.k-correct {
+  fill: var(--gekend);
+  fill-opacity: 1;
+  stroke: var(--bol);
+}
+
+#map #questions > g.Steden.k-correct,
+#map #questions > g.Hoofdsteden.k-correct,
+#map #questions > g.Plaatsen.k-correct {
+  fill: var(--bol);
+}
+
+/* Verdeling */
+.k-bar-count {
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+.k-bar-fill {
+  border-radius: 4px 4px 0 0;
+}
+
+.k-bar.correct .k-bar-fill {
+  background: var(--bol);
+}
+
+.k-bar.correct .k-bar-count {
+  color: var(--bol);
+}
+
+/* Scorebord: losse vakjes, de top drie in de kleuren van de kladblaadjes */
+.k-leaderboard {
+  border-top: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.k-leaderboard li {
+  align-items: center;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.k-leaderboard .k-rank {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--paper-2);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.k-leaderboard li:nth-child(1) .k-rank { background: var(--geel); }
+.k-leaderboard li:nth-child(2) .k-rank { background: var(--roze); }
+.k-leaderboard li:nth-child(3) .k-rank { background: var(--lichtgroen); }
+
+.k-leaderboard .k-delta {
+  color: var(--bol);
+  font-weight: 500;
+}
+
+.k-leaderboard .k-score {
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+.k-leaderboard li.me {
+  border: 2px solid var(--ink);
+  background: var(--gekozen);
+  padding: 7.5px 11.5px;
+}
+
+.k-leaderboard li.me .k-name {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Podium */
+.k-podium-block {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: var(--lichtgroen);
+}
+
+.k-podium-place[data-place="1"] .k-podium-block {
+  background: var(--geel);
+  color: var(--ink);
+}
+
+.k-podium-place[data-place="2"] .k-podium-block {
+  background: var(--roze);
+}
+
+.k-podium-name {
+  font-weight: 500;
+}
+
+/* Uitslag van een vraag op de telefoon */
+.k-result {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+.k-result h2,
+.k-points {
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+.k-result.good h2,
+.k-result.good .k-points {
+  color: var(--bol);
+}
+
+/* ---------------------------------------------------------------------
    Digibord
 
    Het bord (kahoot_host.html) wordt van een meter of acht afstand gelezen,
@@ -812,8 +1233,13 @@ button.k-option:active {
     padding-top: 34px;
   }
 
-  .bord .k-brand {
-    font-size: 32px;
+  .bord .brand img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .bord .brand span {
+    font-size: 34px;
   }
 
   .bord .k-pill {
@@ -982,8 +1408,13 @@ button.k-option:active {
     max-width: 2000px;
   }
 
-  .bord .k-brand {
-    font-size: 42px;
+  .bord .brand img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .bord .brand span {
+    font-size: 44px;
   }
 
   .bord .k-pill {
@@ -1121,4 +1552,16 @@ button.k-option:active {
   .bord .k-map-wrap svg {
     max-height: 64vh;
   }
+}
+
+/* Naast elkaar op het bord: geen extra ruimte boven het tweede vak. */
+.k-board-body .k-card + .k-card {
+  margin-top: 0;
+}
+
+/* Namen onder de staafjes afbreken bij een lettergreep, niet midden in een letter. */
+.k-bar-label {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
 }

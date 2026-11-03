@@ -1,24 +1,20 @@
-/* Oefenscherm: kaart groot links, vragen in smallere kolom rechts. */
-
-.progress {
-  width: 100%;
-  margin: 6px 0 24px;
-}
-
-.progress > span {
-  width: 0;
-  transition: width 0.4s ease;
-}
+/* Oefenscherm: kaart groot links, vraag en voortgang in een smallere kolom rechts. */
 
 .learn {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 32px;
   align-items: start;
+  margin-top: 4px;
+}
+
+.kaart-kolom {
+  min-width: 0;
 }
 
 .map {
-  padding: 16px;
+  position: relative;
+  padding: 0;
   min-height: 320px;
   display: flex;
   align-items: center;
@@ -28,22 +24,80 @@
 .map svg {
   width: 100%;
   height: auto;
-  max-height: 72vh;
+  max-height: 74vh;
   display: block;
 }
 
+/* Naam van de kaart linksboven op het kaartblad */
+.kaartblad-titel {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  z-index: 1;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  padding: 3px 12px 4px;
+  font-size: 16px;
+}
+
+.kaartblad-titel b {
+  font-weight: 600;
+}
+
+.kaartblad-titel span {
+  color: var(--muted);
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.legenda i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--grens);
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.legenda .l-vraag { background: var(--pen); }
+.legenda .l-goed { background: var(--gekend); }
+.legenda .l-fout { background: var(--roze); }
+.legenda .l-open { background: var(--zand); }
+
+/* Rechterkolom */
 .panel {
   min-width: 0;
 }
 
+.vraag {
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 18px 18px 16px;
+}
+
+.vraag[hidden] {
+  display: none;
+}
+
 .panel .question {
-  margin: 4px 0 18px;
-  line-height: 1.35;
+  margin: 4px 0 16px;
 }
 
 .panel-label {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* Meerkeuze */
@@ -53,34 +107,104 @@
   gap: 8px;
 }
 
-#multipleChoise > button {
+.antwoord {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   text-align: left;
-  font-size: 15px;
+  padding: 11px 12px;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  background: #fff;
+  font: 500 17px var(--sans);
+  color: var(--ink);
+}
+
+.antwoord:hover {
+  border-color: var(--ink);
+  background: var(--gekozen);
+}
+
+.antwoord kbd {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  display: grid;
+  place-items: center;
+  font: 500 13px var(--sans);
+  color: var(--muted);
 }
 
 /* Naam typen */
 .answer-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+}
+
+.answer-form .field {
+  font-size: 18px;
+  padding: 12px 14px;
 }
 
 .answer-form .actions {
-  margin-top: 4px;
+  margin-top: 0;
+}
+
+/* Voortgang */
+.voortgang {
+  margin-top: 24px;
+}
+
+.voortgang p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.progress > span {
+  width: 0;
+  transition: width 0.4s ease;
 }
 
 /* Klaar */
-#finished[hidden] {
-  display: none;
+#finished h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
 }
 
-#finished .rule-list {
-  margin-top: 12px;
+.uitslag {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
-#finished .rule-list > * {
-  padding: 10px 0;
+.uitslag > div {
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.uitslag span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.uitslag b {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+#xpBlok .feedback {
+  transform: none;
 }
 
 #QuestionBreakdown[hidden] {
@@ -88,13 +212,17 @@
 }
 
 #QuestionBreakdown {
-  margin-top: 18px;
+  margin-top: 16px;
   max-height: 320px;
   overflow-y: auto;
 }
 
-#QuestionBreakdown .rule-list > * {
-  padding: 8px 0;
+.overzicht .regel {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--track);
   font-size: 14px;
 }
 
@@ -102,15 +230,13 @@
   margin-top: 18px;
 }
 
-@media (max-width: 799px) {
+@media (max-width: 899px) {
   .learn {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
   }
 
   .map {
-    padding: 10px;
     min-height: 0;
   }
 
@@ -118,14 +244,7 @@
     max-height: 52vh;
   }
 
-  .topbar {
-    flex-wrap: wrap;
-    padding-top: 20px;
-    row-gap: 6px;
-  }
-
-  .topbar-right {
-    flex: 1 0 100%;
-    justify-content: space-between;
+  .legenda {
+    display: none;
   }
 }

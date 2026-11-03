@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="814" viewBox="0 0 900 814">
-  <g id="map"><style>.zee{fill:#dfeaf0}path{fill:#EDE6D6;stroke:#B9B1A3;stroke-width:.6}g[category="Wateren"] path{fill:#cfe2ea;stroke:none}</style>
+  <g id="map"><style>.zee{fill:#c4e0ee}path{fill:#f1e6cc;stroke:#8a8172;stroke-width:.6}g[category="Wateren"] path{fill:#c4e0ee;stroke:none}</style>
     <g class="background">
       <rect class="zee" width="900" height="814"/>
       <path d="M 820.2,781.0 L 819.3,781.4 L 820.2,780.3 L 820.8,780.3 Z"/>

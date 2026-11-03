@@ -22,8 +22,11 @@
         for (var i = 0; i < possibleAnswers.length; i++) {
             var button = document.createElement('button');
             button.type = 'button';
-            button.className = 'btn';
-            button.textContent = possibleAnswers[i];
+            button.className = 'antwoord';
+            var toets = document.createElement('kbd');
+            toets.textContent = i + 1;
+            button.appendChild(toets);
+            button.appendChild(document.createTextNode(possibleAnswers[i]));
             button.setAttribute('data-answer', possibleAnswers[i]);
 
             button.addEventListener('click', function() {
@@ -32,6 +35,17 @@
                 socket.emit('answerQuestion', {'awnser': answer, 'hashed':false, 'sessionToken': urlParams.get('sessionToken')});
             });
             multipleChoise.appendChild(button);
+        }
+    });
+
+    // Antwoorden kiezen met de cijfertoetsen 1 tot en met 4.
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+        if (event.target && /INPUT|TEXTAREA/.test(event.target.tagName)) return;
+        var nummer = parseInt(event.key, 10);
+        var knoppen = document.querySelectorAll('#multipleChoise > button');
+        if (nummer >= 1 && nummer <= knoppen.length) {
+            knoppen[nummer - 1].click();
         }
     });
 </script>

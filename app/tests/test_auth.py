@@ -74,7 +74,7 @@ r = c.post('/inloggen', data={'csrfToken': t4, 'email': 'f@example.com', 'passwo
 check('fout wachtwoord geweigerd', 'klopt niet' in r.get_data(as_text=True))
 r = c.post('/inloggen', data={'csrfToken': t4, 'email': 'f@example.com', 'password': 'wachtwoord1'},
            follow_redirects=True)
-check('inloggen lukt', 'Topo' in r.get_data(as_text=True) and r.status_code == 200)
+check('inloggen lukt', 'Ichtopia' in r.get_data(as_text=True) and r.status_code == 200)
 r = c.get('/account')
 check('/account bereikbaar na inloggen', r.status_code == 200 and 'Floris' in r.get_data(as_text=True))
 check('naam in de topbar', 'Floris' in c.get('/').get_data(as_text=True))

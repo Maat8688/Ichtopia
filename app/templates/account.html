@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mijn account · Topo</title>
+    <title>Mijn account · Ichtopia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}">
 </head>
 <body>
 
-<header class="page topbar">
-    <h1><a href="{{ url_for('main.index') }}">Topo</a></h1>
-    <span class="muted">Ichthus · 2026–27</span>
-</header>
+{% include 'partials/nav.html' %}
 
 <main class="page">
     <div class="account-form">
@@ -88,7 +85,7 @@
 
 <footer>
     <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · een account is niet verplicht</p>
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · een account is niet verplicht</p>
     </div>
 </footer>
 

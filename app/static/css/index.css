@@ -1,187 +1,376 @@
-/* Startscherm: uitleg en stappen bovenaan, keuzes links, kaartvoorbeeld rechts. */
+/* Startpagina: keuzes links in een paneel, rechts het kaartvoorbeeld met
+   daaronder de kladblaadjes (duel, ranglijst, met de klas). */
 
-/* Inleiding */
-.lead {
-  max-width: 620px;
-  margin: 20px 0 0;
-}
-
-.lead-text {
-  font-family: var(--serif);
-  font-size: 19px;
-  line-height: 1.45;
-}
-
-.steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 28px;
-  margin: 18px 0 0;
-  padding: 14px 0 0;
-  border-top: 0.5px solid var(--rule);
-  list-style: none;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.steps li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.step-nr {
-  font-family: var(--serif);
-  font-size: 16px;
-  color: var(--atlas);
-}
-
-/* Twee kolommen. De blokken staan expliciet in het raster, zodat het
-   kaartvoorbeeld tussen de kaartkeuze en de instellingen kan staan zonder
-   dat de volgorde in de HTML omgezet hoeft te worden. */
-.start-grid {
+.home {
   display: grid;
-  grid-template-columns: minmax(0, 560px) 340px;
-  gap: 32px 40px;
+  grid-template-columns: minmax(0, 470px) minmax(0, 1fr);
+  gap: 40px;
   align-items: start;
-  margin-top: 32px;
+  margin-top: 6px;
 }
 
-.block-maps {
-  grid-column: 1;
-  grid-row: 1;
-  min-width: 0;
+.keuzes h1 {
+  font-size: 22px;
+  margin-bottom: 2px;
 }
 
-.block-settings {
-  grid-column: 1;
-  grid-row: 2;
-  min-width: 0;
+.keuzes > .muted {
+  font-size: 15px;
 }
 
-.block-maps .section-label:first-child {
-  margin-top: 0;
-}
-
-.block-settings .section-label:first-child {
-  margin-top: 0;
-}
-
-.rule-list.maps .row {
-  padding: 14px 0;
+.keuzes .section-label:first-of-type {
+  margin-top: 20px;
 }
 
 #instellingen[hidden] {
   display: none;
 }
 
-#instellingen .rule-list .row {
-  padding: 12px 0;
+/* Kaartkeuze: klein plaatje, naam, aantal, rondje */
+.kaartrij {
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) auto 22px;
+  align-items: center;
+  gap: 12px !important;
+  padding: 6px 10px 6px 6px !important;
 }
 
-#formError {
-  margin-top: 12px;
+.kaartrij:has(input:checked) {
+  padding: 5.5px 9.5px 5.5px 5.5px !important;
 }
 
-.actions .muted {
+.kaartrij .mini {
+  width: 46px;
+  height: 38px;
+  object-fit: cover;
+  background: var(--zee);
+  border-radius: 3px;
+  display: block;
+}
+
+.kaartrij .status {
   white-space: nowrap;
 }
 
-/* Kaartvoorbeeld */
-.preview {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  position: sticky;
-  top: 24px;
+/* Vraagvorm: drie tegels met een plaatje */
+.vormen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.vorm {
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 10px 10px 9px;
+  cursor: pointer;
+}
+
+.vorm:hover {
+  border-color: var(--ink);
+}
+
+.vorm svg {
+  display: block;
+  height: 26px;
+  margin-bottom: 6px;
+}
+
+.vorm b {
+  display: block;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.vorm small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.vorm:has(input:checked) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.vorm:has(input:checked) small {
+  color: #c9d0d8;
+}
+
+.vorm:has(input:focus-visible),
+.chip:has(input:focus-visible) {
+  outline: 2px solid var(--bol);
+  outline-offset: 2px;
+}
+
+/* Onderdelen en niveau: aan/uit-knopjes */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1.5px solid var(--rule);
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 15px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chip:hover {
+  border-color: var(--ink);
+}
+
+.chip span {
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.chip:has(input:checked) {
+  border-color: var(--ink);
+  background: var(--gekozen);
+  font-weight: 500;
+}
+
+#formError {
+  margin-top: 14px;
+}
+
+.startbalk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1.5px dashed var(--rule);
+}
+
+.startbalk p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.startbalk p b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.startbalk .btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  flex: none;
+}
+
+/* Rechterkolom */
+.rechts {
+  display: grid;
+  gap: 34px;
   min-width: 0;
 }
 
-.preview-frame {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 1 / 1;
-  padding: 16px;
-  background: var(--paper-2);
-  border-radius: 6px;
+.kaartblad {
+  position: relative;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--zee);
+  overflow: hidden;
+  aspect-ratio: 5 / 4;
+}
+
+.kaartblad-titel {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  padding: 3px 12px 4px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.kaartblad-titel:empty {
+  display: none;
 }
 
 .preview-img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.preview-empty {
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
+/* Kladblaadjes */
+.blaadjes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px 24px;
 }
 
-.preview-caption {
-  margin-top: 10px;
-  min-height: 20px;
+.blaadje.breed {
+  grid-column: 1 / -1;
 }
 
-/* Smal scherm: kaartvoorbeeld boven de keuzes, minder hoog. */
-@media (max-width: 799px) {
-  .topbar {
-    padding-top: 22px;
-  }
-
-  .lead-text {
-    font-size: 17px;
-  }
-
-  .steps {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .start-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    margin-top: 26px;
-  }
-
-  /* Onder elkaar in de volgorde van de HTML: kaarten, voorbeeld, instellingen. */
-  .preview {
-    position: static;
-  }
-
-  /* Zolang er niets gekozen is, is een leeg kader hier alleen maar ruis. */
-  .preview.empty {
-    display: none;
-  }
-
-  .preview-frame {
-    aspect-ratio: 3 / 2;
-    padding: 10px;
-  }
+.blaadje .zacht {
+  color: rgba(28, 40, 54, .7);
+  font-size: 14px;
+  margin: -2px 0 6px;
 }
 
-/* Rijen die naar een andere pagina leiden: de klassikale quiz en het duel. */
-.klassikaal,
-.tegen-elkaar {
-  margin-top: 40px;
-  max-width: 560px;
+.blaadje p + p {
+  margin-top: 6px;
 }
 
-.klassikaal .row,
-.tegen-elkaar .row {
-  text-decoration: none;
-  padding: 14px 0;
+.blaadje .code {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  margin: 4px 0 12px;
 }
 
-.klassikaal .status,
-.tegen-elkaar .status {
-  color: var(--muted);
+.blaadje .btn {
+  margin-top: 6px;
+}
+
+.blaadje a.btn-donker,
+.btn-donker {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 0 #000;
+}
+
+.btn-donker:hover {
+  background: #2b3a4c;
+  border-color: #2b3a4c;
+  color: #fff;
+}
+
+.lijstje {
+  list-style: none;
+  margin: 4px 0 10px;
+  padding: 0;
+}
+
+.lijstje li {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(28, 40, 54, .18);
   font-size: 15px;
 }
 
-.klassikaal .row:hover .status,
-.tegen-elkaar .row:hover .status {
-  color: var(--ink);
+.lijstje li span {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
 }
 
+.lijstje li.ik {
+  font-weight: 600;
+}
+
+.pinform {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 10px;
+}
+
+.pinform .pin {
+  width: 150px;
+  padding: 7px 10px;
+  font: 600 22px var(--sans);
+  letter-spacing: .22em;
+  text-align: center;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+}
+
+.pinform .pin::placeholder {
+  color: #c4c0b4;
+}
+
+.pinform .btn {
+  margin-top: 0;
+}
+
+/* Smal scherm: alles onder elkaar, kaartvoorbeeld weg (de plaatjes in de
+   lijst laten al zien welke kaart het is). */
+@media (max-width: 899px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+  }
+
+  .kaartblad {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .paneel {
+    padding: 18px 16px 20px;
+  }
+
+  .vormen {
+    grid-template-columns: 1fr;
+  }
+
+  .vorm {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    column-gap: 10px;
+    align-items: center;
+  }
+
+  .vorm svg {
+    grid-row: span 2;
+    margin: 0;
+  }
+
+  .blaadjes {
+    grid-template-columns: 1fr;
+  }
+
+  .startbalk {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Telefoon: het aantal vragen onder de naam, zodat de naam niet hoeft te breken. */
+@media (max-width: 560px) {
+  .kaartrij {
+    grid-template-columns: 46px minmax(0, 1fr) 22px;
+    row-gap: 0 !important;
+  }
+
+  .kaartrij .mini,
+  .kaartrij input {
+    grid-row: 1 / span 2;
+  }
+
+  .kaartrij .status {
+    grid-column: 2;
+    grid-row: 2;
+    margin-left: 0;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  .kaartrij .row-note {
+    display: none;
+  }
+}
