@@ -103,13 +103,24 @@
       </section>
 
       {# ---------------------------------------------------------- Periode #}
-      <nav class="filters" aria-label="Periode">
+      {% set b = stats.bots %}
+      <nav class="filters" aria-label="Periode en bots">
         <span class="filter-label">Periode</span>
         {% for sleutel, naam in stats.periodes %}
-        <a class="filter{% if sleutel == stats.periode %} aan{% endif %}" href="{{ url_for('kahoot.statistieken', periode=sleutel) }}"{% if sleutel == stats.periode %} aria-current="true"{% endif %}>{{ naam }}</a>
+        <a class="filter{% if sleutel == stats.periode %} aan{% endif %}" href="{{ url_for('kahoot.statistieken', periode=sleutel, bots=b.modus) }}"{% if sleutel == stats.periode %} aria-current="true"{% endif %}>{{ naam }}</a>
         {% endfor %}
+        <span class="filter-label filter-tweede">Bots</span>
+        <a class="filter{% if b.modus == 'weg' %} aan{% endif %}" href="{{ url_for('kahoot.statistieken', periode=stats.periode, bots='weg') }}"{% if b.modus == 'weg' %} aria-current="true"{% endif %}>Weglaten</a>
+        <a class="filter{% if b.modus == 'mee' %} aan{% endif %}" href="{{ url_for('kahoot.statistieken', periode=stats.periode, bots='mee') }}"{% if b.modus == 'mee' %} aria-current="true"{% endif %}>Meenemen</a>
         <span class="filter-bereik">{{ stats.van }} t/m {{ stats.tot }}</span>
       </nav>
+      {% if b.weergaven %}
+      <p class="bot-regel">
+        {% if b.modus == 'weg' %}Weggelaten: {{ b.weergaven }} pagina's{% if b.weergavenPct is not none %} ({{ b.weergavenPct }}% van alles){% endif %} van ongeveer {{ b.bezoekers }} bots.
+        {% else %}Inclusief {{ b.weergaven }} pagina's{% if b.weergavenPct is not none %} ({{ b.weergavenPct }}%){% endif %} van ongeveer {{ b.bezoekers }} bots.{% endif %}
+        <a class="link" href="#bots">Wat telt als bot?</a>
+      </p>
+      {% endif %}
 
       {% if stats.leeg %}
       <p class="melding">In deze periode is nog niets bijgehouden. Vanaf nu telt elk bezoek, elke oefensessie en
@@ -156,8 +167,14 @@
       <section class="kaart-vak">
         <h2>Bezoekers per dag</h2>
         <p class="uitleg">Verschillende bezoekers op een dag. Wie op één dag vaker komt, telt die dag één keer.</p>
-        {{ kolomgrafiek(grafieken.bezoekers, [('bezoekers', 'Bezoekers', 'r1')], 'Bezoekers per dag') }}
-        {{ alsTabel(stats.perDag, [('Dag', 'naam'), ('Bezoekers', 'bezoekers'), ("Pagina's", 'weergaven')]) }}
+        {% if b.modus == 'mee' %}
+        <p class="legenda"><span><i class="r1"></i>mensen</span><span><i class="r2"></i>bots</span></p>
+        {{ kolomgrafiek(grafieken.bezoekers, [('mensen', 'Mensen', 'r1'), ('bots', 'Bots', 'r2')], 'Bezoekers per dag') }}
+        {{ alsTabel(stats.perDag, [('Dag', 'naam'), ('Mensen', 'mensen'), ('Bots', 'bots'), ("Pagina's", 'weergaven')]) }}
+        {% else %}
+        {{ kolomgrafiek(grafieken.bezoekers, [('mensen', 'Bezoekers', 'r1')], 'Bezoekers per dag') }}
+        {{ alsTabel(stats.perDag, [('Dag', 'naam'), ('Bezoekers', 'mensen'), ("Pagina's", 'weergaven')]) }}
+        {% endif %}
       </section>
 
       <section class="kaart-vak">
@@ -398,9 +415,41 @@
         {{ balken(stats.paginas, ' keer bekeken') }}
       </section>
 
+      {# ---------------------------------------------------------- Bots #}
+      <section class="kaart-vak" id="bots">
+        <h2>Bots</h2>
+        <p class="uitleg">Een bot is een programma dat de site bezoekt in plaats van een mens: zoekmachines,
+          AI-crawlers, het voorbeeldje dat WhatsApp maakt als iemand de link deelt, scripts en scanners. Ze tellen
+          {% if b.modus == 'weg' %}nu niet mee in de rest van de pagina{% else %}nu mee in de rest van de pagina{% endif %}.</p>
+        <div class="twee gelijk binnen">
+          <div>
+            <div class="tegels klein">
+              <div class="tegel"><span class="tegel-label">Pagina's van bots</span><span class="tegel-waarde">{{ b.weergaven }}</span>
+                <span class="tegel-bij">{% if b.weergavenPct is not none %}{{ b.weergavenPct }}% van alle bekeken pagina's{% else %}nog geen bezoeken{% endif %}</span></div>
+              <div class="tegel"><span class="tegel-label">Bots per dag, opgeteld</span><span class="tegel-waarde">{{ b.bezoekers }}</span>
+                {% if b.sessies %}<span class="tegel-bij">en {{ b.sessies }} oefensessies</span>{% endif %}</div>
+            </div>
+            <h3>Waaraan herkend</h3>
+            {{ balken(b.redenen, " pagina's", leeg='Geen bots gezien in deze periode.') }}
+          </div>
+          <div>
+            <h3>Hoe we een bot herkennen</h3>
+            <ul class="uitleg-lijst">
+              <li><b>Naam.</b> Elke browser stuurt mee hoe hij heet. Bots zeggen dat meestal eerlijk: Googlebot,
+                GPTBot, WhatsApp, curl, Python. Dan weten we ook wat voor bot het is.</li>
+              <li><b>Geen taal.</b> Een echte browser vertelt altijd welke taal je wilt. Scripts doen dat bijna nooit.</li>
+              <li><b>Te snel.</b> Meer dan 40 pagina's in één minuut van dezelfde bezoeker doet geen mens.
+                Het schoolnetwerk telt hiervoor niet mee: daar zitten soms een hele klas op dezelfde soort laptop.</li>
+            </ul>
+            <p class="leeg">Het blijft een schatting. Een bot die zich voordoet als gewone browser glipt erdoor,
+              en bezoeken van voor deze versie zijn alleen op snelheid te herkennen.</p>
+          </div>
+        </div>
+      </section>
+
       <p class="privacy">Wat hier staat, is geteld zonder namen, e-mailadressen of IP-adressen. Een bezoeker krijgt per
         dag een code die de volgende dag niet meer te herkennen is, dus je kunt zien hoeveel mensen er waren, maar
-        niet wie. De ruwe cijfers staan ook in <a class="link" href="{{ url_for('kahoot.statistiekenJson', periode=stats.periode) }}">statistieken.json</a>.</p>
+        niet wie. De ruwe cijfers staan ook in <a class="link" href="{{ url_for('kahoot.statistiekenJson', periode=stats.periode, bots=b.modus) }}">statistieken.json</a>.</p>
     </main>
 
     <div class="tip" id="tip" role="status" hidden><strong id="tipWaarde"></strong><span id="tipTitel"></span></div>

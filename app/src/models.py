@@ -68,6 +68,9 @@ class Gebruik(db.Model):
     land = db.Column(db.String(2))
     provincie = db.Column(db.String(20))
     school = db.Column(db.Boolean)               # op het schoolnetwerk (als SCHOOL_NETWERK is ingesteld)
+    # Leeg = waarschijnlijk een mens. Anders waarom het op een bot lijkt
+    # ('zoekmachine', 'script', 'geen taal', ...); zie gebruik.botReden().
+    bot = db.Column(db.String(24))
 
     def __repr__(self):
         return f'<Gebruik {self.soort} {self.tijd}>'

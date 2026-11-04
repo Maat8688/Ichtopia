@@ -179,9 +179,11 @@ def statistieken():
     """Wie is er nu bezig, en hoe is de site de afgelopen tijd gebruikt?
     Alleen te zien met de docentcode."""
     from .gebruik import bovenkantPad, kolommen, overzicht
-    data = overzicht(request.args.get('periode', '30'))
+    bots = 'mee' if request.args.get('bots') == 'mee' else 'weg'
+    data = overzicht(request.args.get('periode', '30'), bots=bots)
     grafieken = {
-        'bezoekers': kolommen(data['perDag'], ['bezoekers']),
+        # Met bots erbij: mensen en bots op elkaar, zodat je ziet hoeveel het scheelt.
+        'bezoekers': kolommen(data['perDag'], ['mensen', 'bots'] if bots == 'mee' else ['mensen']),
         'sessies': kolommen(data['perDag'], ['afgerond', 'nietAfgerond']),
         'weekdag': kolommen(data['perWeekdag'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
         'uur': kolommen(data['perUur'], ['aantal'], breedte=720, hoogte=180, labelElke=2),
@@ -202,7 +204,8 @@ def statistiekenJson():
     if request.args.get('alleen') == 'nu':
         return nu
     from .gebruik import overzicht
-    data = overzicht(request.args.get('periode', '30'))
+    data = overzicht(request.args.get('periode', '30'),
+                     bots='mee' if request.args.get('bots') == 'mee' else 'weg')
     for provincie in data['plekken']['provincies'] + data['plekken']['gerangschikt']:
         provincie.pop('paden', None)          # de vormen van de kaart horen niet bij de cijfers
     return {**nu, 'overzicht': data}

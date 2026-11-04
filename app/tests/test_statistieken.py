@@ -47,7 +47,8 @@ def rijen(soort=None):
         return q.all()
 
 
-telefoon = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148'}
+telefoon = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148',
+            'Accept-Language': 'nl-NL,nl;q=0.9'}
 c = app.test_client()
 
 # --- Afgeschermd ---------------------------------------------------------
@@ -69,7 +70,7 @@ alles = json.dumps([{k: str(getattr(b, k)) for k in ('bezoeker', 'pagina', 'appa
 check('geen IP-adres opgeslagen', '127.0.0.1' not in alles)
 
 # --- Oefensessie ---------------------------------------------------------
-r = c.post('/', data={'KaartInput': 'Europa', 'mode': 'MultipleChoise', 'questions': ['Landen']})
+r = c.post('/', data={'KaartInput': 'Europa', 'mode': 'MultipleChoise', 'questions': ['Landen']}, headers=telefoon)
 check('oefensessie gestart', r.status_code == 302)
 start = rijen('oefenen_start')
 check('start vastgelegd met kaart, vorm en onderdelen',

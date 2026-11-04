@@ -164,6 +164,33 @@
   color: var(--muted);
 }
 
+.filter-tweede {
+  margin-left: 14px;
+}
+
+.bot-regel {
+  margin: -8px 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.uitleg-lijst {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.uitleg-lijst li + li {
+  margin-top: 6px;
+}
+
+@media (max-width: 560px) {
+  .filter-tweede {
+    margin-left: 0;
+  }
+}
+
 /* Vakken met een grafiek */
 .kaart-vak {
   background: #fffdf8;

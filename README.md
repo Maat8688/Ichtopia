@@ -112,5 +112,22 @@ Meerdere adressen of reeksen mogen, met komma's: `145.97.12.0/24,2001:db8::/48`.
 Het adres van de school vind je door op school naar bijvoorbeeld
 https://ifconfig.me te gaan.
 
-Testen: `python tests/test_statistieken.py` en `python tests/test_locatie.py`
-(vanuit `app`; de tweede heeft `pip install mmdb-writer` nodig).
+### Bots
+
+Bovenaan `/statistieken` staat een knop **Bots: Weglaten / Meenemen**.
+Standaard worden bots weggelaten. Als bot telt (`botReden()` in
+`src/gebruik.py`):
+
+- een bezoeker die zichzelf een bot noemt in de browsernaam: zoekmachines,
+  AI-crawlers, linkvoorbeelden (WhatsApp, Discord), SEO-crawlers,
+  monitoringdiensten, headless browsers en scripts (curl, Python);
+- een browser die geen taal meestuurt (echte browsers doen dat altijd);
+- meer dan 40 pagina's in één minuut van dezelfde bezoeker. Het
+  schoolnetwerk telt daarvoor niet mee.
+
+De reden staat bij elk bezoek in de kolom `bot`; onderaan de pagina staat
+per reden hoeveel pagina's er werden weggelaten. Bezoeken van voor deze
+versie zijn alleen aan de snelheid te herkennen.
+
+Testen: `python tests/test_statistieken.py`, `python tests/test_locatie.py`
+en `python tests/test_bots.py` (vanuit `app`; `test_locatie.py` heeft `pip install mmdb-writer` nodig).

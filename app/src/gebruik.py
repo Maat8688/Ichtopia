@@ -85,6 +85,55 @@ def apparaatSoort(browser: str) -> str:
     return 'computer'
 
 
+# ----------------------------------------------------------------------
+# Bots herkennen
+# ----------------------------------------------------------------------
+# Op volgorde: de eerste die past, is de reden. Bots noemen zichzelf meestal
+# in de browsernaam (User-Agent); daar kijken we eerst naar.
+BOT_SOORTEN = [
+    ('AI-crawler', r'GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|anthropic-ai|CCBot|PerplexityBot'
+                   r'|Bytespider|Amazonbot|Applebot-Extended|Google-Extended|meta-externalagent|cohere-ai'
+                   r'|Diffbot|ImagesiftBot|YouBot'),
+    ('zoekmachine', r'Googlebot|Google-InspectionTool|AdsBot-Google|Mediapartners-Google|bingbot|BingPreview'
+                    r'|Applebot|DuckDuckBot|YandexBot|Baiduspider|Sogou|Exabot|SeznamBot|Qwantbot|ia_archiver'),
+    ('linkvoorbeeld', r'facebookexternalhit|facebookcatalog|WhatsApp|TelegramBot|Discordbot|Slackbot'
+                      r'|Twitterbot|LinkedInBot|SkypeUriPreview|Pinterest|redditbot|Embedly|vkShare|Iframely'),
+    ('SEO-crawler', r'AhrefsBot|SemrushBot|MJ12bot|DotBot|PetalBot|Screaming Frog|rogerbot|BLEXBot'
+                    r'|DataForSeoBot|serpstatbot|SeekportBot'),
+    ('monitor', r'UptimeRobot|Pingdom|StatusCake|Site24x7|Better ?Uptime|Uptime-Kuma|Freshping'
+                r'|check_http|nagios|zabbix|monitoring'),
+    ('headless browser', r'HeadlessChrome|PhantomJS|Puppeteer|Playwright|Selenium|Lighthouse|WebdriverIO'),
+    ('script', r'^curl/|Wget|python-requests|python-urllib|Python/|httpx|aiohttp|Go-http-client|Java/|okhttp'
+               r'|libwww|Scrapy|node-fetch|axios|undici|PostmanRuntime|Insomnia|HTTPie|Apache-HttpClient'
+               r'|^Ruby|PHP/|Guzzle|masscan|zgrab|Nmap|nuclei|sqlmap|Nikto|Expanse|Censys'),
+    ('andere bot', r'(?<![a-z])(?!cubot)[a-z]*(bot|crawler|spider)(?![a-z])|slurp|archiver|scanner'),
+]
+_BOT_PATRONEN = [(reden, re.compile(patroon, re.I)) for reden, patroon in BOT_SOORTEN]
+
+# Gedrag: zoveel pagina's binnen een minuut van een bezoeker doet geen mens.
+TE_SNEL_PER_MINUUT = 40
+
+
+def botReden(browser: str | None, taal: str | None) -> str | None:
+    """Waarom dit verzoek op een bot lijkt, of None als het een mens lijkt."""
+    browser = (browser or '').strip()
+    if len(browser) < 10:
+        return 'geen browsernaam'
+    for reden, patroon in _BOT_PATRONEN:
+        if patroon.search(browser):
+            return reden
+    if 'Mozilla/' not in browser and 'Opera/' not in browser:
+        return 'script'
+    # Een echte browser zegt altijd welke taal je wilt. Scripts bijna nooit.
+    if not (taal or '').strip():
+        return 'geen taal'
+    return None
+
+
+def botVanVerzoek() -> str | None:
+    return botReden(request.headers.get('User-Agent'), request.headers.get('Accept-Language'))
+
+
 def paginaNaam(pad: str) -> str | None:
     for patroon, naam in PAGINAS:
         if patroon.match(pad):
@@ -112,7 +161,12 @@ def legSessie(soort: str, sessie, **velden):
     """Een oefensessie die begint of klaar is, met wat erbij hoort."""
     try:
         bezoeker, apparaat = bezoekerCode(), apparaatSoort(request.headers.get('User-Agent'))
-        plek = waarVandaan()
+        # Het begin komt binnen via een gewoon formulier; het afmaken via de
+        # websocket, en daar stuurt niet elke browser een taal mee. Daarom
+        # erft het afmaken het oordeel van het begin.
+        if soort == 'oefenen_start':
+            sessie.bot = botVanVerzoek()
+        plek = {**waarVandaan(), 'bot': getattr(sessie, 'bot', None)}
     except RuntimeError:            # buiten een verzoek, bijvoorbeeld in een test
         bezoeker, apparaat, plek = None, None, {}
     onderdelen = sorted({q.category for q in sessie.questions if q.category})
@@ -152,7 +206,8 @@ def waarVandaan() -> dict:
 
 
 # Kolommen die er later bij zijn gekomen: (naam, type in SQL).
-LATERE_KOLOMMEN = [('land', 'VARCHAR(2)'), ('provincie', 'VARCHAR(20)'), ('school', 'BOOLEAN')]
+LATERE_KOLOMMEN = [('land', 'VARCHAR(2)'), ('provincie', 'VARCHAR(20)'), ('school', 'BOOLEAN'),
+                   ('bot', 'VARCHAR(24)')]
 
 
 def zorgVoorKolommen():
@@ -188,7 +243,7 @@ def registreerBezoeken(app):
                 if naam:
                     leg('bezoek', pagina=naam, bezoeker=bezoekerCode(),
                         apparaat=apparaatSoort(request.headers.get('User-Agent')),
-                        **waarVandaan())
+                        bot=botVanVerzoek(), **waarVandaan())
         except Exception:
             app.logger.warning('Bezoek niet geteld', exc_info=True)
         return response
@@ -233,7 +288,7 @@ def _gerangschikt(teller: Counter, max_: int | None = None) -> list[dict]:
     return rijen
 
 
-def overzicht(periode: str = '30') -> dict:
+def overzicht(periode: str = '30', bots: str = 'weg') -> dict:
     from .models import Gebruik
 
     dagen = PERIODES.get(periode, 30)
@@ -247,9 +302,15 @@ def overzicht(periode: str = '30') -> dict:
     if not dagen:
         eersteDag = _lokaal(rijen[0].tijd).date() if rijen else vandaag
 
-    per = defaultdict(list)
     for rij in rijen:
         rij.lokaal = _lokaal(rij.tijd)
+    botInfo = _markeerBots(rijen)
+    metBots = bots == 'mee'
+    if not metBots:
+        rijen = [r for r in rijen if not r.botReden]
+
+    per = defaultdict(list)
+    for rij in rijen:
         per[rij.soort].append(rij)
     bezoeken, gestart, klaar = per['bezoek'], per['oefenen_start'], per['oefenen_klaar']
     quizStart, quizKlaar, quizGemaakt = per['quiz_gestart'], per['quiz_klaar'], per['quiz_aangemaakt']
@@ -266,6 +327,8 @@ def overzicht(periode: str = '30') -> dict:
     perDag = [{
         'datum': d.isoformat(), 'label': _asLabel(d), 'naam': _dagLabel(d),
         'bezoekers': len(bezoekersPerDag.get(d, ())),
+        'mensen': len(botInfo['mensenPerDag'].get(d, ())),
+        'bots': len(botInfo['botsPerDag'].get(d, ())),
         'weergaven': 0,
         'gestart': gestartPerDag.get(d, 0),
         'afgerond': min(klaarPerDag.get(d, 0), gestartPerDag.get(d, 0)),
@@ -353,6 +416,7 @@ def overzicht(periode: str = '30') -> dict:
     bezoekersTotaal = sum(len(v) for v in bezoekersPerDag.values())
     plekken = plekOverzicht(bezoeken, gestart, eersteDag if dagen else None)
     return {
+        'bots': {**botInfo['samenvatting'], 'modus': 'mee' if metBots else 'weg'},
         'plekken': plekken,
         'periode': periode if periode in PERIODES else '30',
         'periodes': [('7', '7 dagen'), ('30', '30 dagen'), ('90', '90 dagen'), ('alles', 'Alles')],
@@ -394,6 +458,50 @@ def overzicht(periode: str = '30') -> dict:
                          'aantal': sum(1 for q in quizStart if q.spelers and van <= q.spelers < tot)}
                         for naam, van, tot in [('1–5', 1, 6), ('6–15', 6, 16), ('16–25', 16, 26),
                                                ('26–35', 26, 36), ('> 35', 36, 10 ** 6)]],
+    }
+
+
+def _markeerBots(rijen) -> dict:
+    """Zet bij elke rij `botReden`: wat er bij het bezoek is vastgesteld, of
+    'te snel' als dezelfde bezoeker meer dan TE_SNEL_PER_MINUUT pagina's in een
+    minuut opvroeg. Het schoolnetwerk telt daar niet voor mee: daar zitten
+    soms dertig leerlingen op dezelfde soort laptop, en die lijken dan op een
+    enkele bezoeker. Geeft de tellingen over bots terug."""
+    perMinuut = Counter()
+    for r in rijen:
+        r.botReden = getattr(r, 'bot', None)
+        if r.soort == 'bezoek' and r.bezoeker and not r.school:
+            perMinuut[(r.bezoeker, r.lokaal.replace(second=0, microsecond=0))] += 1
+    teSnel = {(code, minuut.date()) for (code, minuut), n in perMinuut.items() if n > TE_SNEL_PER_MINUUT}
+    for r in rijen:
+        if not r.botReden and r.bezoeker and (r.bezoeker, r.lokaal.date()) in teSnel \
+                and r.soort in ('bezoek', 'oefenen_start', 'oefenen_klaar'):
+            r.botReden = 'te snel'
+
+    mensenPerDag, botsPerDag = defaultdict(set), defaultdict(set)
+    redenen = Counter()
+    weergaven = botWeergaven = 0
+    for r in rijen:
+        if r.soort != 'bezoek':
+            continue
+        weergaven += 1
+        if r.botReden:
+            botWeergaven += 1
+            redenen[r.botReden] += 1
+        if r.bezoeker:
+            (botsPerDag if r.botReden else mensenPerDag)[r.lokaal.date()].add(r.bezoeker)
+    for dag, codes in mensenPerDag.items():
+        botsPerDag[dag] -= codes            # wie ook als mens langskwam, telt als mens
+    return {
+        'mensenPerDag': mensenPerDag,
+        'botsPerDag': botsPerDag,
+        'samenvatting': {
+            'weergaven': botWeergaven,
+            'weergavenPct': _procent(botWeergaven, weergaven),
+            'bezoekers': sum(len(v) for v in botsPerDag.values()),
+            'sessies': sum(1 for r in rijen if r.soort == 'oefenen_start' and r.botReden),
+            'redenen': _gerangschikt(redenen),
+        },
     }
 
 

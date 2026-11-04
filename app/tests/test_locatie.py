@@ -86,7 +86,9 @@ check('alle provincienamen staan in de kaart', all(p['paden'] for p in locatie.p
 def bezoek(ip, n=1, pad='/'):
     for i in range(n):
         c = app.test_client()
-        c.get(pad, environ_base={'REMOTE_ADDR': ip}, headers={'User-Agent': f'browser-{ip}-{i}'})
+        c.get(pad, environ_base={'REMOTE_ADDR': ip},
+              headers={'User-Agent': f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120 test-{ip}-{i}',
+                       'Accept-Language': 'nl-NL'})
 
 
 bezoek('31.151.10.7', 7)       # 7 verschillende bezoekers uit Gelderland
