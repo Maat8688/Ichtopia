@@ -111,6 +111,12 @@ class mapSession():
         self.mapName = None
         self.sessionMode = sessionMode
         self.correctThreshold = 0.5
+        # Toetsmodus (zie startToets): elke vraag een keer, zonder te zeggen of
+        # het goed was, en aan het eind een cijfer.
+        self.toets = False
+        self.toetsVolgorde: list[int] = []
+        self.toetsPositie = 0
+        self.toetsAntwoorden: list[dict] = []
 
     def touch(self):
         """Onthoud dat er zojuist nog iemand met deze sessie bezig was."""
@@ -196,6 +202,72 @@ class mapSession():
             "questionBreakdown": questionBreakdown
         }
 
+
+    # ------------------------------------------------------------------
+    # Toetsmodus
+    # ------------------------------------------------------------------
+    def startToets(self, aantal: int | None = None):
+        """Maak er een toets van: `aantal` vragen (of alle) in een vaste,
+        willekeurige volgorde. Elke vraag komt precies een keer."""
+        self.toets = True
+        volgorde = list(range(len(self.questions)))
+        random.shuffle(volgorde)
+        if aantal:
+            volgorde = volgorde[:max(1, min(aantal, len(volgorde)))]
+        self.toetsVolgorde = volgorde
+        self.toetsPositie = 0
+        self.toetsAntwoorden = []
+        self.currentQuestionIndex = volgorde[0] if volgorde else -1
+
+    @property
+    def toetsTotaal(self) -> int:
+        return len(self.toetsVolgorde)
+
+    def beantwoordToets(self, awnser, hashed: bool) -> bool:
+        """Kijk het antwoord na en onthoud het. Geeft niets terug aan de
+        leerling: dat komt pas bij de uitslag."""
+        vraag = self.currentQuestion
+        goed = self.awnserQuestion(awnser, hashed)
+        if hashed:
+            # Bij aanwijzen komt het (gehashte) id van het aangeklikte gebied
+            # binnen; zoek op welke plek dat was.
+            namen = {self.hash(q.id): q.displayName for q in self.questions}
+            gegeven = namen.get(str(awnser), 'een andere plek')
+        else:
+            gegeven = str(awnser).strip()[:60]
+        self.toetsAntwoorden.append({
+            'id': vraag.id, 'vraag': vraag.displayName, 'onderdeel': vraag.category,
+            'gegeven': gegeven, 'goed': goed,
+        })
+        return goed
+
+    def volgendeToetsvraag(self) -> bool:
+        """Naar de volgende vraag. True als de toets klaar is."""
+        self.toetsPositie += 1
+        if self.toetsPositie >= len(self.toetsVolgorde):
+            self.finished = True
+            return True
+        self.currentQuestionIndex = self.toetsVolgorde[self.toetsPositie]
+        return False
+
+    def toetsVoortgang(self) -> dict:
+        return {'beantwoord': len(self.toetsAntwoorden), 'totaal': self.toetsTotaal}
+
+    def toetsUitslag(self) -> dict:
+        """Het cijfer en wat er fout ging. Cijfer zoals op school gebruikelijk:
+        1 + 9 x (goed / totaal), op een decimaal."""
+        totaal = self.toetsTotaal
+        goed = sum(1 for a in self.toetsAntwoorden if a['goed'])
+        cijfer = round(1 + 9 * goed / totaal, 1) if totaal else 1.0
+        return {
+            'goed': goed,
+            'totaal': totaal,
+            'cijfer': cijfer,
+            'voldoende': cijfer >= 5.5,
+            'tijd': (datetime.now() - self.startTimestamp).seconds,
+            'fouten': [{'vraag': a['vraag'], 'gegeven': a['gegeven'], 'onderdeel': a['onderdeel']}
+                       for a in self.toetsAntwoorden if not a['goed']],
+        }
 
     def hash(self, awnser:str):
         if self.antiCheat:

@@ -190,6 +190,7 @@ def statistieken():
         'treffers': kolommen(data['perTreffers'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
         'duur': kolommen(data['perDuur'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
         'quizGrootte': kolommen(data['quizGrootte'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
+        'cijfers': kolommen(data['toetsen']['perCijfer'], ['aantal'], breedte=360, hoogte=180, labelElke=1),
     }
     return render_template('statistieken.html', **verzamelStatistieken(), stats=data,
                            grafieken=grafieken, pad=bovenkantPad)

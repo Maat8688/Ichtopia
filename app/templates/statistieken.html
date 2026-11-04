@@ -376,7 +376,33 @@
         {% endif %}
       </section>
 
-      {# ---------------------------------------------------------- Klassikaal #}
+      {# ---------------------------------------------------------- Toetsen #}
+      {% set tt = stats.toetsen %}
+      <section class="kaart-vak">
+        <h2>Toetsen</h2>
+        <p class="uitleg">De toetsmodus: elke vraag een keer, zonder tussendoor te horen of het goed was, en een
+          cijfer aan het eind (1 + 9 &times; goed / totaal). Telt niet mee bij het oefenen hierboven.</p>
+        <div class="tegels klein">
+          <div class="tegel"><span class="tegel-label">Gemaakt</span><span class="tegel-waarde">{{ tt.gemaakt }}</span>
+            {% if tt.begonnen > tt.gemaakt %}<span class="tegel-bij">{{ tt.begonnen - tt.gemaakt }} niet afgemaakt</span>{% endif %}</div>
+          <div class="tegel"><span class="tegel-label">Gemiddeld cijfer</span><span class="tegel-waarde">{{ of(tt.gemiddeld) }}</span></div>
+          <div class="tegel"><span class="tegel-label">Voldoende</span><span class="tegel-waarde">{{ of(tt.voldoendePct, '%') }}</span>
+            <span class="tegel-bij">5,5 of hoger</span></div>
+        </div>
+        <div class="twee gelijk binnen">
+          <div>
+            <h3>Cijfers</h3>
+            {{ kolomgrafiek(grafieken.cijfers, [('aantal', 'Toetsen', 'r1')], 'Cijfers van toetsen') }}
+            {{ alsTabel(tt.perCijfer, [('Cijfer', 'label'), ('Toetsen', 'aantal')]) }}
+          </div>
+          <div>
+            <h3>Met welke kaart</h3>
+            {{ balken(tt.kaarten, ' toetsen', leeg='Nog geen toets gemaakt.') }}
+          </div>
+        </div>
+      </section>
+
+
       <section class="kaart-vak">
         <h2>Klassikale quizzen</h2>
         <div class="tegels klein">

@@ -181,3 +181,22 @@
   color: var(--ink);
 }
 
+
+/* Aantal vragen bij een toets */
+.toets-aantal {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+}
+
+.toets-aantal[hidden] {
+  display: none;
+}
+
+.toets-aantal select.field {
+  width: auto;
+  min-width: 90px;
+  padding: 4px 0;
+  cursor: pointer;
+}

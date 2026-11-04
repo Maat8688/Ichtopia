@@ -170,24 +170,31 @@ def legSessie(soort: str, sessie, **velden):
     except RuntimeError:            # buiten een verzoek, bijvoorbeeld in een test
         bezoeker, apparaat, plek = None, None, {}
     onderdelen = sorted({q.category for q in sessie.questions if q.category})
+    velden.setdefault('vragen', sessie.toetsTotaal if getattr(sessie, 'toets', False) else len(sessie.questions))
     leg(soort,
         bezoeker=bezoeker, apparaat=apparaat, **plek,
         kaart=sessie.mapName, vorm=VORMEN.get(sessie.sessionMode, str(sessie.sessionMode)),
         onderdelen=','.join(onderdelen)[:200], niveau=getattr(sessie, 'niveau', None),
-        vragen=len(sessie.questions), **velden)
+        toets=True if getattr(sessie, 'toets', False) else None, **velden)
 
 
-def legKlaar(sessie, uitslag: dict):
-    """Afgemaakte oefensessie: pogingen, duur en welke plekken fout gingen."""
+def legKlaar(sessie, uitslag: dict, cijfer: float | None = None):
+    """Afgemaakte oefensessie of toets: pogingen, duur, welke plekken fout
+    gingen, en bij een toets het cijfer."""
     fout = {}
     for vraag in uitslag.get('questionBreakdown', []):
         extra = int(vraag.get('tries', 0)) - 1
         if extra > 0:
             fout[str(vraag.get('name'))] = extra
+    velden = {}
+    if getattr(sessie, 'toets', False):
+        # Bij een toets komt elke vraag een keer: 'fout' is dan welke er fout waren.
+        fout = {str(a['id']): 1 for a in sessie.toetsAntwoorden if not a['goed']}
+        velden = {'cijfer': int(round((cijfer or 1) * 10)), 'vragen': sessie.toetsTotaal}
     legSessie('oefenen_klaar', sessie,
               pogingen=int(uitslag.get('totalGuesses') or 0),
               duur=int(uitslag.get('time') or 0),
-              fout=json.dumps(fout, ensure_ascii=False) if fout else None)
+              fout=json.dumps(fout, ensure_ascii=False) if fout else None, **velden)
 
 
 def legQuiz(soort: str, game, spelers: int | None = None):
@@ -207,7 +214,7 @@ def waarVandaan() -> dict:
 
 # Kolommen die er later bij zijn gekomen: (naam, type in SQL).
 LATERE_KOLOMMEN = [('land', 'VARCHAR(2)'), ('provincie', 'VARCHAR(20)'), ('school', 'BOOLEAN'),
-                   ('bot', 'VARCHAR(24)')]
+                   ('bot', 'VARCHAR(24)'), ('toets', 'BOOLEAN'), ('cijfer', 'INTEGER')]
 
 
 def zorgVoorKolommen():
@@ -312,7 +319,13 @@ def overzicht(periode: str = '30', bots: str = 'weg') -> dict:
     per = defaultdict(list)
     for rij in rijen:
         per[rij.soort].append(rij)
-    bezoeken, gestart, klaar = per['bezoek'], per['oefenen_start'], per['oefenen_klaar']
+    bezoeken = per['bezoek']
+    # Toetsen apart: daar komt elke vraag een keer, dus 'meteen goed' en de
+    # duur betekenen iets anders dan bij oefenen.
+    gestart = [r for r in per['oefenen_start'] if not getattr(r, 'toets', None)]
+    klaar = [r for r in per['oefenen_klaar'] if not getattr(r, 'toets', None)]
+    toetsStart = [r for r in per['oefenen_start'] if getattr(r, 'toets', None)]
+    toetsKlaar = [r for r in per['oefenen_klaar'] if getattr(r, 'toets', None) and r.cijfer is not None]
     quizStart, quizKlaar, quizGemaakt = per['quiz_gestart'], per['quiz_klaar'], per['quiz_aangemaakt']
 
     # Per dag
@@ -415,7 +428,19 @@ def overzicht(periode: str = '30', bots: str = 'weg') -> dict:
 
     bezoekersTotaal = sum(len(v) for v in bezoekersPerDag.values())
     plekken = plekOverzicht(bezoeken, gestart, eersteDag if dagen else None)
+    cijfers = [t.cijfer / 10 for t in toetsKlaar]
+    toetsen = {
+        'begonnen': len(toetsStart),
+        'gemaakt': len(toetsKlaar),
+        'gemiddeld': round(statistics.mean(cijfers), 1) if cijfers else None,
+        'voldoendePct': _procent(sum(1 for c in cijfers if c >= 5.5), len(cijfers)),
+        'perCijfer': [{'label': str(c) if c < 10 else '10', 'naam': f'cijfer {c}' if c < 10 else 'cijfer 10',
+                       'aantal': sum(1 for x in cijfers if (round(x) if x < 10 else 10) == c)}
+                      for c in range(1, 11)],
+        'kaarten': _gerangschikt(Counter(t.kaart for t in toetsKlaar if t.kaart)),
+    }
     return {
+        'toetsen': toetsen,
         'bots': {**botInfo['samenvatting'], 'modus': 'mee' if metBots else 'weg'},
         'plekken': plekken,
         'periode': periode if periode in PERIODES else '30',

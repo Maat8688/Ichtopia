@@ -71,6 +71,8 @@ class Gebruik(db.Model):
     # Leeg = waarschijnlijk een mens. Anders waarom het op een bot lijkt
     # ('zoekmachine', 'script', 'geen taal', ...); zie gebruik.botReden().
     bot = db.Column(db.String(24))
+    toets = db.Column(db.Boolean)                # True: een toets in plaats van oefenen
+    cijfer = db.Column(db.Integer)               # cijfer van de toets x 10 (75 = 7,5)
 
     def __repr__(self):
         return f'<Gebruik {self.soort} {self.tijd}>'

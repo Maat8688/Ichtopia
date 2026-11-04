@@ -27,6 +27,8 @@
   <body>
     <script>
       var sessionMode = {{ map.sessionMode }};
+      var isToets = {{ 'true' if map.toets else 'false' }};
+      var toetsStand = null;
       var lastAnswer = "";
       var currentQuestionName = "";
     </script>
@@ -75,6 +77,20 @@
 
           <p class="feedback" id="feedback" hidden></p>
         </div>
+
+        {% if map.toets %}
+        <div id="toetsUitslag" hidden>
+          <p class="panel-label">Uitslag van je toets</p>
+          <p class="cijfer" id="toetsCijfer">?</p>
+          <p class="cijfer-onder" id="toetsGoed"></p>
+          <div class="rule-list toets-fouten" id="toetsFouten"></div>
+          <div class="actions">
+            <a href="/" class="link">Naar start</a>
+            <a href="/" class="btn btn-primary" id="toetsOpnieuw">Nog een toets</a>
+          </div>
+          <p class="muted toets-kaart-uitleg">Op de kaart zie je nu wat je goed en fout had.</p>
+        </div>
+        {% endif %}
 
         <div id="finished" hidden>
           <h2>Klaar</h2>
@@ -151,7 +167,9 @@
 
       socket.on("question", function (data) {
         questionCount += 1;
-        document.getElementById("questionCounter").textContent = "Vraag " + questionCount;
+        document.getElementById("questionCounter").textContent = isToets && toetsStand
+          ? "Vraag " + (toetsStand.beantwoord + 1) + " van " + toetsStand.totaal
+          : "Vraag " + questionCount;
 
         if (sessionMode === 3) {
           currentQuestionName = displayName(data.question);
@@ -238,6 +256,61 @@
 
         document.getElementById("questionArea").hidden = true;
         document.getElementById("finished").hidden = false;
+      });
+
+      // ---- Toetsmodus: geen goed of fout tussendoor, alleen hoe ver je bent.
+      if (isToets) {
+        document.getElementById("sessionTitle").textContent = (mapName || "Topografie") + " · toets";
+        document.title = (mapName || "Topografie") + " · toets";
+        document.getElementById("progressBar").classList.add("toets");
+      }
+
+      socket.on("toetsVoortgang", function (data) {
+        toetsStand = data;
+        document.getElementById("questionsCorrect").style.width =
+          (data.totaal ? (data.beantwoord * 100) / data.totaal : 0) + "%";
+        document.getElementById("progressText").textContent = data.beantwoord + " van " + data.totaal + " beantwoord";
+        document.getElementById("questionCounter").textContent =
+          "Vraag " + Math.min(data.beantwoord + 1, data.totaal) + " van " + data.totaal;
+      });
+
+      socket.on("toetsKlaar", function (data) {
+        var cijfer = document.getElementById("toetsCijfer");
+        cijfer.textContent = String(data.cijfer.toFixed(1)).replace(".", ",");
+        cijfer.classList.toggle("onvoldoende", !data.voldoende);
+        document.getElementById("toetsGoed").textContent =
+          data.goed + " van de " + data.totaal + " goed · " + formatTime(data.tijd);
+
+        var lijst = document.getElementById("toetsFouten");
+        lijst.innerHTML = "";
+        if (data.fouten.length === 0) {
+          var alles = document.createElement("div");
+          alles.textContent = "Alles goed!";
+          lijst.appendChild(alles);
+        }
+        data.fouten.forEach(function (fout) {
+          var rij = document.createElement("div");
+          var goed = document.createElement("span");
+          goed.className = "goede-naam";
+          goed.textContent = displayName(fout.vraag);
+          var gegeven = document.createElement("span");
+          gegeven.className = "muted";
+          gegeven.textContent = "jij: " + (fout.gegeven || "–");
+          rij.appendChild(goed);
+          rij.appendChild(gegeven);
+          lijst.appendChild(rij);
+        });
+
+        var questionElements = document.getElementById("questions").getElementsByTagName("g");
+        Array.from(questionElements).forEach(function (element) {
+          element.classList.remove("active");
+        });
+        var marker = document.getElementById("marker");
+        if (marker) {
+          marker.setAttribute("visibility", "hidden");
+        }
+        document.getElementById("questionArea").hidden = true;
+        document.getElementById("toetsUitslag").hidden = false;
       });
 
       function showBreakdown() {

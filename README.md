@@ -65,6 +65,23 @@ quiz kost ongeveer 85 MB.
 Wil je ooit wel meerdere workers, dan moet die gedeelde toestand eerst naar
 buiten het proces (Redis of de database).
 
+## Toetsmodus
+
+Op de startpagina kies je onder de vraagvorm **Oefenen** of **Toets**. Bij een
+toets kies je het aantal vragen (10, 20, 30 of alle). Dan:
+
+- komt elke vraag precies een keer, in willekeurige volgorde;
+- hoor je tussendoor niet of het goed was, en kleurt de kaart niet in;
+- krijg je aan het eind een cijfer: 1 + 9 × (goed / totaal), op een decimaal,
+  met een lijst van wat je fout had (het goede antwoord en wat jij gaf). Pas
+  dan kleurt de kaart in.
+
+Werkt met alle drie de vraagvormen. Op `/statistieken` staan toetsen apart:
+aantal, gemiddeld cijfer en hoeveel er voldoende waren. Ze tellen niet mee bij
+het gewone oefenen.
+
+Testen: `python tests/test_toets.py` (vanuit `app`).
+
 ## Statistieken
 
 `/statistieken` (alleen met de docentcode) laat zien wie er nu bezig is, en

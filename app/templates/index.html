@@ -102,6 +102,27 @@
               </label>
             </div>
 
+            <p class="section-label">Oefenen of toets</p>
+            <div class="rule-list" id="SoortSelect">
+              <label class="row">
+                <span class="name"><span class="row-title">Oefenen</span><span class="row-note">wat je fout hebt, komt terug tot je het weet</span></span>
+                <input type="radio" name="soort" value="oefenen" checked />
+              </label>
+              <label class="row">
+                <span class="name"><span class="row-title">Toets</span><span class="row-note">elke vraag een keer, je hoort pas aan het eind wat goed was, met een cijfer</span></span>
+                <input type="radio" name="soort" value="toets" />
+              </label>
+            </div>
+            <div class="toets-aantal" id="toetsBlok" hidden>
+              <label class="row-note" for="toetsVragen">Aantal vragen in de toets</label>
+              <select class="field" id="toetsVragen" name="toetsVragen">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="alle">alle</option>
+              </select>
+            </div>
+
             <div id="niveauBlok" hidden>
               <p class="section-label">Niveau</p>
               <div class="rule-list" id="niveauSelect"></div>
@@ -113,7 +134,7 @@
 
             <div class="actions">
               <span class="muted" id="totalCount"></span>
-              <button type="submit" class="btn btn-primary">Oefenen</button>
+              <button type="submit" class="btn btn-primary" id="startKnop">Oefenen</button>
             </div>
           </section>
         </div>
@@ -205,8 +226,24 @@
         checked.forEach(function (box) {
           total += Number(box.dataset.aantal || 0);
         });
-        totalCount.textContent = total === 0 ? "" : total + " vragen";
+        var toets = document.querySelector('input[name="soort"]:checked').value === "toets";
+        var keuze = document.getElementById("toetsVragen").value;
+        document.getElementById("toetsBlok").hidden = !toets;
+        document.getElementById("startKnop").textContent = toets ? "Toets maken" : "Oefenen";
+        if (total === 0) {
+          totalCount.textContent = "";
+        } else if (toets) {
+          var inToets = keuze === "alle" ? total : Math.min(Number(keuze), total);
+          totalCount.textContent = "toets van " + inToets + " vragen";
+        } else {
+          totalCount.textContent = total + " vragen";
+        }
       }
+
+      document.querySelectorAll('input[name="soort"]').forEach(function (knop) {
+        knop.addEventListener("change", updateTotal);
+      });
+      document.getElementById("toetsVragen").addEventListener("change", updateTotal);
 
       function validateForm() {
         const map = document.querySelector('input[name="KaartInput"]:checked');
@@ -221,6 +258,7 @@
         formError.hidden = true;
         try {
           sessionStorage.setItem("topo.map", map.value);
+          sessionStorage.setItem("topo.soort", document.querySelector('input[name="soort"]:checked').value);
         } catch (e) {}
         return true;
       }
