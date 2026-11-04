@@ -39,7 +39,13 @@ def main() -> int:
         url = ADRES.format(maand=maand)
         print(f'Ophalen: {url}')
         try:
-            with urllib.request.urlopen(url, timeout=120) as antwoord:
+            # Zonder eigen naam stuurt Python 'Python-urllib/3.x' mee, en dat
+            # weigert de server van DB-IP (403).
+            verzoek = urllib.request.Request(url, headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; Ichtopia-geo-bijwerken/1.0; +https://ichtopia.nl)',
+                'Accept': '*/*',
+            })
+            with urllib.request.urlopen(verzoek, timeout=120) as antwoord:
                 with tempfile.NamedTemporaryFile(dir=os.path.dirname(DOEL), delete=False) as tijdelijk:
                     with gzip.GzipFile(fileobj=antwoord) as uitgepakt:
                         shutil.copyfileobj(uitgepakt, tijdelijk)
