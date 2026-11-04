@@ -67,6 +67,19 @@ if os.getenv('TRUST_PROXY'):
 # een update vanzelf wordt opgepikt.
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
 
+
+# Elke link naar een statisch bestand krijgt ?v=<tijd van de laatste wijziging>.
+# Verandert een css- of js-bestand na een update, dan verandert de link mee en
+# haalt de browser meteen de nieuwe versie op, in plaats van nog een uur de
+# oude te gebruiken.
+@app.url_defaults
+def statischeVersie(endpoint, values):
+    if endpoint == 'static' and 'filename' in values and 'v' not in values:
+        try:
+            values['v'] = int(os.stat(os.path.join(app.static_folder, values['filename'])).st_mtime)
+        except OSError:
+            pass
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
