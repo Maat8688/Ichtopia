@@ -253,3 +253,42 @@
     padding: 20px 16px 22px;
   }
 }
+
+/* Account verwijderen: weggestopt onderaan, met het wachtwoord ter controle. */
+.verwijder-account {
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1px solid var(--track);
+}
+
+.verwijder-account summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+  width: max-content;
+}
+
+.verwijder-account summary:hover {
+  color: var(--pen);
+}
+
+.verwijder-account p {
+  margin: 10px 0 12px;
+  font-size: 14px;
+}
+
+.verwijder-account label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.btn-gevaar {
+  border-color: var(--pen);
+  color: var(--pen);
+}
+
+.btn-gevaar:hover {
+  background: var(--pen);
+  color: #fff;
+}

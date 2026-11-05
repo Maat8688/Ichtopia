@@ -47,6 +47,22 @@ verbinding.executescript('''
     );
     INSERT INTO "user" (username, email, password_hash, account_type)
     VALUES ('Kevin', 'kevin@example.com', 'scrypt:oud', 'TEACHER');
+
+    -- De statistieken zoals de eerste versie van /statistieken ze bijhield:
+    -- zonder land, provincie, school, bot, toets en cijfer.
+    CREATE TABLE gebruik (
+        id INTEGER PRIMARY KEY, tijd DATETIME NOT NULL, soort VARCHAR(24) NOT NULL,
+        pagina VARCHAR(40), bezoeker VARCHAR(16), apparaat VARCHAR(12),
+        kaart VARCHAR(40), vorm VARCHAR(20), onderdelen VARCHAR(200),
+        niveau VARCHAR(8), vragen INTEGER, pogingen INTEGER, duur INTEGER,
+        spelers INTEGER, fout TEXT
+    );
+    INSERT INTO gebruik (tijd, soort, pagina, bezoeker, apparaat)
+    VALUES ('2026-09-01 09:15:00', 'bezoek', 'Startpagina', 'abc123', 'computer'),
+           ('2026-09-01 09:16:00', 'bezoek', 'Oefenen', 'abc123', 'computer');
+    INSERT INTO gebruik (tijd, soort, kaart, vorm, onderdelen, vragen, pogingen, duur, fout)
+    VALUES ('2026-09-01 09:24:00', 'oefenen_klaar', 'Europa', 'Meerkeuze', 'Landen', 41, 55, 480,
+            '{"Slovenie": 2}');
 ''')
 verbinding.commit()
 verbinding.close()
@@ -54,7 +70,7 @@ verbinding.close()
 app = loadApp(DATABASE_URL='sqlite:///' + OUDE_DATABASE)
 
 from flask_migrate import upgrade                      # noqa: E402
-from src.models import User, db                        # noqa: E402
+from src.models import Gebruik, User, db               # noqa: E402
 
 
 def kolommen(tabel):
@@ -96,9 +112,20 @@ with app.app_context():
     check('het account begint op 0 XP en 1000 elo',
           kevin is not None and kevin.xp == 0 and kevin.rating == 1000)
 
+    # De statistieken: niets kwijt, en de nieuwe kolommen zijn erbij.
+    rijen = Gebruik.query.order_by(Gebruik.id).all()
+    check('alle statistieken staan er nog', len(rijen) == 3, len(rijen))
+    check('de inhoud van de statistieken is onveranderd',
+          [r.pagina for r in rijen[:2]] == ['Startpagina', 'Oefenen']
+          and rijen[2].kaart == 'Europa' and rijen[2].vragen == 41
+          and rijen[2].fout == '{"Slovenie": 2}')
+    check('de tabel gebruik kreeg de latere kolommen erbij',
+          {'land', 'provincie', 'school', 'bot', 'toets', 'cijfer'} <= kolommen('gebruik'))
+
     # Nog een keer draaien mag niets kapotmaken.
     upgrade()
     check('een tweede upgrade doet niets', db.session.query(User.id).count() == 1)
+    check('ook de statistieken niet', Gebruik.query.count() == 3)
 
 # ----------------------------------------------------------------------
 # 2. Verse database (alles al door db.create_all() aangemaakt)

@@ -20,7 +20,8 @@
             verdien je XP, speel je duels en sta je op de ranglijst.</p>
         <p class="muted">Je hebt alleen een naam en een wachtwoord nodig, geen e-mail.
             <b>Onthoud je wachtwoord goed:</b> vergeet je het, dan kunnen we het niet
-            terugzetten en maak je een nieuw account.</p>
+            terugzetten en maak je een nieuw account.
+            <a class="link" href="{{ url_for('main.privacy') }}">Wat we bewaren</a>.</p>
 
         {% for error in errors %}
             <p class="feedback">{{ error }}</p>
@@ -57,7 +58,7 @@
 
 <footer>
     <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · een account is niet verplicht</p>
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · een account is niet verplicht · <a href="{{ url_for('main.privacy') }}">privacy</a></p>
     </div>
 </footer>
 

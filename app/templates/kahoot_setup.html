@@ -14,6 +14,7 @@
       {% include 'partials/brand.html' %}
       <span class="k-pill">Docent</span>
       <a class="k-btn secondary" href="{{ url_for('kahoot.statistieken') }}">Wie is er bezig?</a>
+      <a class="k-btn secondary" href="{{ url_for('beheer.overzicht') }}">Accounts</a>
       <a class="k-btn secondary" href="{{ url_for('kahoot.hostLogout') }}">Uitloggen</a>
     </div>
 
@@ -143,7 +144,7 @@
     </script>
     <footer>
       <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · geen account nodig</p>
+        <p>Gemaakt door Floris, Joël en Sami · geen account nodig · <a href="{{ url_for('main.privacy') }}">privacy</a></p>
       </div>
     </footer>
   </body>

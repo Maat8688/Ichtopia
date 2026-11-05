@@ -183,3 +183,17 @@ class Gebruik(db.Model):
 
     def __repr__(self):
         return f'<Gebruik {self.soort} {self.tijd}>'
+
+
+class GeblokkeerdWoord(db.Model):
+    """Een woord dat een beheerder op /beheer aan het naamfilter heeft
+    toegevoegd, omdat het er toch doorheen glipte. Zie names.zetExtraWoorden."""
+    __tablename__ = 'geblokkeerd_woord'
+
+    id = db.Column(db.Integer, primary_key=True)
+    woord = db.Column(db.String(40), unique=True, nullable=False)
+    toegevoegd_op = db.Column(db.DateTime, nullable=False,
+                              default=lambda: datetime.now(timezone.utc))
+
+    def __repr__(self):
+        return f'<GeblokkeerdWoord {self.woord}>'

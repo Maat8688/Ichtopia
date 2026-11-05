@@ -352,8 +352,38 @@ def verbodenWoord(name: str) -> str | None:
     return None
 
 
+# Woorden die een beheerder er op /beheer bij heeft gezet, voor als er toch
+# iets door het filter glipt. Ze staan in de database (tabel
+# geblokkeerd_woord); de app zet ze hier bij het opstarten en na elke
+# wijziging neer. Ze gelden overal in de naam, ook als leetspeak of met
+# tekens ertussen, net als de woorden in OVERAL.
+_EXTRA: set[str] = set()
+
+
+def normaalWoord(woord: str) -> str:
+    """Een geblokkeerd woord zoals we het vergelijken: kleine letters, geen
+    accenten, cijfers of tekens. 'K4-NK' wordt 'kank'."""
+    return re.sub(r'[^a-z]+', '', _leetVarianten(_basis(woord))[0])
+
+
+def zetExtraWoorden(woorden_) -> None:
+    global _EXTRA
+    _EXTRA = {w for w in (normaalWoord(x) for x in woorden_) if len(w) >= 2}
+
+
+def extraWoord(name: str) -> str | None:
+    """Het extra geblokkeerde woord dat in deze naam zit, of None."""
+    if not _EXTRA:
+        return None
+    vormen = varianten(name)
+    for woord in sorted(_EXTRA):
+        if any(woord in v for v in vormen):
+            return woord
+    return None
+
+
 def containsBlockedWord(name: str) -> bool:
-    return verbodenWoord(name) is not None
+    return verbodenWoord(name) is not None or extraWoord(name) is not None
 
 
 def gereserveerd(name: str) -> bool:

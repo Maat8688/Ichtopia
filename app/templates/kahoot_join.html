@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meedoen · Ichtopia</title>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/vendor/socket.io-4.0.0.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kahoot.css') }}" />
@@ -105,7 +105,7 @@
     </script>
     <footer>
       <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · geen account nodig</p>
+        <p>Gemaakt door Floris, Joël en Sami · geen account nodig · <a href="{{ url_for('main.privacy') }}">privacy</a></p>
       </div>
     </footer>
   </body>

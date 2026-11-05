@@ -1,0 +1,255 @@
+/* Beheer (/beheer) en privacy (/privacy). Bouwt voort op main.css. */
+
+.beheer h1,
+.privacy h1 {
+  font-size: 28px;
+  margin: 4px 0 6px;
+}
+
+.beheer > .muted {
+  max-width: 680px;
+  margin-bottom: 18px;
+}
+
+.beheer .feedback {
+  max-width: 760px;
+  margin: 0 0 16px;
+}
+
+.beheer-raster {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+.beheer .paneel {
+  background: #fff;
+}
+
+.beheer h2 {
+  margin-bottom: 12px;
+}
+
+.zoekbalk {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.zoekbalk .field {
+  max-width: 320px;
+}
+
+.accounts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account {
+  border-top: 1px solid var(--track);
+  padding: 10px 0;
+}
+
+.account:last-child {
+  border-bottom: 1px solid var(--track);
+}
+
+.account-kop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.account-naam {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.account-info {
+  color: var(--muted);
+  font-size: 13px;
+  margin-left: auto;
+}
+
+.label {
+  font-size: 12px;
+  line-height: 18px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--roze);
+  color: #6e2418;
+  font-weight: 500;
+}
+
+.label.grijs {
+  background: var(--paper-2);
+  color: var(--muted);
+}
+
+.account.verdacht .account-naam {
+  color: var(--pen);
+}
+
+.account details summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+  width: max-content;
+}
+
+.account details summary:hover {
+  color: var(--ink);
+}
+
+.acties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 10px;
+}
+
+.actie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.actie .field {
+  width: 190px;
+  padding: 7px 10px;
+  font-size: 15px;
+}
+
+.actie .btn {
+  padding: 7px 12px;
+  font-size: 14px;
+}
+
+.zeker {
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-gevaar {
+  border-color: var(--pen);
+  color: var(--pen);
+}
+
+.btn-gevaar:hover {
+  background: var(--pen);
+  color: #fff;
+}
+
+.bladeren {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+/* Rechts: kladblaadje met de geblokkeerde woorden */
+.woorden {
+  transform: rotate(0.6deg);
+}
+
+.woorden p {
+  font-size: 14px;
+}
+
+.woorden .zacht {
+  color: rgba(28, 40, 54, .7);
+  margin-top: 8px;
+}
+
+.woord-form {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 10px;
+}
+
+.woord-form .field {
+  padding: 7px 10px;
+}
+
+.btn-donker {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-donker:hover {
+  background: #2b3a4c;
+  border-color: #2b3a4c;
+  color: #fff;
+}
+
+.woordlijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.woordlijst li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(28, 40, 54, .15);
+  font-weight: 500;
+}
+
+@media (max-width: 860px) {
+  .beheer-raster {
+    grid-template-columns: 1fr;
+  }
+
+  .account-info {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Privacy */
+.privacy {
+  max-width: 760px;
+}
+
+.privacy .inleiding {
+  font-size: 17px;
+  margin-bottom: 22px;
+}
+
+.privacy section {
+  margin-top: 26px;
+}
+
+.privacy h2 {
+  margin-bottom: 8px;
+}
+
+.privacy p,
+.privacy li {
+  line-height: 1.6;
+}
+
+.privacy ul {
+  padding-left: 20px;
+  margin: 6px 0 0;
+}
+
+.privacy li + li {
+  margin-top: 4px;
+}
+
+.privacy .kort {
+  margin-top: 6px;
+}

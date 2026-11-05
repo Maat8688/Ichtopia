@@ -202,6 +202,33 @@ def logout():
     return redirect(url_for('main.index'))
 
 
+@auth.route('/account/verwijderen', methods=['POST'])
+@login_required
+def deleteAccount():
+    """Je eigen account weghalen. Met je wachtwoord, zodat iemand anders op
+    een laptop die openstaat dat niet zomaar voor je kan doen."""
+    if not csrfValid():
+        flash('Het formulier is verlopen. Probeer het opnieuw.', 'error')
+        return redirect(url_for('auth.account'))
+    if loginLimiter.blocked(clientIp()):
+        flash('Te veel foute wachtwoorden. Probeer het over een paar minuten opnieuw.', 'error')
+        return redirect(url_for('auth.account'))
+    if not current_user.check_password(request.form.get('password') or ''):
+        loginLimiter.registerFailure(clientIp())
+        flash('Dat wachtwoord klopt niet. Je account is niet verwijderd.', 'error')
+        return redirect(url_for('auth.account'))
+
+    from .beheer import verwijderAccount
+    account = db.session.get(User, current_user.id)
+    naam = account.username
+    logout_user()
+    verwijderAccount(account)
+    rotateCsrfToken()
+    current_app.logger.info('account %r door zichzelf verwijderd', naam)
+    flash('Je account is verwijderd. Oefenen kan nog steeds, ook zonder account.', 'success')
+    return redirect(url_for('main.index'))
+
+
 @auth.route('/account')
 @login_required
 def account():

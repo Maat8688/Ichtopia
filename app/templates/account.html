@@ -76,12 +76,28 @@
                 <button type="submit" class="btn">Uitloggen</button>
             </div>
         </form>
+
+        <details class="verwijder-account">
+            <summary>Account verwijderen</summary>
+            <p class="muted">Dan verdwijnen je naam, je punten en je duels voorgoed. Dit kan niet
+                ongedaan worden gemaakt. Meer over wat we bewaren staat op de
+                <a class="link" href="{{ url_for('main.privacy') }}">privacypagina</a>.</p>
+            <form method="POST" action="{{ url_for('auth.deleteAccount') }}">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                <label for="deletePassword">Je wachtwoord, ter controle</label>
+                <input type="password" class="field" id="deletePassword" name="password"
+                       autocomplete="current-password" required>
+                <div class="actions actions-end">
+                    <button type="submit" class="btn btn-gevaar">Mijn account verwijderen</button>
+                </div>
+            </form>
+        </details>
     </div>
 </main>
 
 <footer>
     <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · een account is niet verplicht</p>
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · een account is niet verplicht · <a href="{{ url_for('main.privacy') }}">privacy</a></p>
     </div>
 </footer>
 

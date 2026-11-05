@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy · Ichtopia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/beheer.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}">
+</head>
+<body>
+
+{% include 'partials/nav.html' %}
+
+<main class="page privacy">
+    <h1>Privacy</h1>
+    <p class="inleiding">Ichtopia is een oefensite voor topografie, gemaakt door Floris, Joël en Sami,
+        leerlingen van het Ichthus Lyceum. Op deze pagina staat precies wat de site bewaart, waarom,
+        en hoe lang. Kort gezegd: zo weinig mogelijk, en niets wat naar jou als persoon wijst.</p>
+
+    <div class="blaadje groen">
+        <h2>In het kort</h2>
+        <ul>
+            <li>Oefenen kan zonder account. Dan weten we niet wie je bent.</li>
+            <li>Een account is alleen een naam en een wachtwoord. Geen e-mail, geen echte naam nodig.</li>
+            <li>Geen advertenties, geen volgcookies, en geen andere bedrijven die meekijken.</li>
+            <li>Je kunt je account zelf verwijderen, met alles erop en eraan.</li>
+        </ul>
+    </div>
+
+    <section>
+        <h2>Als je oefent (met of zonder account)</h2>
+        <p>Om te zien hoe de site gebruikt wordt en wat er moeilijk is, houden we bij:</p>
+        <ul>
+            <li>welke pagina's bekeken worden, en of dat op een computer, telefoon of tablet was;</li>
+            <li>bij het oefenen: welke kaart, vraagvorm en onderdelen, hoeveel vragen en pogingen, hoe lang het duurde,
+                welke plekken fout gingen, en bij een toets het cijfer;</li>
+            <li>uit welk land en welke provincie het bezoek ongeveer kwam, en of het van het schoolnetwerk kwam.
+                Dat wordt bij het bezoek opgezocht in een lijst op onze eigen server; het IP-adres zelf
+                bewaren we hierbij <b>niet</b>.</li>
+        </ul>
+        <p class="kort">Om bezoekers per dag te kunnen tellen krijgt elke bezoeker een code die alleen die dag geldt.
+            De volgende dag is die code niet meer terug te leiden naar dezelfde persoon. Er staan geen namen
+            in deze cijfers, dus ze zijn niet aan jou te koppelen. Daarom kunnen we ze ook niet per persoon
+            weghalen. Ze blijven bewaard zolang de site bestaat.</p>
+    </section>
+
+    <section>
+        <h2>Als je een account hebt</h2>
+        <ul>
+            <li>de naam die je zelf kiest (die zien anderen op de ranglijst en in duels; gebruik liever niet je
+                volledige naam);</li>
+            <li>je wachtwoord, maar alleen versleuteld: wij kunnen het niet lezen, en daarom ook niet terugzetten;</li>
+            <li>wanneer je je account maakte, je XP en level, je elo en hoeveel duels je won, verloor of gelijk speelde;</li>
+            <li>de duels die je speelde: tegen wie, op welke kaart en met welke score.</li>
+        </ul>
+        <p class="kort">Dit blijft staan tot je het account verwijdert.</p>
+    </section>
+
+    <section>
+        <h2>Klassikale quiz</h2>
+        <p>De naam waarmee je meedoet aan een quiz op het digibord staat alleen in het geheugen van de server
+            zolang de quiz loopt. Daarna is hij weg. We bewaren alleen dat er een quiz was en met hoeveel spelers.</p>
+    </section>
+
+    <section>
+        <h2>Het logbestand van de server</h2>
+        <p>Voor de beveiliging houdt de server een logbestand bij: welk IP-adres wanneer welke pagina opvroeg.
+            Zo kunnen we zien als iemand de site probeert plat te leggen of wachtwoorden probeert te raden.
+            Het bestand is hooguit 25 MB; daarna worden de oudste regels vanzelf overschreven, meestal na een paar
+            weken. Om wachtwoorden raden tegen te gaan onthoudt de server ook mislukte inlogpogingen per IP-adres,
+            maar alleen in het geheugen en hooguit een uur.</p>
+    </section>
+
+    <section>
+        <h2>Cookies en wat er in je browser staat</h2>
+        <ul>
+            <li>Een cookie om ingelogd te blijven en om formulieren te beveiligen. Zet je "ingelogd blijven" aan,
+                dan blijft hij 30 dagen bewaard.</li>
+            <li>In je eigen browser (niet bij ons) onthoudt de site welke kaart je het laatst koos en hoe ver je
+                per kaart bent, en bij een quiz met welke naam je meedeed, zodat je na het verversen terugkomt.</li>
+        </ul>
+        <p class="kort">Er zijn geen cookies van andere partijen. Het lettertype en alle scripts staan op onze eigen
+            server, dus je browser vraagt niets op bij Google of andere bedrijven.</p>
+    </section>
+
+    <section>
+        <h2>Je account verwijderen</h2>
+        <p>Dat kan zelf, onderaan <a href="{{ url_for('auth.account') }}">Mijn account</a>. Dan verdwijnen je naam,
+            je wachtwoord, je punten en je duels. Ben je je wachtwoord vergeten, vraag dan je docent: die kan
+            het account voor je weghalen.</p>
+    </section>
+
+    <section>
+        <h2>Vragen</h2>
+        <p>Heb je een vraag over je gegevens, of wil je dat er iets weg gaat? Vraag het je docent aardrijkskunde
+            op het Ichthus Lyceum; die geeft het door aan de makers.</p>
+    </section>
+</main>
+
+<footer>
+    <div class="page">
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum</p>
+    </div>
+</footer>
+
+</body>
+</html>

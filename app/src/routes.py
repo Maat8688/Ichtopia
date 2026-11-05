@@ -67,6 +67,11 @@ def homeNotes() -> dict:
         'meInTop': any(row['id'] == me.id for row in top) if me else False,
     }
 
+@main.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+
 @main.route('/learn')
 def learn():
     session = sessionManager.findSession(request.args.get('sessionToken'))

@@ -72,6 +72,7 @@
     <header class="page topbar">
       {% include 'partials/brand.html' %}
       <nav class="topbar-right">
+        <a href="{{ url_for('beheer.overzicht') }}">Accounts</a>
         <a href="{{ url_for('kahoot.host') }}">Nieuwe quiz</a>
         <a href="/">Naar start</a>
       </nav>
@@ -483,7 +484,7 @@
 
     <footer>
       <div class="page">
-        <p>Alleen zichtbaar met de docentcode</p>
+        <p>Alleen zichtbaar met de docentcode · <a href="{{ url_for('main.privacy') }}">privacy</a></p>
       </div>
     </footer>
   </body>

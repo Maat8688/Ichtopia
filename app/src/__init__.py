@@ -121,6 +121,9 @@ with app.app_context():
     from .ranking import ranking
     app.register_blueprint(ranking)
 
+    from .beheer import beheer
+    app.register_blueprint(beheer)
+
     # Een event heeft bij Flask-SocketIO maar een handler, dus verdelen we
     # 'disconnect' zelf over de modules die er iets mee moeten.
     from .sockets import dispatchDisconnect
@@ -179,6 +182,10 @@ with app.app_context():
             app.logger.warning('E-mailkolom niet bijgewerkt; draai flask db upgrade', exc_info=True)
 
     geenEmailMeer()
+
+    # De woorden die een beheerder op /beheer aan het naamfilter toevoegde.
+    from .beheer import laadWoorden
+    laadWoorden()
 
     @login_manager.user_loader
     def load_user(user_id):

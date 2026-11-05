@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beheer · Ichtopia</title>
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/beheer.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}">
+</head>
+<body>
+
+<header class="page topbar">
+    {% include 'partials/brand.html' %}
+    <nav class="topbar-right">
+        <a href="{{ url_for('kahoot.statistieken') }}">Statistieken</a>
+        <a href="{{ url_for('kahoot.host') }}">Nieuwe quiz</a>
+        <a href="/">Naar start</a>
+    </nav>
+</header>
+
+<main class="page beheer">
+    <h1>Beheer</h1>
+    <p class="muted">{{ alleAccounts }} account{{ '' if alleAccounts == 1 else 's' }}. Glipt er een rare naam door,
+        geef die dan hier een andere naam en zet het woord bij de geblokkeerde woorden.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="feedback{% if category == 'success' %} ok{% endif %}">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="beheer-raster">
+        <section class="paneel">
+            <h2>Accounts</h2>
+            <form class="zoekbalk" method="GET" action="{{ url_for('beheer.overzicht') }}">
+                <label class="visually-hidden" for="zoek">Zoek op naam</label>
+                <input class="field" id="zoek" name="zoek" value="{{ zoek }}" placeholder="Zoek op naam" maxlength="40">
+                <button class="btn" type="submit">Zoeken</button>
+                {% if zoek %}<a class="link" href="{{ url_for('beheer.overzicht') }}">alles</a>{% endif %}
+            </form>
+            {% if zoek %}<p class="muted">{{ totaal }} gevonden met "{{ zoek }}".</p>{% endif %}
+
+            {% if accounts %}
+            <ul class="accounts">
+                {% for a in accounts %}
+                <li class="account{% if verdacht[a.id] %} verdacht{% endif %}">
+                    <div class="account-kop">
+                        <span class="account-naam">{{ a.username }}</span>
+                        {% if verdacht[a.id] %}<span class="label">bevat "{{ verdacht[a.id] }}"</span>{% endif %}
+                        {% if a.isTeacher %}<span class="label grijs">docent</span>{% endif %}
+                        <span class="account-info">lvl {{ a.level }} · elo {{ a.rating }} ·
+                            {{ a.duels_won + a.duels_lost + a.duels_drawn }} duels ·
+                            sinds {{ a.created_at.strftime('%d-%m-%Y') }}</span>
+                    </div>
+                    <details>
+                        <summary>Aanpassen</summary>
+                        <div class="acties">
+                            <form method="POST" action="{{ url_for('beheer.hernoem', accountId=a.id) }}" class="actie">
+                                <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                                <input type="hidden" name="zoek" value="{{ zoek }}">
+                                <label class="visually-hidden" for="naam-{{ a.id }}">Nieuwe naam voor {{ a.username }}</label>
+                                <input class="field" id="naam-{{ a.id }}" name="naam" maxlength="20" placeholder="Nieuwe naam">
+                                <button class="btn" type="submit">Opslaan</button>
+                                <button class="btn" type="submit" name="neutraal" value="1"
+                                        title="Wordt 'Speler {{ a.id }}'">Neutrale naam</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('beheer.verwijder', accountId=a.id) }}" class="actie gevaar">
+                                <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                                <input type="hidden" name="zoek" value="{{ zoek }}">
+                                <label class="zeker"><input type="checkbox" name="zeker" value="ja" required> zeker weten</label>
+                                <button class="btn btn-gevaar" type="submit">Account verwijderen</button>
+                            </form>
+                        </div>
+                    </details>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="muted">Geen accounts gevonden.</p>
+            {% endif %}
+
+            {% if paginas > 1 %}
+            <nav class="bladeren">
+                {% if pagina > 1 %}<a class="link" href="{{ url_for('beheer.overzicht', zoek=zoek or None, pagina=pagina - 1) }}">vorige</a>{% endif %}
+                <span class="muted">pagina {{ pagina }} van {{ paginas }}</span>
+                {% if pagina < paginas %}<a class="link" href="{{ url_for('beheer.overzicht', zoek=zoek or None, pagina=pagina + 1) }}">volgende</a>{% endif %}
+            </nav>
+            {% endif %}
+        </section>
+
+        <aside class="blaadje woorden">
+            <h2>Geblokkeerde woorden</h2>
+            <p>Extra woorden bovenop het filter. Ze gelden meteen, ook als iemand er
+                cijfers of puntjes in stopt (<b>sk1b.idi</b>), en ook voor namen in een quiz.</p>
+            <form method="POST" action="{{ url_for('beheer.woordErbij') }}" class="woord-form">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                <label class="visually-hidden" for="woord">Woord blokkeren</label>
+                <input class="field" id="woord" name="woord" maxlength="40" placeholder="woord" required>
+                <button class="btn btn-donker" type="submit">Blokkeren</button>
+            </form>
+            {% if woorden %}
+            <ul class="woordlijst">
+                {% for w in woorden %}
+                <li>
+                    <span>{{ w.woord }}</span>
+                    <form method="POST" action="{{ url_for('beheer.woordWeg', woordId=w.id) }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                        <button class="link" type="submit" title="Weer toestaan">weghalen</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="zacht">Nog geen extra woorden.</p>
+            {% endif %}
+        </aside>
+    </div>
+</main>
+
+<footer>
+    <div class="page">
+        <p>Alleen te zien met de docentcode · elke wijziging komt in het log</p>
+    </div>
+</footer>
+
+</body>
+</html>

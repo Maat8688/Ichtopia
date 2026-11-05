@@ -226,6 +226,33 @@ Bij een lege database (of na `docker compose down -v`) hoeft dit niet.
 > wissen bij de eerste `flask db upgrade` op een database zonder
 > alembic-geschiedenis.
 
+## Beheer
+
+`/beheer` (alleen met de docentcode, net als `/statistieken`) laat alle accounts
+zien, nieuwste bovenaan, met een zoekvak. Per account kun je:
+
+- de naam veranderen, of met een klik een neutrale naam geven ("Speler 12");
+- het account verwijderen (met "zeker weten"); de duels van dat account gaan
+  mee, de elo van tegenstanders blijft zoals hij was.
+
+Rechts kun je woorden aan het naamfilter toevoegen voor wat er toch doorheen
+glipt. Ze gelden meteen, ook als leetspeak of met puntjes ertussen, en ook voor
+namen in een klassikale quiz. De pagina zegt erbij welke accounts het woord al
+in hun naam hebben. Elke wijziging komt in het log.
+
+Accounts verwijderen raakt `/statistieken` nooit: die cijfers staan los van
+accounts. `tests/test_migraties.py` controleert dat een upgrade geen enkele
+rij uit de tabel `gebruik` weghaalt.
+
+## Privacy
+
+`/privacy` legt in gewone taal uit wat de site bewaart; elke pagina linkt
+ernaar in de voet. Iedereen kan zijn eigen account verwijderen onderaan
+Mijn account (met het wachtwoord ter controle). Het lettertype (Lexend, SIL
+Open Font License) en socket.io staan in `static/`, zodat browsers van
+leerlingen niets bij Google of een CDN ophalen. Pas de privacypagina aan als
+er iets verandert in wat de site bijhoudt.
+
 ## Voorbeeldkaarten op de startpagina
 
 De plaatjes `app/static/img/kaart-*.svg` worden gemaakt uit dezelfde kaarten
@@ -247,6 +274,8 @@ python tests/test_names.py       # het naamfilter
 python tests/test_auth.py        # registreren, inloggen, afgeschermde pagina's
 python tests/test_ranking.py     # XP, levels, elo, ranglijst en een heel duel
 python tests/test_duel_tegelijk.py  # tegelijk klikken op een duel
+python tests/test_beheer.py      # /beheer: hernoemen, verwijderen, woorden blokkeren
+python tests/test_privacy.py     # privacypagina, eigen account weg, niets van buiten
 python tests/test_migraties.py   # upgrade op een oude en op een verse database
 python tests/test_security.py    # sessiegrenzen, rem, csrf, X-Forwarded-For
 python tests/test_kaart.py       # kaarten inlezen: land blijft land
