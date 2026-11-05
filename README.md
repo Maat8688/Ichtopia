@@ -226,6 +226,18 @@ Bij een lege database (of na `docker compose down -v`) hoeft dit niet.
 > wissen bij de eerste `flask db upgrade` op een database zonder
 > alembic-geschiedenis.
 
+## Voorbeeldkaarten op de startpagina
+
+De plaatjes `app/static/img/kaart-*.svg` worden gemaakt uit dezelfde kaarten
+als het spel, zodat een voorbeeld er altijd hetzelfde uitziet als de kaart
+waarop je oefent. Verandert er een kaart in `app/data/maps`, maak ze dan
+opnieuw:
+
+```
+cd app
+python kaartvoorbeelden.py
+```
+
 ## Tests
 
 Draaien vanuit `app`, allemaal op een tijdelijke SQLite-database:
