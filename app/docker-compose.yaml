@@ -47,12 +47,19 @@ services:
     restart: always
     # Een worker met threads: alle quizzen en duels staan in het geheugen van
     # dit ene proces. Niet meer workers zetten, dan raken spelers elkaar kwijt.
+    # Eerst de database bijwerken, dan pas de site starten. Zo is er na een
+    # update nooit een moment waarop de code nieuwe kolommen verwacht die er
+    # nog niet zijn, en kan 'flask db upgrade' niet vergeten worden. Het mag
+    # altijd: de migraties slaan over wat er al is en raken de statistieken
+    # (tabel gebruik) niet aan. Lukt het niet, dan start de site niet en
+    # staat de fout in: docker compose logs web
     command: >
-      gunicorn src:app
+      sh -c "flask db upgrade &&
+      exec gunicorn src:app
       --worker-class gthread --workers 1 --threads 100
       --bind 0.0.0.0:8000
       --timeout 120
-      --access-logfile -
+      --access-logfile -"
 
   db:
     image: postgres:17

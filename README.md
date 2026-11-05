@@ -208,12 +208,24 @@ worden zodra er iets doorheen glipt.
 ## Een bestaande database bijwerken
 
 De app maakt ontbrekende tabellen zelf aan bij het opstarten (`db.create_all()`),
-maar voegt geen kolommen toe aan een tabel die al bestaat. Draait er al een
-database van voor deze versie, dan moet je dus een keer migreren:
+maar voegt geen kolommen toe aan een tabel die al bestaat. Daarom draait de
+container bij elke start eerst `flask db upgrade` en pas daarna gunicorn (zie
+`command` in `docker-compose.yaml`). Na `docker compose up -d --build` is de
+database dus vanzelf bijgewerkt. Met de hand kan ook:
 
 ```
 docker compose exec web flask db upgrade
 ```
+
+Draai dat **nooit** met de code van de branch `claude/design-aanpassing-lqxpbi`:
+daar staan nog de oude migraties die de tabel `user` weggooien. Eerst de
+nieuwe code ophalen, dan pas upgraden.
+
+De statistieken (tabel `gebruik`) worden door geen enkele migratie aangeraakt;
+dat is op Postgres getest vanaf een database zoals de server die nu heeft, met
+en zonder eerdere alembic-geschiedenis. De data zelf staat in het Docker-volume
+`postgres_data` en blijft bij `git pull` en `docker compose up --build` gewoon
+staan. Alleen `docker compose down -v` gooit dat volume weg.
 
 Dat mag altijd en zo vaak je wilt: de migraties kijken eerst wat er al staat en
 slaan over wat er al is. Bestaande accounts blijven staan en beginnen op 0 XP
