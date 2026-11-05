@@ -88,6 +88,28 @@
         </div>
         <p class="feedback" id="feedback" hidden></p>
 
+        <!-- "Klopt dit niet?": meldt de laatst beantwoorde vraag (of bij een
+             toets de vraag uit de uitslag). Kaart, vraag en antwoord haalt de
+             server zelf uit de oefensessie. -->
+        <form class="meld-paneel" id="meldPaneel" hidden>
+          <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+          <input type="hidden" name="soort" value="kaart">
+          <input type="hidden" name="vraag" id="meldVraag" value="">
+          <input type="hidden" name="pagina" value="/learn">
+          <p class="meld-titel">Wat klopt er niet<span id="meldOver"></span>?</p>
+          <label class="checkline"><input type="radio" name="reden" value="antwoord" checked> Mijn antwoord werd fout gerekend</label>
+          <label class="checkline"><input type="radio" name="reden" value="plek"> De plek of grens klopt niet</label>
+          <label class="checkline"><input type="radio" name="reden" value="spelling"> Spelfout in de naam</label>
+          <label class="checkline"><input type="radio" name="reden" value="anders"> Iets anders</label>
+          <label class="visually-hidden" for="meldTekst">Toelichting</label>
+          <input class="field" id="meldTekst" name="tekst" maxlength="500" placeholder="Toelichting (mag leeg)">
+          <div class="meld-knoppen">
+            <button type="button" class="link" id="meldAnnuleer">Annuleren</button>
+            <button type="submit" class="btn btn-primary">Melden</button>
+          </div>
+          <p class="meld-bericht" id="meldBericht" hidden></p>
+        </form>
+
         {% if map.toets %}
         <div class="vraag" id="toetsUitslag" hidden>
           <p class="panel-label">Uitslag van je toets</p>
@@ -139,7 +161,7 @@
 
     <footer>
       <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · <a href="{{ url_for('main.privacy') }}">privacy</a></p>
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · <a href="{{ url_for('main.privacy') }}">privacy</a> · <a href="{{ url_for('meldingen.formulier', van=request.path) }}">iets kapot of een idee?</a></p>
       </div>
     </footer>
 
@@ -183,6 +205,53 @@
         return minutes + " min " + rest + " s";
       }
 
+      // ---- Melden ----------------------------------------------------
+      var meldPaneel = document.getElementById("meldPaneel");
+      var meldBericht = document.getElementById("meldBericht");
+      var meldToken = new URLSearchParams(window.location.search).get("sessionToken") || "";
+
+      function openMelden(vraag, naam) {
+        document.getElementById("meldVraag").value = vraag;
+        document.getElementById("meldOver").textContent = naam ? " bij " + naam : "";
+        document.getElementById("meldTekst").value = "";
+        meldBericht.hidden = true;
+        meldPaneel.querySelector('button[type="submit"]').disabled = false;
+        meldPaneel.hidden = false;
+        meldPaneel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+
+      function sluitMelden() {
+        meldPaneel.hidden = true;
+      }
+
+      document.getElementById("meldAnnuleer").addEventListener("click", sluitMelden);
+
+      meldPaneel.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var gegevens = new FormData(meldPaneel);
+        gegevens.append("sessionToken", meldToken);
+        var knop = meldPaneel.querySelector('button[type="submit"]');
+        knop.disabled = true;
+        fetch("/melden", { method: "POST", body: gegevens, headers: { "X-Requested-With": "fetch" } })
+          .then(function (antwoord) { return antwoord.json(); })
+          .then(function (data) {
+            meldBericht.textContent = data.bericht;
+            meldBericht.classList.toggle("fout", !data.ok);
+            meldBericht.hidden = false;
+            if (data.ok) {
+              setTimeout(sluitMelden, 1800);
+            } else {
+              knop.disabled = false;
+            }
+          })
+          .catch(function () {
+            meldBericht.textContent = "Versturen lukte niet. Probeer het zo nog eens.";
+            meldBericht.classList.add("fout");
+            meldBericht.hidden = false;
+            knop.disabled = false;
+          });
+      });
+
       function showFeedback(text, ok) {
         feedback.innerHTML = "";
         var strong = document.createElement("strong");
@@ -190,7 +259,15 @@
         feedback.appendChild(strong);
         feedback.appendChild(document.createTextNode(" " + text));
         feedback.classList.toggle("ok", ok);
+        var meld = document.createElement("button");
+        meld.type = "button";
+        meld.className = "link meld-knop";
+        meld.textContent = "Klopt dit niet?";
+        meld.addEventListener("click", function () { openMelden("", ""); });
+        feedback.appendChild(document.createTextNode(" "));
+        feedback.appendChild(meld);
         feedback.hidden = false;
+        sluitMelden();
       }
 
       socket.on("question", function (data) {
@@ -352,6 +429,12 @@
           gegeven.textContent = "jij: " + (fout.gegeven || "–");
           rij.appendChild(goed);
           rij.appendChild(gegeven);
+          var meldFout = document.createElement("button");
+          meldFout.type = "button";
+          meldFout.className = "link meld-knop";
+          meldFout.textContent = "klopt niet?";
+          meldFout.addEventListener("click", function () { openMelden(fout.vraag, displayName(fout.vraag)); });
+          rij.appendChild(meldFout);
           lijst.appendChild(rij);
         });
 

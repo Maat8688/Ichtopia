@@ -253,3 +253,152 @@
 .privacy .kort {
   margin-top: 6px;
 }
+
+/* Meldingen */
+.melden textarea.field {
+  resize: vertical;
+  min-height: 110px;
+  font-family: var(--sans);
+}
+
+.keuze-soort {
+  border: 0;
+  padding: 0;
+  margin: 0 0 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+}
+
+.keuze-soort legend {
+  margin-top: 0;
+}
+
+.filters-meldingen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.filter-knop {
+  border: 1.5px solid var(--rule);
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 15px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.filter-knop span {
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+.filter-knop.gekozen {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.filter-knop.gekozen span {
+  color: #c9d0d8;
+}
+
+.beheer .paneel + .paneel {
+  margin-top: 22px;
+}
+
+.groeplijst,
+.meldinglijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.groeplijst li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--track);
+}
+
+.groeplijst .aantal {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--pen);
+  min-width: 2ch;
+  text-align: right;
+}
+
+.groeplijst .btn {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.melding {
+  padding: 12px 0;
+  border-top: 1px solid var(--track);
+}
+
+.melding.klaar {
+  opacity: .6;
+}
+
+.melding-kop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.melding p {
+  margin-top: 6px;
+}
+
+.melding-tekst {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+
+.label.kaart {
+  background: var(--lichtgroen);
+  color: #2c4a17;
+}
+
+.label.idee {
+  background: var(--geel);
+  color: #5a4a0c;
+}
+
+.melding-acties {
+  display: flex;
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.gevaar-link {
+  color: var(--pen);
+}
+
+.beheer-meldingen-link {
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 560px) {
+  .groeplijst li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .groeplijst form {
+    grid-column: 1 / -1;
+  }
+}

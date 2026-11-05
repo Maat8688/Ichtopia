@@ -15,6 +15,7 @@
 <header class="page topbar">
     {% include 'partials/brand.html' %}
     <nav class="topbar-right">
+        <a href="{{ url_for('meldingen.overzicht') }}">Meldingen{% if openMeldingen %} ({{ openMeldingen }}){% endif %}</a>
         <a href="{{ url_for('kahoot.statistieken') }}">Statistieken</a>
         <a href="{{ url_for('kahoot.host') }}">Nieuwe quiz</a>
         <a href="/">Naar start</a>
@@ -25,6 +26,11 @@
     <h1>Beheer</h1>
     <p class="muted">{{ alleAccounts }} account{{ '' if alleAccounts == 1 else 's' }}. Glipt er een rare naam door,
         geef die dan hier een andere naam en zet het woord bij de geblokkeerde woorden.</p>
+
+    {% if openMeldingen %}
+    <a class="feedback beheer-meldingen-link" href="{{ url_for('meldingen.overzicht') }}">Er {{ 'staat' if openMeldingen == 1 else 'staan' }}
+        <b>{{ openMeldingen }}</b> melding{{ '' if openMeldingen == 1 else 'en' }} van bezoekers open. Bekijken</a>
+    {% endif %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}

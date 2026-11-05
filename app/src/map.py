@@ -165,6 +165,9 @@ class mapSession():
         self.antiCheat = True
         self.startTimestamp = datetime.now()
         self.lastSeen = self.startTimestamp
+        # De laatst beantwoorde vraag, voor het knopje "Klopt dit niet?":
+        # {'vraag', 'onderdeel', 'gegeven', 'goed'}. Zie awnserQuestion.
+        self.vorigeVraag: dict | None = None
         self.mapName = None
         self.sessionMode = sessionMode
         self.correctThreshold = 0.5
@@ -285,13 +288,7 @@ class mapSession():
         leerling: dat komt pas bij de uitslag."""
         vraag = self.currentQuestion
         goed = self.awnserQuestion(awnser, hashed)
-        if hashed:
-            # Bij aanwijzen komt het (gehashte) id van het aangeklikte gebied
-            # binnen; zoek op welke plek dat was.
-            namen = {self.hash(q.id): q.displayName for q in self.questions}
-            gegeven = namen.get(str(awnser), 'een andere plek')
-        else:
-            gegeven = str(awnser).strip()[:60]
+        gegeven = self.vorigeVraag['gegeven']
         self.toetsAntwoorden.append({
             'id': vraag.id, 'vraag': vraag.displayName, 'onderdeel': vraag.category,
             'gegeven': gegeven, 'goed': goed,
@@ -331,8 +328,19 @@ class mapSession():
             awnser = hashlib.sha256(str(awnser).encode('utf-8')).hexdigest()
         return awnser
     
+    def gegevenAntwoord(self, awnser, hashed: bool) -> str:
+        """Wat de leerling antwoordde, leesbaar. Bij aanwijzen komt het
+        (gehashte) id van het aangeklikte gebied binnen; zoek op welke plek
+        dat was."""
+        if hashed:
+            namen = {self.hash(q.id): q.displayName for q in self.questions}
+            return namen.get(str(awnser), 'een andere plek')
+        return str(awnser).strip()[:60]
+
     def awnserQuestion(self, awnser:int, hashed:bool):
         possibleAwnsers = self.currentQuestion.allAnswers
+        vraag = self.currentQuestion
+        gegeven = self.gegevenAntwoord(awnser, hashed)
         
         self.currentQuestion.tries += 1
 
@@ -345,12 +353,13 @@ class mapSession():
             awnser = normalizeAnswer(awnser)
             possibleAwnsers = [normalizeAnswer(a) for a in possibleAwnsers]
 
-        if awnser in possibleAwnsers:
+        goed = awnser in possibleAwnsers
+        self.vorigeVraag = {'vraag': vraag.displayName, 'onderdeel': vraag.category,
+                            'gegeven': gegeven, 'goed': goed}
+        if goed:
             self.score += 1
             self.currentQuestion.timesCorrect += 1
-            return True
-        else:
-            return False
+        return goed
         
     def nextQuestion(self):
         possibleQuestions = []

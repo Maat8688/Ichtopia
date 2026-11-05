@@ -66,6 +66,15 @@
     </section>
 
     <section>
+        <h2>Als je iets meldt</h2>
+        <p>Met "Klopt dit niet?" tijdens het oefenen of "iets kapot of een idee?" onderaan de pagina kun je
+            de makers iets laten weten. Dan bewaren we wat je typt (hooguit 500 tekens), op welke pagina je was,
+            en bij een kaartvraag welke kaart en vraag het was en wat je antwoordde. Geen naam, geen account en
+            geen IP-adres. Zet er dus ook liever geen namen of andere persoonlijke dingen in. De makers lezen de
+            meldingen, handelen ze af en gooien weg wat er niet in hoort.</p>
+    </section>
+
+    <section>
         <h2>Het logbestand van de server</h2>
         <p>Voor de beveiliging houdt de server een logbestand bij: welk IP-adres wanneer welke pagina opvroeg.
             Zo kunnen we zien als iemand de site probeert plat te leggen of wachtwoorden probeert te raden.
@@ -102,7 +111,7 @@
 
 <footer>
     <div class="page">
-        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum</p>
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · <a href="{{ url_for('meldingen.formulier', van=request.path) }}">iets kapot of een idee?</a></p>
     </div>
 </footer>
 

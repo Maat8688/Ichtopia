@@ -292,3 +292,74 @@
 .toets-kaart-uitleg {
   margin-top: 14px;
 }
+
+/* "Klopt dit niet?" */
+.meld-knop {
+  font-size: 13px;
+  margin-left: 4px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.feedback .meld-knop {
+  color: rgba(28, 40, 54, .7);
+}
+
+.meld-paneel {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  background: #fff;
+  display: grid;
+  gap: 6px;
+}
+
+.meld-paneel[hidden] {
+  display: none;
+}
+
+.meld-titel {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.meld-paneel .checkline {
+  font-size: 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.meld-paneel .field {
+  margin-top: 4px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.meld-knoppen {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.meld-knoppen .btn {
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
+.meld-bericht {
+  font-size: 14px;
+  color: var(--bol);
+}
+
+.meld-bericht.fout {
+  color: var(--pen);
+}
+
+.toets-fouten .regel {
+  align-items: baseline;
+  gap: 8px;
+}

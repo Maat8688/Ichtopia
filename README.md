@@ -256,6 +256,25 @@ Accounts verwijderen raakt `/statistieken` nooit: die cijfers staan los van
 accounts. `tests/test_migraties.py` controleert dat een upgrade geen enkele
 rij uit de tabel `gebruik` weghaalt.
 
+## Meldingen
+
+Bezoekers kunnen op twee manieren iets laten weten:
+
+- **"Klopt dit niet?"** onder de uitleg na elk antwoord tijdens het oefenen,
+  en bij elke fout in de uitslag van een toets. De leerling kiest een reden
+  (antwoord fout gerekend, plek of grens klopt niet, spelfout, iets anders)
+  en kan een toelichting typen. Kaart, vraag en antwoord vult de server zelf
+  in vanuit de oefensessie; per sessie kan elke vraag maar een keer gemeld
+  worden.
+- **"iets kapot of een idee?"** onderaan elke pagina, een kort formulier
+  (hooguit 500 tekens). De pagina waar het vandaan kwam gaat mee, zonder
+  het deel na het vraagteken.
+
+Lezen gaat op `/beheer/meldingen` (docentcode). Kaartmeldingen staan bovenaan
+per vraag opgeteld; elke melding kun je afhandelen of verwijderen. Er wordt
+geen naam, account of IP-adres bewaard. Tegen volspammen: hooguit 30
+meldingen per IP-adres per tien minuten (alleen in het geheugen).
+
 ## Privacy
 
 `/privacy` legt in gewone taal uit wat de site bewaart; elke pagina linkt
@@ -288,6 +307,7 @@ python tests/test_ranking.py     # XP, levels, elo, ranglijst en een heel duel
 python tests/test_duel_tegelijk.py  # tegelijk klikken op een duel
 python tests/test_beheer.py      # /beheer: hernoemen, verwijderen, woorden blokkeren
 python tests/test_privacy.py     # privacypagina, eigen account weg, niets van buiten
+python tests/test_meldingen.py   # "Klopt dit niet?", het meldformulier en /beheer/meldingen
 python tests/test_migraties.py   # upgrade op een oude en op een verse database
 python tests/test_security.py    # sessiegrenzen, rem, csrf, X-Forwarded-For
 python tests/test_kaart.py       # kaarten inlezen: land blijft land

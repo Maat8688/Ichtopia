@@ -197,3 +197,27 @@ class GeblokkeerdWoord(db.Model):
 
     def __repr__(self):
         return f'<GeblokkeerdWoord {self.woord}>'
+
+
+class Melding(db.Model):
+    """Een melding van een bezoeker: iets werkt niet, een idee, of een vraag
+    op de kaart die niet klopt. Alleen te zien op /beheer/meldingen.
+
+    Bewust zonder naam, account of IP-adres: wie meldt, blijft onbekend.
+    """
+    __tablename__ = 'melding'
+
+    id = db.Column(db.Integer, primary_key=True)
+    tijd = db.Column(db.DateTime, nullable=False, index=True,
+                     default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+    soort = db.Column(db.String(10), nullable=False)       # kaart, kapot, idee
+    reden = db.Column(db.String(20))                         # bij kaart: antwoord, plek, spelling, anders
+    tekst = db.Column(db.String(500))
+    pagina = db.Column(db.String(80))
+    kaart = db.Column(db.String(40))
+    vraag = db.Column(db.String(80))
+    antwoord = db.Column(db.String(80))                     # wat de leerling antwoordde
+    afgehandeld = db.Column(db.Boolean, nullable=False, default=False, server_default='0')
+
+    def __repr__(self):
+        return f'<Melding {self.soort} {self.tijd}>'

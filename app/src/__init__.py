@@ -124,6 +124,9 @@ with app.app_context():
     from .beheer import beheer
     app.register_blueprint(beheer)
 
+    from .meldingen import meldingen
+    app.register_blueprint(meldingen)
+
     # Een event heeft bij Flask-SocketIO maar een handler, dus verdelen we
     # 'disconnect' zelf over de modules die er iets mee moeten.
     from .sockets import dispatchDisconnect

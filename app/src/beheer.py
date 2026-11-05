@@ -20,6 +20,7 @@ from sqlalchemy import func, or_
 
 from .kahoot_routes import teacherRequired
 from .models import DuelMatch, GeblokkeerdWoord, Results, User, db
+from .meldingen import openMeldingen
 from .names import NameError_, checkName, extraWoord, naamSleutel, normaalWoord, zetExtraWoorden
 from .security import csrfValid
 
@@ -96,7 +97,7 @@ def overzicht():
     return render_template('beheer.html', accounts=accounts, zoek=zoek, pagina=pagina,
                            paginas=max(1, -(-totaal // PER_PAGINA)), totaal=totaal,
                            alleAccounts=User.query.count(), woorden=woorden,
-                           verdacht=verdacht)
+                           verdacht=verdacht, openMeldingen=openMeldingen())
 
 
 @beheer.route('/beheer/account/<int:accountId>/naam', methods=['POST'])

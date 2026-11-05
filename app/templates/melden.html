@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iets melden · Ichtopia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/beheer.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}">
+</head>
+<body>
+
+{% include 'partials/nav.html' %}
+
+<main class="page">
+    <div class="account-form melden">
+        {% if bedankt %}
+            <h2>Bedankt!</h2>
+            <p class="feedback ok">Je melding is binnen. De makers lezen hem en kijken wat ze ermee kunnen.</p>
+            <div class="actions actions-end">
+                <a class="btn btn-primary" href="{{ url_for('main.index') }}">Naar de startpagina</a>
+            </div>
+        {% else %}
+            <h2>Iets kapot of een idee?</h2>
+            <p class="muted">Vertel het ons. Je hoeft je naam niet te geven, en zet er ook liever geen
+                namen van anderen in.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <p class="feedback{% if category == 'success' %} ok{% endif %}">{{ message }}</p>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('meldingen.melden') }}">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                <input type="hidden" name="pagina" value="{{ van }}">
+
+                <fieldset class="keuze-soort">
+                    <legend class="section-label">Wat wil je melden?</legend>
+                    <label class="checkline"><input type="radio" name="soort" value="kapot" checked> Iets werkt niet</label>
+                    <label class="checkline"><input type="radio" name="soort" value="idee"> Een idee</label>
+                </fieldset>
+
+                <div>
+                    <label for="tekst">Wat is er?</label>
+                    <textarea class="field" id="tekst" name="tekst" rows="5" maxlength="500" required
+                              placeholder="Bijvoorbeeld: als ik op Toets klik, gebeurt er niets."></textarea>
+                    <p class="hint"><span id="teller">0</span> van de 500 tekens{% if van %} · vanaf de pagina {{ van }}{% endif %}</p>
+                </div>
+
+                <div class="actions">
+                    <a class="link" href="{{ van or url_for('main.index') }}">Terug</a>
+                    <button type="submit" class="btn btn-primary">Versturen</button>
+                </div>
+            </form>
+            <p class="muted form-footnote">Klopt er een vraag op de kaart niet? Dat meld je het snelst tijdens het
+                oefenen, met "Klopt dit niet?" onder het antwoord. Wat we met meldingen doen staat op de
+                <a class="link" href="{{ url_for('main.privacy') }}">privacypagina</a>.</p>
+        {% endif %}
+    </div>
+</main>
+
+<footer>
+    <div class="page">
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum</p>
+    </div>
+</footer>
+
+<script>
+    (function () {
+        var tekst = document.getElementById("tekst");
+        var teller = document.getElementById("teller");
+        if (!tekst) return;
+        tekst.addEventListener("input", function () { teller.textContent = tekst.value.length; });
+    })();
+</script>
+
+</body>
+</html>

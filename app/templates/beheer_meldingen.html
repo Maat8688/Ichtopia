@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meldingen · Beheer · Ichtopia</title>
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/beheer.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}">
+</head>
+<body>
+
+<header class="page topbar">
+    {% include 'partials/brand.html' %}
+    <nav class="topbar-right">
+        <a href="{{ url_for('beheer.overzicht') }}">Accounts</a>
+        <a href="{{ url_for('kahoot.statistieken') }}">Statistieken</a>
+        <a href="/">Naar start</a>
+    </nav>
+</header>
+
+<main class="page beheer">
+    <h1>Meldingen</h1>
+    <p class="muted">Wat bezoekers melden: kaartvragen die niet kloppen, dingen die niet werken, en ideeën.
+        Zonder naam of IP-adres. Handel af wat klaar is; verwijder wat persoonlijke dingen of onzin bevat.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="feedback{% if category == 'success' %} ok{% endif %}">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <nav class="filters-meldingen">
+        <a class="filter-knop{% if toon == 'open' %} gekozen{% endif %}" href="{{ url_for('meldingen.overzicht') }}">Open <span>{{ aantallen.open }}</span></a>
+        <a class="filter-knop{% if toon == 'afgehandeld' %} gekozen{% endif %}" href="{{ url_for('meldingen.overzicht', toon='afgehandeld') }}">Afgehandeld <span>{{ aantallen.afgehandeld }}</span></a>
+        <a class="filter-knop{% if toon == 'alles' %} gekozen{% endif %}" href="{{ url_for('meldingen.overzicht', toon='alles') }}">Alles</a>
+    </nav>
+
+    {% if groepen and toon != 'afgehandeld' %}
+    <section class="paneel groepen">
+        <h2>Kaartvragen die gemeld zijn</h2>
+        <p class="muted">Open meldingen per vraag opgeteld. Wat vaak gemeld wordt, staat bovenaan.</p>
+        <ul class="groeplijst">
+            {% for g in groepen %}
+            <li>
+                <div>
+                    <b>{{ g.vraag }}</b> <span class="muted">· {{ g.kaart or 'onbekende kaart' }}</span>
+                    <div class="row-note">
+                        {% for reden, aantal in g.redenen.items() %}{{ aantal }}× {{ redenen.get(reden, reden) }}{% if not loop.last %} · {% endif %}{% endfor %}
+                        {% if g.antwoorden %}<br>antwoorden: {% for a, n in g.antwoorden.items() %}"{{ a }}"{% if n > 1 %} ({{ n }}×){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+                    </div>
+                </div>
+                <span class="aantal">{{ g.aantal }}</span>
+                <form method="POST" action="{{ url_for('meldingen.vraagAfhandelen') }}">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                    <input type="hidden" name="kaart" value="{{ g.kaart or '' }}">
+                    <input type="hidden" name="vraag" value="{{ g.vraag or '' }}">
+                    <input type="hidden" name="toon" value="{{ toon }}">
+                    <button class="btn" type="submit">Afgehandeld</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    <section class="paneel">
+        <h2>{{ {'open': 'Open meldingen', 'afgehandeld': 'Afgehandeld', 'alles': 'Alle meldingen'}[toon] }}</h2>
+        {% if lijst %}
+        <ul class="meldinglijst">
+            {% for m in lijst %}
+            <li class="melding{% if m.afgehandeld %} klaar{% endif %}">
+                <div class="melding-kop">
+                    <span class="label {{ m.soort }}">{{ soortNamen.get(m.soort, m.soort) }}</span>
+                    <span class="muted">{{ m.tijd.strftime('%d-%m-%Y %H:%M') }} UTC{% if m.pagina %} · {{ m.pagina }}{% endif %}</span>
+                </div>
+                {% if m.soort == 'kaart' %}
+                <p><b>{{ m.vraag }}</b> op {{ m.kaart or 'onbekende kaart' }}: {{ redenen.get(m.reden, m.reden) }}{% if m.antwoord %} · antwoord: "{{ m.antwoord }}"{% endif %}</p>
+                {% endif %}
+                {% if m.tekst %}<p class="melding-tekst">{{ m.tekst }}</p>{% endif %}
+                <div class="melding-acties">
+                    <form method="POST" action="{{ url_for('meldingen.afhandelen', meldingId=m.id) }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                        <input type="hidden" name="toon" value="{{ toon }}">
+                        <button class="link" type="submit">{{ 'weer open zetten' if m.afgehandeld else 'afgehandeld' }}</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('meldingen.verwijder', meldingId=m.id) }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+                        <input type="hidden" name="toon" value="{{ toon }}">
+                        <button class="link gevaar-link" type="submit">verwijderen</button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">Geen meldingen{{ ' die nog open staan' if toon == 'open' else '' }}.</p>
+        {% endif %}
+    </section>
+</main>
+
+<footer>
+    <div class="page">
+        <p>Alleen te zien met de docentcode</p>
+    </div>
+</footer>
+
+</body>
+</html>
