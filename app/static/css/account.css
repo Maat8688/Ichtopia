@@ -1,0 +1,255 @@
+/* Inloggen, registreren, de accountpagina en de ranglijst. */
+
+.account-form {
+  max-width: 460px;
+  margin-top: 8px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 24px 26px 26px;
+}
+
+.account-form h2 {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.account-form > .muted {
+  font-size: 15px;
+}
+
+.account-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.account-form label {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.account-form .hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.account-form .feedback {
+  margin: 16px 0 0;
+}
+
+/* Meldingen in een formulier staan recht: het is geen kladblaadje. */
+.account-form .feedback,
+.board .feedback {
+  transform: none;
+  box-shadow: none;
+  border-radius: var(--radius);
+}
+
+.account-form .rule-list {
+  margin-top: 20px;
+}
+
+.account-form .rule-list .row {
+  cursor: default;
+}
+
+.account-form .rule-list .row:hover {
+  border-color: var(--rule);
+}
+
+.checkline {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 15px !important;
+  font-weight: 400 !important;
+}
+
+.checkline input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--bol);
+}
+
+.choice {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.choice legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.choice .row {
+  margin: 0;
+}
+
+.logout-form {
+  margin-top: 8px;
+}
+
+.form-footnote {
+  margin-top: 22px;
+}
+
+/* ---------------------------------------------------------------- */
+/* Ranglijst en level-balkje                                        */
+/* ---------------------------------------------------------------- */
+
+.board {
+  max-width: 680px;
+}
+
+.board > h1 {
+  font-size: 26px;
+}
+
+.board-intro {
+  margin-top: 10px;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 20px 0 6px;
+  padding: 4px;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+}
+
+.tab {
+  padding: 6px 16px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 999px;
+}
+
+.tab:hover {
+  background: var(--gekozen);
+}
+
+.tab.current {
+  background: var(--ink);
+  color: #fff;
+}
+
+.board .feedback {
+  margin-top: 14px;
+}
+
+.board-list {
+  margin-top: 18px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.board-list .row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  cursor: default;
+}
+
+.board-list .row:hover {
+  border-color: var(--rule);
+}
+
+.board-list .row.mine {
+  border: 2px solid var(--ink);
+  background: var(--gekozen);
+  padding: 8.5px 11.5px;
+}
+
+.board-rank {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--paper-2);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* De top drie krijgt de kleuren van de kladblaadjes. */
+.board-list .row:nth-child(1) .board-rank { background: var(--geel); }
+.board-list .row:nth-child(2) .board-rank { background: var(--roze); }
+.board-list .row:nth-child(3) .board-rank { background: var(--lichtgroen); }
+
+.board-list .name {
+  flex: 1;
+}
+
+.board-list .status {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Level-balkje op de accountpagina */
+.level-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 22px;
+}
+
+.level-line strong {
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.level-bar {
+  height: 10px;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.level-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--gekend);
+}
+
+.duel-history {
+  margin-top: 24px;
+}
+
+.duel-history .row .status.won {
+  color: var(--bol);
+  font-weight: 600;
+}
+
+.duel-history .row .status.lost {
+  color: var(--pen);
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .account-form {
+    padding: 20px 16px 22px;
+  }
+}

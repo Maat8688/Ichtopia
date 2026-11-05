@@ -1,0 +1,25 @@
+# Caddy zit voor de app: regelt https (certificaat van Let's Encrypt, ook het
+# verlengen) en stuurt alles door naar gunicorn in de container 'web'.
+#
+# Zet DOMAIN in .env op de echte domeinnaam, bijvoorbeeld topo.ichthus.nl. Die
+# naam moet in DNS al naar deze server wijzen en poort 80 en 443 moeten open
+# staan, anders kan Caddy geen certificaat ophalen.
+# Zonder DOMAIN draait het op https://localhost met een eigen testcertificaat.
+
+{$DOMAIN:localhost} {
+	encode zstd gzip
+
+	header {
+		# Browser altijd https laten gebruiken voor deze site.
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Niet in een iframe van een andere site (tegen clickjacking).
+		X-Frame-Options "SAMEORIGIN"
+		-Server
+	}
+
+	# Websockets (Socket.IO) gaan hier vanzelf goed doorheen. Caddy zet zelf
+	# X-Forwarded-For met het echte IP en negeert wat een bezoeker meestuurt.
+	reverse_proxy web:8000
+}

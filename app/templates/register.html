@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account aanmaken · Ichtopia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}">
+</head>
+<body>
+
+{% include 'partials/nav.html' %}
+
+<main class="page">
+    <div class="account-form">
+        <h2>Account aanmaken</h2>
+        <p class="muted">Je hebt geen account nodig om te oefenen. Met een account
+            verdien je XP, speel je duels en sta je op de ranglijst.</p>
+        <p class="muted">Je hebt alleen een naam en een wachtwoord nodig, geen e-mail.
+            <b>Onthoud je wachtwoord goed:</b> vergeet je het, dan kunnen we het niet
+            terugzetten en maak je een nieuw account.</p>
+
+        {% for error in errors %}
+            <p class="feedback">{{ error }}</p>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
+            <div>
+                <label for="username">Naam</label>
+                <input type="text" class="field" id="username" name="username"
+                       value="{{ form.username }}" autocomplete="nickname"
+                       maxlength="20" required autofocus>
+                <p class="hint">Zo zien anderen je in de klassikale quiz, op de ranglijst en in een duel. Hiermee log je ook in. Maximaal 20 tekens, en netjes: scheldwoorden en rare namen worden geweigerd.</p>
+            </div>
+            <div>
+                <label for="password">Wachtwoord</label>
+                <input type="password" class="field" id="password" name="password"
+                       autocomplete="new-password" minlength="8" required>
+                <p class="hint">Minstens 8 tekens.</p>
+            </div>
+            <div>
+                <label for="passwordRepeat">Wachtwoord herhalen</label>
+                <input type="password" class="field" id="passwordRepeat" name="passwordRepeat"
+                       autocomplete="new-password" minlength="8" required>
+            </div>
+
+            <div class="actions actions-end">
+                <a class="link" href="{{ url_for('auth.login') }}">Ik heb al een account</a>
+                <button type="submit" class="btn btn-primary">Account aanmaken</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <div class="page">
+        <p>Gemaakt door Floris, Joël en Sami · Ichthus Lyceum · een account is niet verplicht</p>
+    </div>
+</footer>
+
+</body>
+</html>

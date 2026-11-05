@@ -1,423 +1,250 @@
-body {
-  flex-direction: column;
+/* Oefenscherm: kaart groot links, vraag en voortgang in een smallere kolom rechts. */
+
+.learn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 32px;
+  align-items: start;
+  margin-top: 4px;
 }
 
-html,
-body {
-  height: 100vh;
-  margin: 0;
+.kaart-kolom {
+  min-width: 0;
+}
+
+.map {
+  position: relative;
   padding: 0;
-  overflow: hidden;
+  min-height: 320px;
   display: flex;
-}
-
-#progressBar {
-  width: 90%;
-  max-width: 900px;
-  margin: 0;
-  margin-top: 40px;
-  height: 5vh;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: #e0e0e0;
+  justify-content: center;
 }
 
-#gamemodeContainer > #multipleChoise > button {
-  width: 12vw;
-  padding: 15px 0;
-  color: black;
-  border-radius: 6px;
-  border: 1px solid black;
-  font-size: clamp(10px, 2vw, 20px);
-  cursor: pointer;
-}
-
-#gamemodeContainer > #multipleChoise > button:hover {
-  transform: translateY(-1px);
-}
-
-#gamemodeContainer > #multipleChoise > button:active {
-  background-color: #f0f0f1;
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
-  color: rgba(0, 0, 0, 0.65);
-  transform: translateY(0);
-}
-
-#progressBar,
-#progressBar > #bar {
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-#progressBar > #bar {
+.map svg {
   width: 100%;
-  display: flex;
-  background-color: #f0f0f1;
-  height: 100%;
-}
-
-#questionsCorrect {
-  background-color: #3b9e3b;
-  height: 100%;
-  transition: width 0.5s ease;
-}
-#questionsIncorrect {
-  background-color: #b43f3f;
-  height: 100%;
-  transition: width 0.5s ease;
-}
-
-#finishedContainer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s, opacity 0.5s;
-}
-
-.button-56 {
-  align-items: center;
-  background-color: #fee6e3;
-  border: 2px solid #111;
-  border-radius: 8px;
-  box-sizing: border-box;
-  color: #111;
-  cursor: pointer;
-  display: flex;
-  font-family: Inter, sans-serif;
-  font-size: 16px;
-  height: 48px;
-  justify-content: center;
-  line-height: 24px;
-  max-width: 100%;
-  padding: 0 25px;
-  position: absolute;
-  text-align: center;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  width: 10%;
-  top: 10%;
-  right: 5%;
-}
-.typeAwnserInput {
-  width: 100%;
-  max-width: 300px;
-  padding: 12px 16px;
-  font-size: 16px;
-  color: #333;
-  background-color: #f9f9f9;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  box-sizing: border-box;
-}
-
-.typeAwnserInput::placeholder {
-  color: #aaa;
-}
-
-.typeAwnserInput:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
-}
-
-.button-56:after {
-  background-color: #111;
-  border-radius: 8px;
-  content: "";
+  height: auto;
+  max-height: 74vh;
   display: block;
-  height: 48px;
-  left: 0;
-  width: 100%;
+}
+
+/* Naam van de kaart linksboven op het kaartblad */
+.kaartblad-titel {
   position: absolute;
-  top: -2px;
-  transform: translate(8px, 8px);
-  transition: transform 0.2s ease-out;
-  z-index: -1;
-}
-
-.button-56:hover:after {
-  transform: translate(0, 0);
-}
-
-.button-56:active {
-  background-color: #ffdeda;
-  outline: 0;
-}
-
-.button-56:hover {
-  outline: 0;
-}
-
-@media (min-width: 768px) {
-  .button-56 {
-    padding: 0 40px;
-  }
-}
-
-#finishedContainer.show {
-  visibility: visible;
-  opacity: 1;
-}
-
-.popup {
-  position: fixed;
-  width: 40%;
-  max-width: 400px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-.popup h2 {
-  margin: 0 0 10px;
-}
-
-.popup p {
-  margin: 5px 0;
-}
-
-#QuestionBreakdown {
-  max-height: 150px;
-  overflow-y: auto;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f9f9f9;
+  top: 12px;
+  left: 14px;
+  z-index: 1;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
   border-radius: 4px;
+  padding: 3px 12px 4px;
+  font-size: 16px;
 }
 
-.overlay {
-  background: rgba(0, 0, 0, 0.5); /* Darker overlay */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  animation: fadeIn 0.3s ease; /* Fade-in animation */
+.kaartblad-titel b {
+  font-weight: 600;
 }
 
-.overlay.show {
+.kaartblad-titel span {
+  color: var(--muted);
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+.legenda {
   display: flex;
-}
-
-.popup {
-  background-color: #6a7f8b;
-  border-radius: 15px;
-  text-align: center;
-  border: 2px solid #000000;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  width: 90%;
-  max-width: 500px;
-  transform: scale(0.8);
-  animation: popupEnter 0.3s forwards;
-  box-shadow: #2c3532 4px 4px 0 0;
-}
-
-#mainContent {
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 100vw;
-  padding: 1vw;
-  box-sizing: border-box;
-  flex: 1;
-  overflow: hidden;
-}
-
-#gamemodeContainer {
-  width: fit-content;
-  height: fit-content;
-  margin: 1vw;
-  font-size: 1rem;
-}
-
-#gamemodeContainer > #multipleChoise {
-  display: flex;
-  gap: 30px;
   flex-wrap: wrap;
-  max-width: 30vw;
+  gap: 6px 18px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-#mapContainer {
-  max-width: 60vw;
+.legenda i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--grens);
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.legenda .l-vraag { background: var(--pen); }
+.legenda .l-goed { background: var(--gekend); }
+.legenda .l-fout { background: var(--roze); }
+.legenda .l-open { background: var(--zand); }
+
+/* Rechterkolom */
+.panel {
+  min-width: 0;
+}
+
+.vraag {
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 18px 18px 16px;
+}
+
+.vraag[hidden] {
+  display: none;
+}
+
+.panel .question {
+  margin: 4px 0 16px;
+}
+
+.panel-label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Meerkeuze */
+#multipleChoise {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  width: 60%;
-  height: clamp(30vh, 40vw, 70vh);
-  border: 2px solid black;
-  background-color: #6a7f8b;
-  padding: 20px 0;
-  border-radius: 10px;
+  gap: 8px;
 }
 
-#mapContainer > svg {
-  max-width: 70%;
-  min-height: 65%;
-}
-
-@media (max-width: 799px) {
-  #mainContent {
-    flex-direction: column;
-  }
-
-  #mapContainer {
-    max-width: 400px;
-    max-height: 400px;
-    height: 50vh;
-    width: 90vw;
-  }
-
-  #mapContainer > svg {
-    max-width: 90%;
-  }
-
-  #gamemodeContainer > #multipleChoise {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    row-gap: 20px;
-    column-gap: 15px;
-    align-items: center;
-    justify-items: center;
-  }
-
-  #gamemodeContainer > #multipleChoise,
-  #gamemodeContainer {
-    max-width: 80vw;
-    width: fit-content;
-  }
-
-  #gamemodeContainer {
-    display: flex;
-    justify-content: center;
-    margin-top: -30px;
-  }
-
-  #gamemodeContainer > #multipleChoise > button {
-    width: 30vw;
-    max-width: 180px;
-    height: 70px;
-    font-size: 100%;
-  }
-}
-
-@media (min-width: 800px) and (max-width: 1100px) {
-  #multipleChoise {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    row-gap: 20px;
-    column-gap: 15px;
-    align-items: center;
-    justify-items: center;
-  }
-
-  #gamemodeContainer > #multipleChoise > button {
-    height: 65px;
-    width: 105px;
-    font-size: 16px;
-  }
-
-  #mapContainer {
-    max-height: 70vh;
-    max-height: 500px;
-  }
-
-  #mapContainer > svg {
-    max-height: 80%;
-    max-width: 90%;
-  }
-}
-.loadingScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: white;
+.antwoord {
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 9999;
-  font-size: 30px;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 11px 12px;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  background: #fff;
+  font: 500 17px var(--sans);
+  color: var(--ink);
 }
 
-#logo_loading {
-  width: 150px;
-  animation: spin 2s linear infinite;
-  position: absolute;
-  margin-bottom: 200px;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-#logo {
-  transition: transform 2s;
+.antwoord:hover {
+  border-color: var(--ink);
+  background: var(--gekozen);
 }
 
-.Klikhetland {
-  color: white;
+.antwoord kbd {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  display: grid;
+  place-items: center;
+  font: 500 13px var(--sans);
+  color: var(--muted);
+}
+
+/* Naam typen */
+.answer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.answer-form .field {
+  font-size: 18px;
+  padding: 12px 14px;
+}
+
+.answer-form .actions {
+  margin-top: 0;
+}
+
+/* Voortgang */
+.voortgang {
+  margin-top: 24px;
+}
+
+.voortgang p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.progress > span {
+  width: 0;
+  transition: width 0.4s ease;
+}
+
+/* Klaar */
+#finished h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.uitslag {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.uitslag > div {
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.uitslag span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.uitslag b {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+#xpBlok .feedback {
+  transform: none;
+}
+
+#QuestionBreakdown[hidden] {
+  display: none;
 }
 
 #QuestionBreakdown {
-  display: none;
-  padding: 20px;
-  background-color: white;
-  margin-top: 10px;
-  pointer-events: none; /* Prevent interactions initially */
-  opacity: 0.5; /* Make it look visually disabled */
-  
-}
-.correct-answer {
-  animation: correctFlash 0.5s ease-in-out;
-}
-.incorrect-answer {
-  animation: incorrectFlash 0.5s ease-in-out;
+  margin-top: 16px;
+  max-height: 320px;
+  overflow-y: auto;
 }
 
-@keyframes correctFlash {
-  from { background-color: #d4edda; }
-  to { background-color: transparent; }
+.overzicht .regel {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--track);
+  font-size: 14px;
 }
 
-@keyframes incorrectFlash {
-  from { background-color: #f8d7da; }
-  to { background-color: transparent; }
-}
-.shake {
-  animation: shake 0.5s;
+.results-note {
+  margin-top: 18px;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
+@media (max-width: 899px) {
+  .learn {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .map {
+    min-height: 0;
+  }
+
+  .map svg {
+    max-height: 52vh;
+  }
+
+  .legenda {
+    display: none;
+  }
 }

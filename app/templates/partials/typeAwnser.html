@@ -1,17 +1,18 @@
-<input class="typeAwnserInput" type="text" name="textInput" placeholder="...">
+<form class="answer-form" id="answerForm" autocomplete="off">
+    <input class="field" type="text" name="textInput" placeholder="Naam" autocapitalize="off" autocomplete="off" aria-label="Antwoord" />
+    <div class="actions actions-end">
+        <button type="submit" class="btn btn-primary">Nakijken</button>
+    </div>
+</form>
 
 <script>
     socket.on('question', function(data) {
         var mapElement = document.getElementById(data.question);
-        var question = data.question;
         var textInput = document.querySelector('input[name="textInput"]');
 
         // Remove the active element from all mapelements
         var questionsElement = document.getElementById("questions");
         var questionElements = questionsElement.getElementsByTagName('g');
-        console.log(questionElements);
-        console.log(question);
-        console.log(mapElement);
         Array.from(questionElements).forEach(function(element) {
             element.classList.remove('active');
         });
@@ -21,14 +22,18 @@
         }
 
         textInput.value = '';
+        textInput.focus();
     });
 
-    document.querySelector('input[name="textInput"]').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            const inputValue = event.target.value;
-            socket.emit('answerQuestion', {'awnser': inputValue, 'hashed':false, 'sessionToken': urlParams.get('sessionToken')});
+    document.getElementById('answerForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var textInput = document.querySelector('input[name="textInput"]');
+        var inputValue = textInput.value.trim();
+        if (inputValue === '') {
+            textInput.focus();
+            return;
         }
+        lastAnswer = inputValue;
+        socket.emit('answerQuestion', {'awnser': inputValue, 'hashed':false, 'sessionToken': urlParams.get('sessionToken')});
     });
-
-
 </script>

@@ -1,0 +1,120 @@
+"""Rooktest van het accountsysteem.
+
+Draaien vanuit de map `app`:
+
+    python tests/test_auth.py
+"""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from helpers import Checks, csrf as token, loadApp   # noqa: E402
+
+app = loadApp()
+
+check = Checks()
+
+c = app.test_client()
+
+# --- registreren ---
+r = c.get('/registreren')
+check('GET /registreren', r.status_code == 200, r.status_code)
+t = token(r.get_data(as_text=True))
+
+r = c.post('/registreren', data={'csrfToken': 'fout', 'username': 'Floris',
+                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'})
+check('CSRF wordt geweigerd', 'verlopen' in r.get_data(as_text=True))
+
+r = c.post('/registreren', data={'csrfToken': t, 'username': 'Floris',
+                                 'password': 'kort', 'passwordRepeat': 'kort'})
+check('te kort wachtwoord geweigerd', 'minstens 8 tekens' in r.get_data(as_text=True))
+
+r = c.post('/registreren', data={'csrfToken': t, 'username': 'Floris',
+                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord2'})
+check('ongelijke wachtwoorden geweigerd', 'niet gelijk' in r.get_data(as_text=True))
+
+check('geen keuze leerling/docent meer', 'accountType' not in c.get('/registreren').get_data(as_text=True))
+
+r = c.post('/registreren', data={'csrfToken': t, 'username': 'Floris',
+                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'}, follow_redirects=True)
+body = r.get_data(as_text=True)
+check('registreren lukt', 'Mijn account' in body, body[:400])
+check('geen e-mail op de accountpagina', 'mail' not in body.lower(), body[:400])
+check('geen e-mailveld bij registreren', 'type="email"' not in c.get('/registreren').get_data(as_text=True))
+
+from src.models import User   # noqa: E402
+with app.app_context():
+    check('geen e-mail opgeslagen', User.query.filter_by(username='Floris').first().email is None)
+
+# dezelfde naam, of een naam die er te veel op lijkt
+c2 = app.test_client()
+for naam, melding in [('floris', 'al bezet'), ('FLORIS', 'al bezet'), ('F1oris', 'te veel op'),
+                      ('FIoris', 'te veel op'), ('Flor1s', 'te veel op'), ('Floriss', 'te veel op')]:
+    t2 = token(c2.get('/registreren').get_data(as_text=True))
+    r = c2.post('/registreren', data={'csrfToken': t2, 'username': naam,
+                                      'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'})
+    check(f'{naam} geweigerd ({melding})', melding in r.get_data(as_text=True))
+t2 = token(c2.get('/registreren').get_data(as_text=True))
+r = c2.post('/registreren', data={'csrfToken': t2, 'username': 'K4nk3r',
+                                  'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'})
+check('scheldwoord als naam geweigerd', 'niet toestaan' in r.get_data(as_text=True))
+
+# --- uitloggen ---
+r = c.get('/account')
+t3 = token(r.get_data(as_text=True))
+r = c.post('/uitloggen', data={'csrfToken': t3}, follow_redirects=True)
+check('uitloggen lukt', 'Inloggen' in r.get_data(as_text=True))
+r = c.get('/account')
+check('/account beschermd na uitloggen', r.status_code == 302 and '/inloggen' in r.headers['Location'],
+      r.headers.get('Location'))
+
+# --- inloggen ---
+r = c.get('/inloggen')
+t4 = token(r.get_data(as_text=True))
+r = c.post('/inloggen', data={'csrfToken': t4, 'username': 'Floris', 'password': 'fout'})
+check('fout wachtwoord geweigerd', 'Naam of wachtwoord klopt niet' in r.get_data(as_text=True))
+r = c.post('/inloggen', data={'csrfToken': t4, 'username': 'Bestaatniet', 'password': 'wachtwoord1'})
+check('onbekende naam: dezelfde melding', 'Naam of wachtwoord klopt niet' in r.get_data(as_text=True))
+r = c.post('/inloggen', data={'csrfToken': t4, 'username': ' floris ', 'password': 'wachtwoord1'},
+           follow_redirects=True)
+check('inloggen lukt, hoofdletters en spaties maken niet uit', 'Ichtopia' in r.get_data(as_text=True) and r.status_code == 200)
+r = c.get('/account')
+check('/account bereikbaar na inloggen', r.status_code == 200 and 'Floris' in r.get_data(as_text=True))
+check('naam in de topbar', 'Floris' in c.get('/').get_data(as_text=True))
+
+# --- open redirect ---
+c3 = app.test_client()
+t5 = token(c3.get('/inloggen').get_data(as_text=True))
+r = c3.post('/inloggen?next=https://evil.example.com/x',
+            data={'csrfToken': t5, 'username': 'Floris', 'password': 'wachtwoord1'})
+check('geen open redirect', 'evil.example.com' not in r.headers.get('Location', ''), r.headers.get('Location'))
+
+# --- rem op gokken ---
+c4 = app.test_client()
+for i in range(6):
+    t6 = token(c4.get('/inloggen').get_data(as_text=True))
+    r = c4.post('/inloggen', data={'csrfToken': t6, 'username': 'Floris', 'password': 'fout'})
+check('rem na 5 pogingen', 'Te veel mislukte pogingen' in r.get_data(as_text=True))
+
+# --- geen docentaccounts via het formulier ---
+# Ook wie het formulier zelf nabouwt met accountType=docent en de goede code,
+# krijgt een gewoon account. Hosten gaat alleen met de docentcode op /host.
+c5 = app.test_client()
+t7 = token(c5.get('/registreren').get_data(as_text=True))
+r = c5.post('/registreren', data={'csrfToken': t7, 'username': 'Kevin',
+                                  'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
+                                  'accountType': 'docent', 'teacherCode': 'docent123'},
+            follow_redirects=True)
+check('registreren met docent-veld lukt gewoon', 'Mijn account' in r.get_data(as_text=True))
+with app.app_context():
+    kevin = User.query.filter_by(username='Kevin').first()
+    check('maar het wordt geen docentaccount', kevin is not None and not kevin.isTeacher)
+r = c5.get('/host')
+check('zonder docentcode geen klassikale quiz hosten', r.status_code != 200 or 'docentcode' in r.get_data(as_text=True).lower(), r.status_code)
+
+# oude /login-link blijft werken
+r = app.test_client().get('/login')
+check('/login stuurt door naar /inloggen', r.status_code == 302 and r.headers['Location'].endswith('/inloggen'), r.headers.get('Location'))
+
+sys.exit(check.report())

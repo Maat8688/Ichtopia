@@ -10,6 +10,14 @@ import json
 import urllib.request
 import os
 
+# Draait meestal los op de server (python src/monitor.py), dus de instellingen
+# zelf uit app/.env halen als die er is.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+except ImportError:
+    pass
+
 # =========================
 # CONFIG
 # =========================
@@ -71,11 +79,13 @@ HIGH_RATE_THRESHOLD = 1.0  # >1 req/sec averaged over WINDOW_SECONDS
 MANY_PATHS_THRESHOLD = 20
 
 # Optional: Discord webhook for alerts (leave empty to disable)
-DISCORD_WEBHOOK_URL = ""  # e.g. "https://discord.com/api/webhooks/...."
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")  # e.g. "https://discord.com/api/webhooks/...."
 
 # Optional: ntfy for alerts (leave NTFY_TOPIC empty to disable)
-NTFY_SERVER = "https://ntfy.sh"
-NTFY_TOPIC = "AK-Leer-129845"  # e.g. "xxxxxxxxx"
+# Uit de omgeving (.env), niet in de code: wie de topic kent, kan de alerts
+# meelezen en zelf nepmeldingen sturen. Kies een lange willekeurige naam.
+NTFY_SERVER = os.getenv("NTFY_SERVER", "https://ntfy.sh")
+NTFY_TOPIC = os.getenv("NTFY_TOPIC", "")
 
 # Suspicious path patterns (regex)
 SUSPICIOUS_PATTERNS = [

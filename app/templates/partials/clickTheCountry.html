@@ -1,8 +1,8 @@
-<h1 class="Klikhetland">Klik op <span id="countryText">...</span></h1>
+<p class="question">Waar ligt <span id="countryText">…</span>?</p>
 <script>
     socket.on('question', function(data) {
         var span = document.getElementById('countryText');
-        span.textContent = data.question;
+        span.textContent = String(data.question).replace(/[_]/g, ' ');
     });
 </script>
 
@@ -20,6 +20,13 @@
         question.addEventListener('click', function(event) {
           var questionId = event.currentTarget.id;
           socket.emit('answerQuestion', { awnser: questionId, hashed: true, sessionToken: urlParams.get('sessionToken') });
+        });
+        // Een <g> is geen knop, dus Enter en spatie moeten we zelf afvangen.
+        question.addEventListener('keydown', function(event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.currentTarget.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          }
         });
       }
       
