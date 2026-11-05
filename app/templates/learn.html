@@ -61,8 +61,10 @@
         </div>
         <div class="legenda" aria-hidden="true">
           <span><i class="l-vraag"></i>deze vraag</span>
+          {% if not map.toets %}
           <span><i class="l-goed"></i>gekend</span>
           <span><i class="l-fout"></i>fout gehad</span>
+          {% endif %}
           <span><i class="l-open"></i>nog te doen</span>
         </div>
       </section>
@@ -319,7 +321,7 @@
         toetsStand = data;
         document.getElementById("questionsCorrect").style.width =
           (data.totaal ? (data.beantwoord * 100) / data.totaal : 0) + "%";
-        document.getElementById("progressText").textContent = data.beantwoord + " van " + data.totaal + " beantwoord";
+        document.getElementById("progressText").textContent = data.beantwoord + " van " + data.totaal;
         document.getElementById("questionCounter").textContent =
           "Vraag " + Math.min(data.beantwoord + 1, data.totaal) + " van " + data.totaal;
       });

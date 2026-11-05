@@ -61,23 +61,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Statistieken · Topo</title>
+    <title>Statistieken · Ichtopia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/statistieken.css') }}" />
-    <link rel="icon" href="{{ url_for('static', filename='img/logo_small.png') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/logo-96.png') }}" />
     <script src="{{ url_for('static', filename='js/statistieken.js') }}" defer></script>
   </head>
   <body>
     <header class="page topbar">
-      <h1>Statistieken</h1>
-      <div class="topbar-right">
-        <a href="{{ url_for('kahoot.host') }}" class="link">nieuwe quiz</a>
-        <a href="/" class="link">naar start</a>
-      </div>
+      {% include 'partials/brand.html' %}
+      <nav class="topbar-right">
+        <a href="{{ url_for('kahoot.host') }}">Nieuwe quiz</a>
+        <a href="/">Naar start</a>
+      </nav>
     </header>
 
     <main class="page stat">
+      <h1 class="stat-titel">Statistieken</h1>
       {# ---------------------------------------------------------- Nu #}
       <section class="nu" id="nu" data-bron="{{ url_for('kahoot.statistiekenJson', alleen='nu') }}">
         <h2>Nu bezig</h2>

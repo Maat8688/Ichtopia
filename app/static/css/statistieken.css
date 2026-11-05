@@ -8,11 +8,24 @@
   --reeks-grijs: #c4bcad;
   --raster: #e2dacb;
   --w0: var(--paper-2);
-  --w1: #7fb2b0;
-  --w2: #56979a;
-  --w3: #377b7e;
-  --w4: #1f6063;
-  --w5: #0f3c3f;
+  /* Van het lichtgroen van 'gekend' naar het donkergroen van het logo. */
+  --w1: #c9e0ad;
+  --w2: #93c48a;
+  --w3: #53a06f;
+  --w4: #2a7c58;
+  --w5: #0f4632;
+}
+
+.stat-titel {
+  font-size: 28px;
+  margin: 4px 0 18px;
+}
+
+/* main.css zet ruimte tussen twee secties onder elkaar; naast elkaar in een
+   raster hoort dat niet, anders staat het tweede vak lager dan het eerste. */
+.stat .twee > section,
+.stat .drie > section {
+  margin-top: 0;
 }
 
 .stat h2 {
@@ -78,9 +91,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background: var(--paper-2);
+  background: #fff;
+  border: 1.5px solid var(--rule);
   padding: 14px 16px 13px;
-  border-radius: 6px;
+  border-radius: var(--radius);
 }
 
 .tegel.breed {
@@ -193,9 +207,9 @@
 
 /* Vakken met een grafiek */
 .kaart-vak {
-  background: #fffdf8;
-  border: 0.5px solid var(--rule);
-  border-radius: 6px;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
   padding: 18px 20px 14px;
   min-width: 0;
 }
@@ -412,7 +426,7 @@
 }
 
 .nl .prov path {
-  stroke: #fffdf8;
+  stroke: #fff;
   stroke-width: 1.2px;
   vector-effect: non-scaling-stroke;
 }
@@ -650,4 +664,28 @@ details.tabel table {
   .warmte-uur {
     font-size: 9px;
   }
+}
+
+/* "Nu bezig" als kladblaadjes, net als op de startpagina. */
+.nu .tegel {
+  background: var(--geel);
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .08), 0 10px 18px -12px rgba(0, 0, 0, .35);
+  transform: rotate(-0.8deg);
+}
+
+.nu .tegel:nth-child(2) {
+  background: var(--roze);
+  transform: rotate(0.6deg);
+}
+
+.nu .tegel:nth-child(3) {
+  background: var(--lichtgroen);
+  transform: rotate(-0.3deg);
+}
+
+.nu .tegel .tegel-label,
+.nu .tegel .tegel-bij {
+  color: #4a4636;
 }
