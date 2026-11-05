@@ -242,7 +242,14 @@ class mapSession():
             "totalTried": totalTried,
             "totalCorrect": totalCorrect,
             "totalIncorrect": totalIncorrect,
-            "totalQuestions": len(self.questions)
+            "totalQuestions": len(self.questions),
+            # Voor "x van y gekend" op de startpagina: welke vragen je nu
+            # kent (dezelfde codes als op de kaart, dus elke sessie gelijk) en
+            # hoeveel vragen de hele kaart heeft op jouw niveau. De browser
+            # telt de codes van alle sessies bij elkaar op.
+            "gekendIds": [self.hash(q.id) for q in self.questions
+                          if self.getQuestionState(q) == "Correct"],
+            "kaartTotaal": getattr(self, 'kaartTotaal', None) or len(self.questions),
         }
     
     def getFinishedData(self):

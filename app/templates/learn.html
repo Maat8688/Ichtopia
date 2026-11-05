@@ -303,11 +303,19 @@
           (total ? (known * 100) / total : 0) + "%";
         document.getElementById("progressText").textContent = known + " van " + total;
 
-        if (mapName) {
+        // Wat je kent, per kaart over alle sessies heen, voor de startpagina.
+        // Alleen de codes van de vragen; die zijn in elke sessie hetzelfde.
+        if (mapName && data["gekendIds"]) {
           try {
-            var saved = JSON.parse(localStorage.getItem("topo.progress") || "{}");
-            saved[mapName] = { known: known, total: total };
-            localStorage.setItem("topo.progress", JSON.stringify(saved));
+            var alles = JSON.parse(localStorage.getItem("topo.gekend") || "{}");
+            var stand = alles[mapName] || { ids: [], totaal: 0 };
+            var ids = {};
+            stand.ids.concat(data["gekendIds"]).forEach(function (id) { ids[id] = true; });
+            alles[mapName] = {
+              ids: Object.keys(ids),
+              totaal: Math.max(stand.totaal || 0, data["kaartTotaal"] || 0),
+            };
+            localStorage.setItem("topo.gekend", JSON.stringify(alles));
           } catch (e) {}
         }
       });

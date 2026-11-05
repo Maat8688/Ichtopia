@@ -46,7 +46,7 @@
           <label class="row kaartrij">
             <img class="mini" src="{{ url_for('static', filename='img/kaart-' ~ kaart ~ '.svg') }}" alt="" loading="lazy" />
             <span class="name"><span class="row-title">{{ kaart }}</span><span class="row-note">{{ note }}</span></span>
-            <span class="status" data-map="{{ kaart }}">{{ aantal }} vragen</span>
+            <span class="status" data-map="{{ kaart }}" data-aantal="{{ aantal }}">{{ aantal }} vragen</span>
             <input type="radio" name="KaartInput" value="{{ kaart }}" />
           </label>
           {% endfor %}
@@ -362,14 +362,17 @@
       })();
 
       // Laatste stand per kaart, alleen in deze browser bewaard.
+      // Wat je kent telt over al je sessies op die kaart bij elkaar, van de hele
+      // kaart: na alleen de provincies is dat "12 van 98", niet "12 van 12".
       try {
-        const saved = JSON.parse(localStorage.getItem("topo.progress") || "{}");
+        localStorage.removeItem("topo.progress");   // oude manier van tellen
+        const gekend = JSON.parse(localStorage.getItem("topo.gekend") || "{}");
         document.querySelectorAll(".status[data-map]").forEach(function (el) {
-          const p = saved[el.dataset.map];
-          if (p && p.total > 0) {
-            el.textContent = p.known + " van " + p.total + " gekend";
-            el.classList.add("known");
-          }
+          const p = gekend[el.dataset.map];
+          if (!p || !p.ids || !p.ids.length) return;
+          const totaal = p.totaal || Number(el.dataset.aantal) || p.ids.length;
+          el.textContent = Math.min(p.ids.length, totaal) + " van " + totaal + " gekend";
+          el.classList.add("known");
         });
       } catch (e) {}
     </script>

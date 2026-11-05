@@ -1,3 +1,4 @@
+import functools
 from flask import Blueprint, abort, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, send, emit
 from flask_login import current_user
@@ -33,6 +34,7 @@ def index():
         if not newSession.questions:
             return redirect(url_for('main.index'))
         newSession.niveau = niveau
+        newSession.kaartTotaal = kaartTotaal(kaart, niveau)
         if request.form.get('soort') == 'toets':
             aantal = request.form.get('toetsVragen', '20')
             newSession.startToets(None if aantal == 'alle' else _getal(aantal, 20))
@@ -40,6 +42,14 @@ def index():
         legSessie('oefenen_start', newSession)
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html', **homeNotes())
+
+@functools.lru_cache(maxsize=None)
+def kaartTotaal(kaart: str, niveau: str | None) -> int:
+    """Hoeveel vragen de hele kaart heeft (alle onderdelen) op dit niveau."""
+    from .kahoot import MAP_CATEGORIES
+    return len(mapSession.fromSVG(MAP_FILES[kaart], 'MultipleChoise',
+                                  list(MAP_CATEGORIES[kaart]), niveau).questions)
+
 
 def _getal(tekst, standaard: int) -> int:
     try:
