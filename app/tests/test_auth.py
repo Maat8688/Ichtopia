@@ -23,31 +23,23 @@ check('GET /registreren', r.status_code == 200, r.status_code)
 t = token(r.get_data(as_text=True))
 
 r = c.post('/registreren', data={'csrfToken': 'fout', 'username': 'Floris',
-                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
-                                 'accountType': 'student'})
+                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'})
 check('CSRF wordt geweigerd', 'verlopen' in r.get_data(as_text=True))
 
 r = c.post('/registreren', data={'csrfToken': t, 'username': 'Floris',
-                                 'password': 'kort', 'passwordRepeat': 'kort',
-                                 'accountType': 'student'})
+                                 'password': 'kort', 'passwordRepeat': 'kort'})
 check('te kort wachtwoord geweigerd', 'minstens 8 tekens' in r.get_data(as_text=True))
 
 r = c.post('/registreren', data={'csrfToken': t, 'username': 'Floris',
-                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord2',
-                                 'accountType': 'student'})
+                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord2'})
 check('ongelijke wachtwoorden geweigerd', 'niet gelijk' in r.get_data(as_text=True))
 
-r = c.post('/registreren', data={'csrfToken': t, 'username': 'Floris',
-                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
-                                 'accountType': 'docent', 'teacherCode': 'fout'})
-check('foute docentcode geweigerd', 'docentcode klopt niet' in r.get_data(as_text=True))
+check('geen keuze leerling/docent meer', 'accountType' not in c.get('/registreren').get_data(as_text=True))
 
 r = c.post('/registreren', data={'csrfToken': t, 'username': 'Floris',
-                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
-                                 'accountType': 'student'}, follow_redirects=True)
+                                 'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'}, follow_redirects=True)
 body = r.get_data(as_text=True)
 check('registreren lukt', 'Mijn account' in body, body[:400])
-check('leerling-account', 'Leerling' in body)
 check('geen e-mail op de accountpagina', 'mail' not in body.lower(), body[:400])
 check('geen e-mailveld bij registreren', 'type="email"' not in c.get('/registreren').get_data(as_text=True))
 
@@ -61,13 +53,11 @@ for naam, melding in [('floris', 'al bezet'), ('FLORIS', 'al bezet'), ('F1oris',
                       ('FIoris', 'te veel op'), ('Flor1s', 'te veel op'), ('Floriss', 'te veel op')]:
     t2 = token(c2.get('/registreren').get_data(as_text=True))
     r = c2.post('/registreren', data={'csrfToken': t2, 'username': naam,
-                                      'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
-                                      'accountType': 'student'})
+                                      'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'})
     check(f'{naam} geweigerd ({melding})', melding in r.get_data(as_text=True))
 t2 = token(c2.get('/registreren').get_data(as_text=True))
 r = c2.post('/registreren', data={'csrfToken': t2, 'username': 'K4nk3r',
-                                  'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
-                                  'accountType': 'student'})
+                                  'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1'})
 check('scheldwoord als naam geweigerd', 'niet toestaan' in r.get_data(as_text=True))
 
 # --- uitloggen ---
@@ -107,17 +97,21 @@ for i in range(6):
     r = c4.post('/inloggen', data={'csrfToken': t6, 'username': 'Floris', 'password': 'fout'})
 check('rem na 5 pogingen', 'Te veel mislukte pogingen' in r.get_data(as_text=True))
 
-# --- docentaccount ---
+# --- geen docentaccounts via het formulier ---
+# Ook wie het formulier zelf nabouwt met accountType=docent en de goede code,
+# krijgt een gewoon account. Hosten gaat alleen met de docentcode op /host.
 c5 = app.test_client()
 t7 = token(c5.get('/registreren').get_data(as_text=True))
 r = c5.post('/registreren', data={'csrfToken': t7, 'username': 'Kevin',
                                   'password': 'wachtwoord1', 'passwordRepeat': 'wachtwoord1',
                                   'accountType': 'docent', 'teacherCode': 'docent123'},
             follow_redirects=True)
-body = r.get_data(as_text=True)
-check('docentaccount aanmaken', 'Mijn account' in body and 'Docent' in body, body[:300])
+check('registreren met docent-veld lukt gewoon', 'Mijn account' in r.get_data(as_text=True))
+with app.app_context():
+    kevin = User.query.filter_by(username='Kevin').first()
+    check('maar het wordt geen docentaccount', kevin is not None and not kevin.isTeacher)
 r = c5.get('/host')
-check('docent mag de klassikale quiz hosten', r.status_code == 200, r.status_code)
+check('zonder docentcode geen klassikale quiz hosten', r.status_code != 200 or 'docentcode' in r.get_data(as_text=True).lower(), r.status_code)
 
 # oude /login-link blijft werken
 r = app.test_client().get('/login')

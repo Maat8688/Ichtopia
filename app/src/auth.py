@@ -1,7 +1,12 @@
 """Accounts: registreren, inloggen, uitloggen en de accountpagina.
 
 Een account is nergens verplicht. Oefenen kan gewoon zonder inloggen; een
-account voegt iets toe (XP, duels, de ranglijst, docentrechten).
+account voegt iets toe (XP, duels, de ranglijst).
+
+Er is geen keuze tussen leerling en docent: iedereen krijgt hetzelfde soort
+account. Een docent start een klassikale quiz met de docentcode op /host; zo
+kan een leerling zichzelf nooit docentrechten geven. Oude docentaccounts
+blijven gewoon werken.
 
 Bewust zonder e-mailadres: we hebben er niets aan, de leerlingen ook niet, en
 ouders en scholen willen liever dat er geen persoonsgegevens van kinderen
@@ -42,13 +47,6 @@ MIN_PASSWORD_LENGTH = 8
 DUMMY_HASH = generate_password_hash(secrets.token_urlsafe(16))
 
 
-def teacherCode() -> str:
-    """De docentcode uit de omgeving; dezelfde code als voor de klassikale quiz."""
-    # Hier geimporteerd en niet bovenaan, om een kringetje van imports te vermijden.
-    from .kahoot_routes import hostCode
-    return hostCode()
-
-
 @auth.app_context_processor
 def injectAuthHelpers():
     """`csrfToken()` beschikbaar in elke template."""
@@ -73,7 +71,7 @@ def lijktOpBestaandeNaam(naam: str) -> bool:
 
 
 def validateRegistration(username: str, password: str,
-                         passwordRepeat: str, accountType: str, code: str) -> list[str]:
+                         passwordRepeat: str) -> list[str]:
     """Alle fouten in een keer terug, zodat het formulier ze samen kan tonen."""
     errors: list[str] = []
 
@@ -86,15 +84,6 @@ def validateRegistration(username: str, password: str,
         errors.append(f'Het wachtwoord moet minstens {MIN_PASSWORD_LENGTH} tekens lang zijn.')
     if password != passwordRepeat:
         errors.append('De twee wachtwoorden zijn niet gelijk.')
-    if accountType not in ('student', 'docent'):
-        errors.append('Kies of je leerling of docent bent.')
-    elif accountType == 'docent':
-        expected = teacherCode()
-        if not expected:
-            errors.append('Docentaccounts kunnen nog niet worden aangemaakt: er is '
-                          'op de server geen docentcode ingesteld.')
-        elif code != expected:
-            errors.append('De docentcode klopt niet.')
 
     return errors
 
@@ -104,17 +93,15 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('auth.account'))
 
-    formData = {'username': '', 'accountType': 'student'}
+    formData = {'username': ''}
     errors: list[str] = []
 
     if request.method == 'POST':
         username = ' '.join((request.form.get('username') or '').split())
         password = request.form.get('password') or ''
         passwordRepeat = request.form.get('passwordRepeat') or ''
-        accountType = request.form.get('accountType') or 'student'
-        code = (request.form.get('teacherCode') or '').strip()
 
-        formData = {'username': username, 'accountType': accountType}
+        formData = {'username': username}
 
         if not csrfValid():
             errors.append('Het formulier is verlopen. Probeer het opnieuw.')
@@ -122,8 +109,7 @@ def register():
             errors.append('Er zijn vanaf dit adres net te veel accounts aangemaakt. '
                           'Probeer het over een uur nog eens.')
         else:
-            errors = validateRegistration(username, password,
-                                          passwordRepeat, accountType, code)
+            errors = validateRegistration(username, password, passwordRepeat)
 
             if not errors:
                 if zoekGebruiker(username):
@@ -134,8 +120,7 @@ def register():
             if not errors:
                 user = User(
                     username=username,
-                    account_type=(AccountType.TEACHER if accountType == 'docent'
-                                  else AccountType.STUDENT),
+                    account_type=AccountType.STUDENT,
                 )
                 user.set_password(password)
                 try:
@@ -159,8 +144,7 @@ def register():
                     flash('Je account is aangemaakt.', 'success')
                     return redirect(url_for('auth.account'))
 
-    return render_template('register.html', errors=errors, form=formData,
-                           teacherSignupPossible=bool(teacherCode()))
+    return render_template('register.html', errors=errors, form=formData)
 
 
 @auth.route('/login')

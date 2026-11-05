@@ -11,15 +11,18 @@ SECRET_KEY=een-lange-willekeurige-string
 KAHOOT_HOST_CODE=de-code-die-alleen-docenten-kennen
 ```
 
-Zonder `KAHOOT_HOST_CODE` kan niemand een quiz hosten. Een ingelogd account met
-`account_type = TEACHER` mag ook zonder code hosten.
+Zonder `KAHOOT_HOST_CODE` kan niemand een quiz hosten. Oude accounts met
+`account_type = TEACHER` mogen nog zonder code hosten; nieuwe docentaccounts
+kun je niet meer aanmaken.
 
 ## Accounts
 
 Oefenen kan zonder account; inloggen is optioneel.
 
-- `/registreren` - account aanmaken. Wie "docent" kiest, moet de `KAHOOT_HOST_CODE`
-  invullen; zo kunnen leerlingen zichzelf geen docentrechten geven.
+- `/registreren` - account aanmaken. Er is geen keuze tussen leerling en docent:
+  iedereen krijgt hetzelfde account. Docenten starten een klassikale quiz met
+  de `KAHOOT_HOST_CODE` op `/host`, dus een leerling kan zichzelf nooit
+  docentrechten geven.
 - `/inloggen` - inloggen met je naam en wachtwoord (`/login` stuurt hierheen door).
   Hoofdletters maken bij de naam niet uit.
 - `/account` - je gegevens en de uitlogknop.

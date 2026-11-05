@@ -41,14 +41,12 @@ def csrf(html: str) -> str:
     return match.group(1)
 
 
-def register(client, username: str, password: str = 'wachtwoord1',
-             accountType: str = 'student', teacherCode: str = ''):
+def register(client, username: str, password: str = 'wachtwoord1'):
     """Maak een account aan en log er meteen mee in. Alleen naam en wachtwoord."""
     token = csrf(client.get('/registreren').get_data(as_text=True))
     response = client.post('/registreren', data={
         'csrfToken': token, 'username': username,
         'password': password, 'passwordRepeat': password,
-        'accountType': accountType, 'teacherCode': teacherCode,
     }, follow_redirects=True)
     body = response.get_data(as_text=True)
     assert 'Mijn account' in body, f'registreren van {username} mislukt: {body[:300]}'
