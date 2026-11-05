@@ -16,9 +16,10 @@ class AccountType(Enum):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    # E-mail wordt altijd in kleine letters opgeslagen, zodat Jan@ en jan@
-    # niet twee losse accounts worden.
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    # Niet meer gebruikt: een account is alleen een naam en een wachtwoord.
+    # De kolom blijft bestaan (leeg) zodat oudere databases niet stuk gaan;
+    # de migratie e2b4c6d8f0a1 heeft alle adressen gewist.
+    email = db.Column(db.String(120), unique=True, nullable=True)
     # Ruim genomen: de hash van werkzeug (scrypt) is een stuk langer dan 128
     # tekens en paste niet in de oude kolom.
     password_hash = db.Column(db.String(255), nullable=False)
@@ -86,9 +87,6 @@ class User(db.Model, UserMixin):
         self.xp_today = (self.xp_today or 0) + amount
         return amount
 
-    @staticmethod
-    def normalizeEmail(email: str) -> str:
-        return (email or '').strip().lower()
     
 class Results(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)

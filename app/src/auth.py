@@ -1,7 +1,12 @@
 """Accounts: registreren, inloggen, uitloggen en de accountpagina.
 
 Een account is nergens verplicht. Oefenen kan gewoon zonder inloggen; een
-account voegt alleen iets toe (docentrechten nu, opgeslagen voortgang later).
+account voegt iets toe (XP, duels, de ranglijst, docentrechten).
+
+Bewust zonder e-mailadres: we hebben er niets aan, de leerlingen ook niet, en
+ouders en scholen willen liever dat er geen persoonsgegevens van kinderen
+worden verzameld. Een account is dus alleen een naam en een wachtwoord. Wie
+zijn wachtwoord vergeet, maakt een nieuw account.
 """
 from __future__ import annotations
 
@@ -11,11 +16,12 @@ import secrets
 from flask import (Blueprint, render_template, request, redirect, url_for,
                    flash, current_app)
 from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .models import db, DuelMatch, User, AccountType
-from .names import NameError_, checkName
+from .names import NameError_, checkName, naamSleutel
 from .security import (AttemptLimiter, clientIp, csrfToken, csrfValid,
                        rotateCsrfToken, safeUrl)
 
@@ -27,11 +33,10 @@ loginLimiter = AttemptLimiter(maxAttempts=5, window=5 * 60)
 # aanmaken van accounts.
 registerLimiter = AttemptLimiter(maxAttempts=5, window=60 * 60)
 
-EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$')
 MIN_PASSWORD_LENGTH = 8
 
-# Een echte hash van een willekeurig wachtwoord om tegenaan te rekenen als het
-# e-mailadres niet bestaat. Zo duurt een inlogpoging even lang met en zonder
+# Een echte hash van een willekeurig wachtwoord om tegenaan te rekenen als de
+# naam niet bestaat. Zo duurt een inlogpoging even lang met en zonder
 # bestaand account, en kun je via de reactietijd niet uitvissen wie er een
 # account heeft.
 DUMMY_HASH = generate_password_hash(secrets.token_urlsafe(16))
@@ -50,7 +55,24 @@ def injectAuthHelpers():
     return {'csrfToken': csrfToken}
 
 
-def validateRegistration(username: str, email: str, password: str,
+def zoekGebruiker(naam: str) -> User | None:
+    """Het account bij deze naam. Hoofdletters maken niet uit."""
+    naam = ' '.join((naam or '').split())
+    if not naam:
+        return None
+    return User.query.filter(func.lower(User.username) == naam.lower()).first()
+
+
+def lijktOpBestaandeNaam(naam: str) -> bool:
+    """Lijkt de naam te veel op een bestaande? Floris, F1oris, FIoris en
+    Flor1s zijn voor wie op de ranglijst kijkt dezelfde persoon. Zo kan
+    niemand een ander nadoen."""
+    sleutel = naamSleutel(naam)
+    return any(naamSleutel(bestaand) == sleutel
+               for (bestaand,) in db.session.query(User.username).all())
+
+
+def validateRegistration(username: str, password: str,
                          passwordRepeat: str, accountType: str, code: str) -> list[str]:
     """Alle fouten in een keer terug, zodat het formulier ze samen kan tonen."""
     errors: list[str] = []
@@ -60,8 +82,6 @@ def validateRegistration(username: str, email: str, password: str,
         checkName(username)
     except NameError_ as e:
         errors.append(str(e))
-    if not EMAIL_RE.match(email) or len(email) > 120:
-        errors.append('Vul een geldig e-mailadres in.')
     if len(password) < MIN_PASSWORD_LENGTH:
         errors.append(f'Het wachtwoord moet minstens {MIN_PASSWORD_LENGTH} tekens lang zijn.')
     if password != passwordRepeat:
@@ -84,18 +104,17 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('auth.account'))
 
-    formData = {'username': '', 'email': '', 'accountType': 'student'}
+    formData = {'username': '', 'accountType': 'student'}
     errors: list[str] = []
 
     if request.method == 'POST':
-        username = (request.form.get('username') or '').strip()
-        email = User.normalizeEmail(request.form.get('email'))
+        username = ' '.join((request.form.get('username') or '').split())
         password = request.form.get('password') or ''
         passwordRepeat = request.form.get('passwordRepeat') or ''
         accountType = request.form.get('accountType') or 'student'
         code = (request.form.get('teacherCode') or '').strip()
 
-        formData = {'username': username, 'email': email, 'accountType': accountType}
+        formData = {'username': username, 'accountType': accountType}
 
         if not csrfValid():
             errors.append('Het formulier is verlopen. Probeer het opnieuw.')
@@ -103,19 +122,18 @@ def register():
             errors.append('Er zijn vanaf dit adres net te veel accounts aangemaakt. '
                           'Probeer het over een uur nog eens.')
         else:
-            errors = validateRegistration(username, email, password,
+            errors = validateRegistration(username, password,
                                           passwordRepeat, accountType, code)
 
             if not errors:
-                if User.query.filter_by(email=email).first():
-                    errors.append('Er bestaat al een account met dit e-mailadres.')
-                if User.query.filter_by(username=username).first():
-                    errors.append('Deze naam is al bezet.')
+                if zoekGebruiker(username):
+                    errors.append('Deze naam is al bezet. Kies een andere.')
+                elif lijktOpBestaandeNaam(username):
+                    errors.append('Deze naam lijkt te veel op die van iemand anders. Kies een andere.')
 
             if not errors:
                 user = User(
                     username=username,
-                    email=email,
                     account_type=(AccountType.TEACHER if accountType == 'docent'
                                   else AccountType.STUDENT),
                 )
@@ -124,7 +142,7 @@ def register():
                     db.session.add(user)
                     db.session.commit()
                 except IntegrityError:
-                    # Twee mensen tegelijk met dezelfde naam of hetzelfde adres.
+                    # Twee mensen tegelijk met dezelfde naam.
                     db.session.rollback()
                     errors.append('Dat account bestaat al. Probeer het opnieuw.')
                 except Exception:
@@ -159,10 +177,10 @@ def login():
         return redirect(nextUrl)
 
     errors: list[str] = []
-    email = ''
+    username = ''
 
     if request.method == 'POST':
-        email = User.normalizeEmail(request.form.get('email'))
+        username = ' '.join((request.form.get('username') or '').split())[:80]
         password = request.form.get('password') or ''
         ip = clientIp()
 
@@ -171,7 +189,7 @@ def login():
         elif loginLimiter.blocked(ip):
             errors.append('Te veel mislukte pogingen. Wacht vijf minuten en probeer het opnieuw.')
         else:
-            user = User.query.filter_by(email=email).first()
+            user = zoekGebruiker(username)
             if user and user.check_password(password):
                 loginLimiter.reset(ip)
                 rotateCsrfToken()
@@ -183,10 +201,10 @@ def login():
                 # Even lang rekenen als bij een bestaand account.
                 check_password_hash(DUMMY_HASH, password)
             loginLimiter.registerFailure(ip)
-            # Bewust een algemene melding: verklap niet of het adres bestaat.
-            errors.append('E-mailadres of wachtwoord klopt niet.')
+            # Bewust een algemene melding: verklap niet of de naam bestaat.
+            errors.append('Naam of wachtwoord klopt niet.')
 
-    return render_template('login.html', errors=errors, email=email, next=nextUrl)
+    return render_template('login.html', errors=errors, username=username, next=nextUrl)
 
 
 @auth.route('/uitloggen', methods=['POST'])

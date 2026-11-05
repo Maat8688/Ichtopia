@@ -17,8 +17,11 @@
     <div class="account-form">
         <h2>Account aanmaken</h2>
         <p class="muted">Je hebt geen account nodig om te oefenen. Met een account
-            onthoudt de site straks je voortgang, en docenten kunnen een klassikale
-            quiz starten zonder telkens de docentcode.</p>
+            verdien je XP, speel je duels en sta je op de ranglijst. Docenten kunnen
+            een klassikale quiz starten zonder telkens de docentcode.</p>
+        <p class="muted">Je hebt alleen een naam en een wachtwoord nodig, geen e-mail.
+            <b>Onthoud je wachtwoord goed:</b> vergeet je het, dan kunnen we het niet
+            terugzetten en maak je een nieuw account.</p>
 
         {% for error in errors %}
             <p class="feedback">{{ error }}</p>
@@ -31,12 +34,7 @@
                 <input type="text" class="field" id="username" name="username"
                        value="{{ form.username }}" autocomplete="nickname"
                        maxlength="20" required autofocus>
-                <p class="hint">Zo zien anderen je in de klassikale quiz, op de ranglijst en in een duel. Maximaal 20 tekens.</p>
-            </div>
-            <div>
-                <label for="email">E-mail</label>
-                <input type="email" class="field" id="email" name="email"
-                       value="{{ form.email }}" autocomplete="email" maxlength="120" required>
+                <p class="hint">Zo zien anderen je in de klassikale quiz, op de ranglijst en in een duel. Hiermee log je ook in. Maximaal 20 tekens, en netjes: scheldwoorden en rare namen worden geweigerd.</p>
             </div>
             <div>
                 <label for="password">Wachtwoord</label>

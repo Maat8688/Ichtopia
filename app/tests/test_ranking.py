@@ -51,11 +51,11 @@ check('elo zakt nooit onder de bodem', newRating(100, 2000, 0, 50) >= 100)
 # ----------------------------------------------------------------------
 clientA = app.test_client()
 clientB = app.test_client()
-register(clientA, 'Floris', 'a@example.com')
-register(clientB, 'Sami', 'b@example.com')
+register(clientA, 'Floris')
+register(clientB, 'Sami')
 
 with app.app_context():
-    user = User.query.filter_by(email='a@example.com').first()
+    user = User.query.filter_by(username='Floris').first()
     check('nieuw account begint op 0 XP en 1000 elo', user.xp == 0 and user.rating == 1000)
     check('nieuw account is level 1', user.level == 1)
     added = user.addXp(120, cap=600)
@@ -70,7 +70,7 @@ with app.app_context():
 # XP voor een afgeronde oefensessie
 # ----------------------------------------------------------------------
 clientC = app.test_client()
-register(clientC, 'Joel', 'c@example.com')
+register(clientC, 'Joel')
 
 response = clientC.post('/', data={'KaartInput': 'Europa', 'mode': 'FillInTheBlank',
                                    'questions': ['Landen']})
@@ -92,7 +92,7 @@ check('oefensessie is afgerond', session.finished)
 check('afgeronde oefensessie levert XP op', xpMelding and xpMelding['earned'] > 0, xpMelding)
 check('de sessie geeft je level terug', xpMelding and xpMelding['level'] >= 2, xpMelding)
 with app.app_context():
-    joel = User.query.filter_by(email='c@example.com').first()
+    joel = User.query.filter_by(username='Joel').first()
     check('XP staat in de database', joel.xp == xpMelding['earned'], joel.xp)
 socketC.disconnect()
 
@@ -215,8 +215,8 @@ check('elo verschuift even veel als hij optelt',
 check('de verliezer houdt er ook XP aan over', eindeB and eindeB['xpEarned'] > 0, eindeB)
 
 with app.app_context():
-    winnaar = User.query.filter_by(email='a@example.com').first()
-    verliezer = User.query.filter_by(email='b@example.com').first()
+    winnaar = User.query.filter_by(username='Floris').first()
+    verliezer = User.query.filter_by(username='Sami').first()
     match = DuelMatch.query.first()
     check('duel is opgeslagen', match is not None and match.rated is True)
     check('score staat erbij', match and match.one_score > match.two_score)
@@ -260,9 +260,9 @@ def bewaarDuel(winnaar, verliezer, rated=True):
 
 
 with app.app_context():
-    een = User.query.filter_by(email='a@example.com').first()
-    twee = User.query.filter_by(email='b@example.com').first()
-    drie = User.query.filter_by(email='c@example.com').first()
+    een = User.query.filter_by(username='Floris').first()
+    twee = User.query.filter_by(username='Sami').first()
+    drie = User.query.filter_by(username='Joel').first()
 
     # Het duel hierboven telde al als een overwinning van 'een' op 'twee'.
     for _ in range(RATED_WINS_PER_PAIR_PER_DAY - 1):

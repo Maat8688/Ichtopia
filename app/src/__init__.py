@@ -132,6 +132,26 @@ with app.app_context():
     db.create_all()
     migrate.init_app(app, db)
 
+    # Vangnet voor als 'flask db upgrade' vergeten is (zie de migratie
+    # e2b4c6d8f0a1): een account heeft geen e-mail meer, dus de kolom mag niet
+    # meer verplicht zijn, en wat er nog in staat wordt gewist.
+    def geenEmailMeer():
+        from sqlalchemy import inspect, text
+        try:
+            kolommen = {k['name']: k for k in inspect(db.engine).get_columns('user')}
+            email = kolommen.get('email')
+            if email is None:
+                return
+            with db.engine.begin() as verbinding:
+                if not email.get('nullable', True) and db.engine.dialect.name == 'postgresql':
+                    verbinding.execute(text('ALTER TABLE "user" ALTER COLUMN email DROP NOT NULL'))
+                if email.get('nullable', True) or db.engine.dialect.name == 'postgresql':
+                    verbinding.execute(text('UPDATE "user" SET email = NULL WHERE email IS NOT NULL'))
+        except Exception:
+            app.logger.warning('E-mailkolom niet bijgewerkt; draai flask db upgrade', exc_info=True)
+
+    geenEmailMeer()
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))

@@ -33,9 +33,10 @@
             <input type="hidden" name="csrfToken" value="{{ csrfToken() }}">
             <input type="hidden" name="next" value="{{ next }}">
             <div>
-                <label for="email">E-mail</label>
-                <input type="email" class="field" id="email" name="email"
-                       value="{{ email }}" autocomplete="email" required autofocus>
+                <label for="username">Naam</label>
+                <input type="text" class="field" id="username" name="username"
+                       value="{{ username }}" autocomplete="username" autocapitalize="off"
+                       maxlength="20" required autofocus>
             </div>
             <div>
                 <label for="password">Wachtwoord</label>
@@ -51,6 +52,8 @@
             </div>
         </form>
 
+        <p class="muted form-footnote">Wachtwoord vergeten? Dat kunnen we niet terugzetten, want we
+            bewaren geen e-mailadres. Maak dan een nieuw account.</p>
         <p class="muted form-footnote">Nog geen account?
             <a class="link" href="{{ url_for('auth.register') }}">Maak er een aan</a>.</p>
     </div>

@@ -86,8 +86,11 @@ with app.app_context():
     check('de tabellen user en results staan er nog',
           {'user', 'results'} <= tabellen())
 
-    kevin = User.query.filter_by(email='kevin@example.com').first()
+    kevin = User.query.filter_by(username='Kevin').first()
     check('het bestaande account is niet verdwenen', kevin is not None)
+    check('het e-mailadres is gewist', kevin is not None and kevin.email is None)
+    email = [k for k in db.inspect(db.engine).get_columns('user') if k['name'] == 'email']
+    check('e-mail is niet meer verplicht', email and email[0]['nullable'])
     check('het account heeft een aanmaakdatum gekregen',
           kevin is not None and kevin.created_at is not None)
     check('het account begint op 0 XP en 1000 elo',

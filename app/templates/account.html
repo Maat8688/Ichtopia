@@ -33,8 +33,6 @@
         <div class="rule-list">
             <div class="row"><span class="name">Naam</span>
                 <span class="status">{{ current_user.username }}</span></div>
-            <div class="row"><span class="name">E-mail</span>
-                <span class="status">{{ current_user.email }}</span></div>
             <div class="row"><span class="name">Soort account</span>
                 <span class="status">{{ 'Docent' if current_user.isTeacher else 'Leerling' }}</span></div>
             <div class="row"><span class="name">Elo</span>

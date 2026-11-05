@@ -20,8 +20,15 @@ Oefenen kan zonder account; inloggen is optioneel.
 
 - `/registreren` - account aanmaken. Wie "docent" kiest, moet de `KAHOOT_HOST_CODE`
   invullen; zo kunnen leerlingen zichzelf geen docentrechten geven.
-- `/inloggen` - inloggen met e-mail en wachtwoord (`/login` stuurt hierheen door).
+- `/inloggen` - inloggen met je naam en wachtwoord (`/login` stuurt hierheen door).
+  Hoofdletters maken bij de naam niet uit.
 - `/account` - je gegevens en de uitlogknop.
+
+Er wordt geen e-mailadres gevraagd of bewaard: we hebben er niets aan en het is
+een persoonsgegeven van een kind. Dat betekent ook dat er geen "wachtwoord
+vergeten" is. Wie zijn wachtwoord kwijt is, maakt een nieuw account aan.
+Bestaande e-mailadressen worden gewist door de migratie `e2b4c6d8f0a1` en, als
+die nog niet gedraaid is, ook bij het opstarten van de app.
 
 Wachtwoorden staan als hash in de database (werkzeug, scrypt). Formulieren zijn
 beveiligd met een CSRF-token en na vijf mislukte inlogpogingen is een IP-adres
@@ -91,9 +98,23 @@ elkaar spelen en netjes wisselen merken hier niets van.
 Namen komen op de ranglijst, op het digibord en in duels te staan, dus ze gaan
 door een filter (`src/names.py`): 2 tot 20 tekens, alleen letters, cijfers,
 spaties, punten en streepjes, en geen scheldwoorden of namen als "docent" of
-"admin". Het filter kijkt ook door l3etspeak en tussengevoegde tekens heen
-("K-U-T", "K4nker"). Hetzelfde filter geldt voor accountnamen en voor de naam
-waarmee een leerling aan een klassikale quiz meedoet.
+"admin". Het filter kijkt door de trucs heen die bruggers proberen:
+
+- leetspeak en tekens ertussen: "H1tl3r", "k@nk3r", "K-U-T", "k a n k e r";
+- letters herhalen ("kaaaanker"), klankspelling ("phuck", "fvck") en
+  achterstevoren ("reltih");
+- letters uit andere alfabetten die er hetzelfde uitzien (Cyrillische а, о, е);
+- getallen als 1488, 69 en 420;
+- rare namen: toetsenbordrijen ("qwerty", "asdf"), woorden zonder klinkers,
+  drie keer dezelfde letter, meer dan vier cijfers, @-handles en websites.
+
+Echte namen die toevallig op een scheldwoord lijken (Nazir, Kutlu, Lulof, Isis)
+staan in `TOEGESTAAN` en mogen wel. Een naam die te veel lijkt op een bestaand
+account ("F1oris" als "Floris" al bestaat) wordt ook geweigerd, zodat niemand
+zich voor een ander kan uitgeven.
+
+Hetzelfde filter geldt voor accountnamen en voor de naam waarmee een leerling
+aan een klassikale quiz meedoet.
 
 De woordenlijst staat bovenin `src/names.py` en is bedoeld om aangevuld te
 worden zodra er iets doorheen glipt.
@@ -110,7 +131,7 @@ docker compose exec web flask db upgrade
 
 Dat mag altijd en zo vaak je wilt: de migraties kijken eerst wat er al staat en
 slaan over wat er al is. Bestaande accounts blijven staan en beginnen op 0 XP
-en 1000 elo.
+en 1000 elo. De laatste migratie wist alle opgeslagen e-mailadressen.
 
 Bij een lege database (of na `docker compose down -v`) hoeft dit niet.
 
