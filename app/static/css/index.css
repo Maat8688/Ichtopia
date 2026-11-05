@@ -69,6 +69,7 @@
 }
 
 .vorm {
+  --rand: #fff;   /* rand om de muispijl: dezelfde kleur als het kaartje */
   border: 1.5px solid var(--rule);
   border-radius: var(--radius);
   background: #fff;
@@ -102,6 +103,7 @@
 }
 
 .vorm:has(input:checked) {
+  --rand: var(--ink);
   background: var(--ink);
   border-color: var(--ink);
   color: #fff;
