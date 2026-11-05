@@ -284,7 +284,7 @@ def setupDuelSockets(socketio: SocketIO):
             emit('duelError', {'message': 'Dit duel bestaat niet (meer).', 'fatal': True})
             return
         try:
-            player = currentDuel.join(playerFromUser(current_user))
+            player = duelManager.join(currentDuel, playerFromUser(current_user))
         except ValueError as e:
             emit('duelError', {'message': str(e), 'fatal': True})
             return
@@ -294,8 +294,7 @@ def setupDuelSockets(socketio: SocketIO):
         join_room(duelRoom(currentDuel.code))
         sendState(currentDuel)
 
-        if (currentDuel.state == 'lobby' and currentDuel.isFull
-                and all(p.connected for p in currentDuel.players)):
+        if all(p.connected for p in currentDuel.players) and currentDuel.claimStart():
             socketio.emit('duelStarting', {'seconds': START_COUNTDOWN},
                           to=duelRoom(currentDuel.code))
             socketio.start_background_task(startDuel, currentDuel, currentDuel.questionRun)

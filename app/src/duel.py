@@ -80,6 +80,7 @@ class Duel:
         self.createdAt = time.time()
         self.startedAt: float | None = None
         self.ratingApplied = False   # elo wordt maar een keer verwerkt
+        self.startClaimed = False    # het aftellen begint maar een keer
         self.resultChanges: dict[int, dict] = {}   # per speler wat elo en XP deden
         self.lock = threading.Lock()
 
@@ -114,6 +115,20 @@ class Duel:
                 raise ValueError('Dit duel zit al vol.')
             self.players.append(player)
             return player
+
+    def claimStart(self) -> bool:
+        """True voor precies een aanroeper zodra het duel vol is.
+
+        Komen beide spelers (bijna) tegelijk binnen, of laadt iemand de pagina
+        opnieuw tijdens het aftellen, dan zien meerdere verzoeken tegelijk een
+        vol duel. Zonder deze vlag start elk daarvan een eigen aftelling, en
+        sla je vraag 1 over omdat er twee keer 'volgende vraag' komt.
+        """
+        with self.lock:
+            if self.state != 'lobby' or not self.isFull or self.startClaimed:
+                return False
+            self.startClaimed = True
+            return True
 
     def playerBySid(self, sid) -> DuelPlayer | None:
         for player in self.players:
@@ -371,6 +386,31 @@ class DuelManager:
                         questionCount, seconds, creator, open_)
             self.duels[code] = duel
         return duel
+
+    def join(self, duel: Duel, player: DuelPlayer) -> DuelPlayer:
+        """Doe mee met een duel, of kom terug in je eigen duel.
+
+        Alles onder het slot van de manager, zodat twee mensen die tegelijk
+        klikken elkaar niet in de weg zitten:
+        - wie al in een ander duel speelt, kan niet ook nog hier meedoen;
+        - wie zelf nog een open duel had staan, raakt dat kwijt (anders kan
+          daar ook iemand in, en zit je in twee duels tegelijk);
+        - is dit duel net verdwenen omdat de maker elders meedeed, dan kan
+          het niet meer.
+        """
+        with self.lock:
+            if self.duels.get(duel.code) is not duel:
+                raise ValueError('Dit duel bestaat niet meer.')
+            if duel.playerFor(player.userId) is not None:
+                return duel.join(player)
+            for other in list(self.duels.values()):
+                if other is duel or other.state == 'finished' or other.playerFor(player.userId) is None:
+                    continue
+                if other.state == 'lobby' and not other.isFull:
+                    del self.duels[other.code]          # je eigen wachtende duel
+                else:
+                    raise ValueError('Je zit al in een ander duel.')
+            return duel.join(player)
 
     def getDuel(self, code: str) -> Duel | None:
         if not code:

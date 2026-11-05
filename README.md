@@ -246,6 +246,7 @@ Draaien vanuit `app`, allemaal op een tijdelijke SQLite-database:
 python tests/test_names.py       # het naamfilter
 python tests/test_auth.py        # registreren, inloggen, afgeschermde pagina's
 python tests/test_ranking.py     # XP, levels, elo, ranglijst en een heel duel
+python tests/test_duel_tegelijk.py  # tegelijk klikken op een duel
 python tests/test_migraties.py   # upgrade op een oude en op een verse database
 python tests/test_security.py    # sessiegrenzen, rem, csrf, X-Forwarded-For
 python tests/test_kaart.py       # kaarten inlezen: land blijft land
