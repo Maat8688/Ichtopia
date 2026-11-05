@@ -5,6 +5,8 @@ import sys
 from . import sessionManager
 from .models import User
 from .map import mapSession, SessionGamemode, SessionManager
+from .kahoot import MAP_FILES
+from .gebruik import legKlaar, legSessie
 
 main = Blueprint('main', __name__)
 
@@ -12,16 +14,29 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        print(request.form, file=sys.stderr)
-        if request.form.get('KaartInput') == 'Nederland':
-            newSession = mapSession.fromSVG('data/maps/Nederland.svg', request.form.get('mode'), request.form.getlist('questions'))
-        elif request.form.get('KaartInput') == 'Europa':
-            newSession = mapSession.fromSVG('data/maps/Europa.svg', request.form.get('mode'), request.form.getlist('questions'))
-        elif request.form.get('KaartInput') == 'Wereld':
-            newSession = mapSession.fromSVG('data/maps/Wereld.svg', request.form.get('mode'), request.form.getlist('questions'))
+        kaart = request.form.get('KaartInput')
+        if kaart not in MAP_FILES:
+            return redirect(url_for('main.index'))
+        niveau = request.form.get('niveau') or None
+        newSession = mapSession.fromSVG(MAP_FILES[kaart], request.form.get('mode'),
+                                        request.form.getlist('questions'), niveau)
+        if not newSession.questions:
+            return redirect(url_for('main.index'))
+        newSession.niveau = niveau
+        if request.form.get('soort') == 'toets':
+            aantal = request.form.get('toetsVragen', '20')
+            newSession.startToets(None if aantal == 'alle' else _getal(aantal, 20))
         id = sessionManager.createSession(newSession)
+        legSessie('oefenen_start', newSession)
         return redirect(url_for('main.learn', sessionToken=id))
     return render_template('index.html')
+
+def _getal(tekst, standaard: int) -> int:
+    try:
+        return max(1, min(int(tekst), 500))
+    except (TypeError, ValueError):
+        return standaard
+
 
 @main.route('/me')
 @login_required
@@ -59,17 +74,6 @@ def learn():
     else:
         return redirect(url_for('main.index'))
     
-
-@main.route('/host')
-def host():
-    print('host', file=sys.stderr)
-    return 'host'
-
-@main.route('/join')
-def join():
-    print('join', file=sys.stderr)
-    return 'join'
-
 
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
@@ -112,14 +116,63 @@ def join():
 
 
 def setupSockets(socketio: SocketIO):
+    def haalSessie(data):
+        """De sessie bij dit token, of None als hij is opgeruimd.
+
+        Sessies worden na een paar uur stilte weggegooid, anders loopt het
+        geheugen van de server vol. Wie daarna nog een antwoord instuurt,
+        krijgt een melding in plaats van een pagina die niets meer doet.
+        """
+        session = sessionManager.getSession((data or {}).get('sessionToken'))
+        if session is None:
+            emit('sessieVerlopen')
+            return None
+        session.touch()
+        return session
+
     @socketio.on('message')
     def handle_message(data):
         print('received message: ' + data)
         send(f'You said: {data}')
 
+    def stuurVraag(session):
+        if session.sessionMode == 1:
+            emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
+        elif session.sessionMode == 2:
+            emit('question', {'question': session.hash(session.currentQuestion.id)})
+        elif session.sessionMode == 3:
+            emit('question', {'question': session.currentQuestion.displayName})
+
+    def toetsKlaar(session):
+        """Uitslag van de toets; pas nu mag de kaart laten zien wat goed was."""
+        uitslag = session.toetsUitslag()
+        emit('setMapState', session.getMapState())
+        emit('toetsKlaar', uitslag)
+        if not getattr(session, 'geteld', False):
+            session.geteld = True
+            legKlaar(session, session.getFinishedData(), cijfer=uitslag['cijfer'])
+
+    def toetsAntwoord(session, data):
+        # Een antwoord dat binnenkomt na de laatste vraag (dubbelklik) telt niet.
+        if session.finished:
+            toetsKlaar(session)
+            return
+        session.beantwoordToets(data.get('awnser', ''), bool(data.get('hashed')))
+        if session.volgendeToetsvraag():
+            emit('toetsVoortgang', session.toetsVoortgang())
+            toetsKlaar(session)
+            return
+        emit('toetsVoortgang', session.toetsVoortgang())
+        stuurVraag(session)
+
     @socketio.on('answerQuestion')
     def answerQuestion(data): # expects {'awnser': str, 'hashed': bool, 'sessionToken': str}
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session = haalSessie(data)
+        if session is None:
+            return
+        if session.toets:
+            toetsAntwoord(session, data)
+            return
         questionId = session.hash(session.currentQuestion.id) 
 
         if session.awnserQuestion(data['awnser'], data['hashed']):
@@ -136,8 +189,12 @@ def setupSockets(socketio: SocketIO):
         if session.nextQuestion():
             # emit('finished', {'score': currentSession.score, 'totalGuesses': currentSession.totalGuesses})
             send(f"Finished with a score of {session.score}/{session.totalGuesses}")
-            print(session.getFinishedData(), file=sys.stderr)
-            emit('finished', {"Overvieuw": session.getFinishedData()})
+            uitslag = session.getFinishedData()
+            # Een keer tellen, ook als er daarna nog een antwoord binnenkomt.
+            if not getattr(session, 'geteld', False):
+                session.geteld = True
+                legKlaar(session, uitslag)
+            emit('finished', {"Overvieuw": uitslag})
             return
 
         if session.sessionMode == 1:
@@ -145,19 +202,33 @@ def setupSockets(socketio: SocketIO):
         elif session.sessionMode == 2:
             emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
-            emit('question', {'question': session.currentQuestion.id})
+            emit('question', {'question': session.currentQuestion.displayName})
 
     @socketio.on('getQuestion')
     def getQuestion(data): # expects {'sessionToken': str}
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session = haalSessie(data)
+        if session is None:
+            return
+        if session.toets:
+            emit('toetsVoortgang', session.toetsVoortgang())
+            if session.finished:
+                toetsKlaar(session)
+            else:
+                stuurVraag(session)
+            return
         if session.sessionMode == 1:
             emit('question', {'question': session.hash(session.currentQuestion.id), 'mcAwnsers': session.mcAwnsers})
         elif session.sessionMode == 2:
             emit('question', {'question': session.hash(session.currentQuestion.id)})
         elif session.sessionMode == 3:
-            emit('question', {'question': session.currentQuestion.id})
+            emit('question', {'question': session.currentQuestion.displayName})
 
     @socketio.on('getProgressbar')
     def getProgressbar(data):
-        session:mapSession = sessionManager.getSession(data['sessionToken'])
+        session = haalSessie(data)
+        if session is None:
+            return
+        if session.toets:
+            emit('toetsVoortgang', session.toetsVoortgang())
+            return
         emit('setProgressBar', session.getProgresBar())

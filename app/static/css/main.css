@@ -1,34 +1,423 @@
-footer {
-  background: repeating-linear-gradient(
-    45deg,
-    #136d15,
-    #136d15 10px,
-    #117c13 10px,
-    #117c13 20px
-  );
-  text-align: center;
-  width: 100%;
-  padding: 15px 0;
+/* Gedeelde opmaak. Kleuren en fonts komen uit design-tokens.css. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-footer p {
-  color: #ffffff;
+html,
+body {
   margin: 0;
-  padding: 10px;
-  font-size: 0.9em;
+  min-height: 100%;
 }
 
 body {
-  font-family: "Open Sans", sans-serif;
-  background-color: #87ceeb;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:svgjs='http://svgjs.dev/svgjs' width='1440' height='560' preserveAspectRatio='none' viewBox='0 0 1440 560'%3e%3cg mask='url(%26quot%3b%23SvgjsMask3332%26quot%3b)' fill='none'%3e%3crect width='1440' height='560' x='0' y='0' fill='url(%26quot%3b%23SvgjsLinearGradient3333%26quot%3b)'%3e%3c/rect%3e%3cpath d='M1440 0L1304.09 0L1440 194.87z' fill='rgba(255%2c 255%2c 255%2c .1)'%3e%3c/path%3e%3cpath d='M1304.09 0L1440 194.87L1440 328.12L1217.81 0z' fill='rgba(255%2c 255%2c 255%2c .075)'%3e%3c/path%3e%3cpath d='M1217.81 0L1440 328.12L1440 390.22L558.76 0z' fill='rgba(255%2c 255%2c 255%2c .05)'%3e%3c/path%3e%3cpath d='M558.76 0L1440 390.22L1440 401.54L276.05 0z' fill='rgba(255%2c 255%2c 255%2c .025)'%3e%3c/path%3e%3cpath d='M0 560L637.4 560L0 491.92z' fill='rgba(0%2c 0%2c 0%2c .1)'%3e%3c/path%3e%3cpath d='M0 491.92L637.4 560L648.1999999999999 560L0 321.42z' fill='rgba(0%2c 0%2c 0%2c .075)'%3e%3c/path%3e%3cpath d='M0 321.42L648.1999999999999 560L1083.8 560L0 215.61z' fill='rgba(0%2c 0%2c 0%2c .05)'%3e%3c/path%3e%3cpath d='M0 215.61L1083.8 560L1225.4299999999998 560L0 164.49z' fill='rgba(0%2c 0%2c 0%2c .025)'%3e%3c/path%3e%3c/g%3e%3cdefs%3e%3cmask id='SvgjsMask3332'%3e%3crect width='1440' height='560' fill='white'%3e%3c/rect%3e%3c/mask%3e%3clinearGradient x1='15.28%25' y1='139.29%25' x2='84.72%25' y2='-39.29%25' gradientUnits='userSpaceOnUse' id='SvgjsLinearGradient3333'%3e%3cstop stop-color='rgba(10%2c 151%2c 125%2c 1)' offset='0'%3e%3c/stop%3e%3cstop stop-color='rgba(0%2c 50%2c 98%2c 1)' offset='0.75'%3e%3c/stop%3e%3c/linearGradient%3e%3c/defs%3e%3c/svg%3e");
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+p {
   margin: 0;
 }
 
-html {
+h2 {
+  font-size: 19px;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--atlas);
+  outline-offset: 2px;
+}
+
+.page {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Kop */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding-top: 28px;
+  padding-bottom: 12px;
+}
+
+.topbar h1 {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  white-space: nowrap;
+}
+
+.accent {
+  color: var(--atlas);
+}
+
+/* Hoofdinhoud */
+main {
+  flex: 1;
+  width: 100%;
+  padding-bottom: 40px;
+}
+
+section + section {
+  margin-top: 36px;
+}
+
+.section-label {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 24px 0 4px;
+}
+
+/* Lijstrijen */
+.rule-list {
   margin: 0;
-  height: 100vh;
+  padding: 0;
+  list-style: none;
+}
+
+.rule-list > * {
+  align-items: baseline;
+  gap: 16px;
+  margin: 0;
+}
+
+.row {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.row .name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 16px;
+  min-width: 0;
+}
+
+/* Regel uitleg onder de naam van een rij. */
+.row-note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.row:hover .row-note,
+.row:has(input:checked) .row-note {
+  color: var(--muted);
+}
+
+.row .status {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.row .status.known {
+  color: var(--atlas);
+}
+
+.row:hover .row-title,
+.row:hover .name:not(:has(.row-title)) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.row:has(input:checked) .row-title,
+.row:has(input:checked) .name:not(:has(.row-title)) {
+  font-weight: 500;
+}
+
+.row:has(input:focus-visible) {
+  outline: 2px solid var(--atlas);
+  outline-offset: 2px;
+}
+
+/* Keuzevakjes: vierkant, inkt, geen radius */
+.row input[type="radio"],
+.row input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex: none;
+  border: 1.5px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  align-self: center;
+}
+
+.row input[type="radio"]:checked,
+.row input[type="checkbox"]:checked {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+
+.row input[type="radio"]:focus-visible,
+.row input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--atlas);
+  outline-offset: 2px;
+}
+
+/* Een rij waarvan het keuzerondje verborgen is (de kaartkeuze) mag geen
+   onzichtbaar klikvlak over de tekst leggen. */
+.row input.visually-hidden {
+  width: 1px;
+  height: 1px;
+  border: 0;
+  box-shadow: none;
+}
+
+.row input:disabled {
+  border-color: var(--rule);
+  cursor: default;
+}
+
+.row:has(input:disabled) {
+  color: var(--muted);
+  cursor: default;
+}
+
+.row:has(input:disabled):hover .row-title {
+  text-decoration: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Knoppen */
+.btn {
+  line-height: 1.4;
+}
+
+.btn:hover {
+  background: var(--paper-2);
+}
+
+.btn-primary:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.btn:active {
+  background: var(--track);
+}
+
+.btn-primary:active {
+  background: var(--atlas);
+  border-color: var(--atlas);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.actions-end {
+  justify-content: flex-end;
+}
+
+.link {
+  cursor: pointer;
+  font-family: var(--sans);
+}
+
+.link:hover {
+  color: var(--ink);
+}
+
+/* Feedback */
+.feedback {
+  line-height: 1.5;
+}
+
+.feedback[hidden] {
+  display: none;
+}
+
+/* Voet */
+footer {
+  width: 100%;
+  border-top: 0.5px solid var(--rule);
+  padding: 14px 0;
+  margin-top: auto;
+}
+
+footer p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+a.btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+/* Laadscherm (partials/loading.html + js/loading.js) */
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.loading.done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-text {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Streep die heen en weer loopt: we weten niet hoe ver het laden is. */
+.loading-bar {
+  width: 160px;
+  height: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.loading-bar > span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--atlas);
+  animation: loadingSlide 1.1s ease-in-out infinite;
+}
+
+@keyframes loadingSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar > span {
+    width: 100%;
+    animation: none;
+  }
+
+  /* En verder overal: geen animaties en geen overgangen. Dat raakt onder meer
+     het knipperen in de lobby van de klassikale quiz en het inkleuren van de
+     kaart. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Foutpagina's (404, 500) */
+main.error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* De tekst blijft links uitgelijnd met de kop, maar wordt niet te breed. */
+main.error > * {
+  max-width: 620px;
+}
+
+.error-code {
+  font-family: var(--serif);
+  font-size: 72px;
+  line-height: 1;
+  /* Een tint donkerder dan de lijnkleur: het cijfer is versiering, maar zo is
+     het ook leesbaar op een scherm in een licht lokaal. */
+  color: #8C8271;
+  margin-bottom: 8px;
+}
+
+.error-title {
+  font-size: 22px;
+}
+
+.error-text {
+  color: var(--muted);
+  margin-top: 6px;
+  padding-bottom: 20px;
+  border-bottom: 0.5px solid var(--rule);
+}
+
+/* Melding als de verbinding met de server weg is */
+.verbinding {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border: 0.5px solid var(--pen);
+  border-left: 3px solid var(--pen);
+  background: var(--paper-2);
+  color: var(--pen);
+  font-size: 14px;
+}
+
+.verbinding[hidden] {
+  display: none;
 }

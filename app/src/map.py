@@ -2,30 +2,99 @@ from __future__ import annotations
 import werkzeug.security
 import hashlib
 import random
+import unicodedata
+import os
+import threading
 from enum import Enum
 from bs4 import BeautifulSoup
 import sys
 from datetime import datetime
+
+def normalizeAnswer(text) -> str:
+    """Maak een antwoord vergelijkbaar met de goede antwoorden.
+
+    Hoofdletters, accenten, spaties, streepjes, apostroffen en punten doen er
+    niet toe. "den haag", "Den-Haag" en "Den Haag" worden alle drie "denhaag",
+    en "Slovenie" wordt hetzelfde als "Slovenië". Zo hoeft niet elke schrijfwijze
+    los in de kaart te staan.
+    """
+    text = unicodedata.normalize('NFD', str(text))
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    return ''.join(c for c in text.lower() if c.isalnum())
+
 
 class SessionGamemode(Enum):
     MULTIPLECHOICE = 1
     FILLINTHEBLANK = 2
     CLICKTHECOUNTRY = 3
 
+# Een oefensessie blijft in het geheugen staan zolang iemand ermee bezig is.
+# Zonder opruimen groeit dat tot de server omvalt: een sessie op de wereldkaart
+# kost ongeveer 1,6 MB, en op een machine van 1 GB is het na een paar honderd
+# sessies op. Een les duurt een lesuur, dus drie uur stilte is ruim genoeg om
+# een sessie als verlaten te beschouwen.
+MAX_SESSIE_LEEFTIJD = 3 * 60 * 60   # seconden zonder iets te doen
+# 250 sessies x ~1,6 MB is ongeveer 400 MB in het ergste geval. Dat past op een
+# server van 1 GB met Postgres en Caddy ernaast. Staat de site op een grotere
+# machine, dan mag dit getal omhoog.
+MAX_SESSIES = 250                   # harde bovengrens, wat er ook gebeurt
+
+
 class SessionManager():
     def __init__(self):
         self.sessions = {}
-    
+        self.lock = threading.Lock()
+
     def createSession(self, session:mapSession) -> str:
         id = werkzeug.security.generate_password_hash(str(datetime.now()))
-        self.sessions[id] = session
+        with self.lock:
+            self.sessions[id] = session
+            self.opruimen()
         return id
-    
-    def getSession(self, id:str) -> mapSession:
-        return self.sessions[id]
-    
+
+    def opruimen(self):
+        """Gooi weg wat niemand meer gebruikt. Wordt aangeroepen met de lock vast."""
+        nu = datetime.now()
+        for sleutel, sessie in list(self.sessions.items()):
+            if (nu - sessie.lastSeen).total_seconds() > MAX_SESSIE_LEEFTIJD:
+                del self.sessions[sleutel]
+
+        # Mocht er ooit een stormloop zijn: de oudste gaan er als eerste uit.
+        overschot = len(self.sessions) - MAX_SESSIES
+        if overschot > 0:
+            oudste = sorted(self.sessions.items(), key=lambda kv: kv[1].lastSeen)
+            for sleutel, _ in oudste[:overschot]:
+                del self.sessions[sleutel]
+
+    def getSession(self, id:str) -> mapSession | None:
+        """None als de sessie niet (meer) bestaat; de aanroeper vangt dat af."""
+        return self.sessions.get(id)
+
     def deleteSession(self, id:str):
-        del self.sessions[id]
+        with self.lock:
+            self.sessions.pop(id, None)
+
+    def stats(self, window:int=300) -> dict:
+        """Wie is er nu bezig? Actief = in de laatste `window` seconden iets gedaan.
+
+        De teller kijkt naar oefensessies, niet naar browservensters. Wie de
+        kaart openzet en een kwartier niets doet, telt niet meer mee.
+        """
+        now = datetime.now()
+        perMap = {}
+        active = 0
+        for session in list(self.sessions.values()):
+            if (now - session.lastSeen).total_seconds() > window:
+                continue
+            active += 1
+            name = session.mapName or 'onbekend'
+            perMap[name] = perMap.get(name, 0) + 1
+        return {
+            'active': active,
+            'perMap': dict(sorted(perMap.items(), key=lambda kv: -kv[1])),
+            'started': len(self.sessions),
+            'window': window,
+        }
 
 class mapSession():
     def __init__(self, questions:list[mapQuestion], backgroundElements:list, foregroundElements:list, viewBox:tuple=(0, 0, 1000, 1000), sessionMode:SessionGamemode=SessionGamemode.MULTIPLECHOICE):
@@ -33,13 +102,25 @@ class mapSession():
         self.backgroundElements = backgroundElements
         self.foregroundElements = foregroundElements
         self.viewBox = viewBox
-        self.currentQuestionIndex = random.randint(0, len(questions) - 1)
+        self.currentQuestionIndex = random.randint(0, len(questions) - 1) if questions else -1
         self.score = 0
         self.finished = False
         self.antiCheat = True
         self.startTimestamp = datetime.now()
+        self.lastSeen = self.startTimestamp
+        self.mapName = None
         self.sessionMode = sessionMode
         self.correctThreshold = 0.5
+        # Toetsmodus (zie startToets): elke vraag een keer, zonder te zeggen of
+        # het goed was, en aan het eind een cijfer.
+        self.toets = False
+        self.toetsVolgorde: list[int] = []
+        self.toetsPositie = 0
+        self.toetsAntwoorden: list[dict] = []
+
+    def touch(self):
+        """Onthoud dat er zojuist nog iemand met deze sessie bezig was."""
+        self.lastSeen = datetime.now()
 
     def getViewBox(self):
         return ' '.join(map(str, self.viewBox))
@@ -122,6 +203,72 @@ class mapSession():
         }
 
 
+    # ------------------------------------------------------------------
+    # Toetsmodus
+    # ------------------------------------------------------------------
+    def startToets(self, aantal: int | None = None):
+        """Maak er een toets van: `aantal` vragen (of alle) in een vaste,
+        willekeurige volgorde. Elke vraag komt precies een keer."""
+        self.toets = True
+        volgorde = list(range(len(self.questions)))
+        random.shuffle(volgorde)
+        if aantal:
+            volgorde = volgorde[:max(1, min(aantal, len(volgorde)))]
+        self.toetsVolgorde = volgorde
+        self.toetsPositie = 0
+        self.toetsAntwoorden = []
+        self.currentQuestionIndex = volgorde[0] if volgorde else -1
+
+    @property
+    def toetsTotaal(self) -> int:
+        return len(self.toetsVolgorde)
+
+    def beantwoordToets(self, awnser, hashed: bool) -> bool:
+        """Kijk het antwoord na en onthoud het. Geeft niets terug aan de
+        leerling: dat komt pas bij de uitslag."""
+        vraag = self.currentQuestion
+        goed = self.awnserQuestion(awnser, hashed)
+        if hashed:
+            # Bij aanwijzen komt het (gehashte) id van het aangeklikte gebied
+            # binnen; zoek op welke plek dat was.
+            namen = {self.hash(q.id): q.displayName for q in self.questions}
+            gegeven = namen.get(str(awnser), 'een andere plek')
+        else:
+            gegeven = str(awnser).strip()[:60]
+        self.toetsAntwoorden.append({
+            'id': vraag.id, 'vraag': vraag.displayName, 'onderdeel': vraag.category,
+            'gegeven': gegeven, 'goed': goed,
+        })
+        return goed
+
+    def volgendeToetsvraag(self) -> bool:
+        """Naar de volgende vraag. True als de toets klaar is."""
+        self.toetsPositie += 1
+        if self.toetsPositie >= len(self.toetsVolgorde):
+            self.finished = True
+            return True
+        self.currentQuestionIndex = self.toetsVolgorde[self.toetsPositie]
+        return False
+
+    def toetsVoortgang(self) -> dict:
+        return {'beantwoord': len(self.toetsAntwoorden), 'totaal': self.toetsTotaal}
+
+    def toetsUitslag(self) -> dict:
+        """Het cijfer en wat er fout ging. Cijfer zoals op school gebruikelijk:
+        1 + 9 x (goed / totaal), op een decimaal."""
+        totaal = self.toetsTotaal
+        goed = sum(1 for a in self.toetsAntwoorden if a['goed'])
+        cijfer = round(1 + 9 * goed / totaal, 1) if totaal else 1.0
+        return {
+            'goed': goed,
+            'totaal': totaal,
+            'cijfer': cijfer,
+            'voldoende': cijfer >= 5.5,
+            'tijd': (datetime.now() - self.startTimestamp).seconds,
+            'fouten': [{'vraag': a['vraag'], 'gegeven': a['gegeven'], 'onderdeel': a['onderdeel']}
+                       for a in self.toetsAntwoorden if not a['goed']],
+        }
+
     def hash(self, awnser:str):
         if self.antiCheat:
             awnser = hashlib.sha256(str(awnser).encode('utf-8')).hexdigest()
@@ -133,13 +280,14 @@ class mapSession():
         self.currentQuestion.tries += 1
 
         if hashed:
-            possibleAwnsers = [self.hash(awnser) for awnser in possibleAwnsers]
+            # Bij aanwijzen stuurt de browser de id van het gebied door (gehasht),
+            # dus de id telt hier altijd mee, ook als er <awnser>-regels zijn.
+            awnser = str(awnser)
+            possibleAwnsers = [self.hash(a) for a in possibleAwnsers + [self.currentQuestion.id]]
         else:
-            awnser = awnser.upper()
-            possibleAwnsers = [awnser.upper() for awnser in possibleAwnsers]
-        
-        print(awnser, file=sys.stderr)
-        print(possibleAwnsers, file=sys.stderr)
+            awnser = normalizeAnswer(awnser)
+            possibleAwnsers = [normalizeAnswer(a) for a in possibleAwnsers]
+
         if awnser in possibleAwnsers:
             self.score += 1
             self.currentQuestion.timesCorrect += 1
@@ -159,7 +307,7 @@ class mapSession():
         
 
     @staticmethod
-    def fromSVG(file:str, sessionMode:SessionGamemode|str=SessionGamemode.MULTIPLECHOICE, includeQuestions:list[str]=[]) -> mapSession:
+    def fromSVG(file:str, sessionMode:SessionGamemode|str=SessionGamemode.MULTIPLECHOICE, includeQuestions:list[str]=[], niveau:str=None) -> mapSession:
         with open(file, 'r') as f:
             svg = f.read()
         
@@ -169,12 +317,15 @@ class mapSession():
         backgroundElements = []
         foregroundElements = []
         #loop trough all g in map
-        print(includeQuestions, file=sys.stderr)
         for g in mapElement.find_all('g'):
             if g.get('class') == None:
                 backgroundElements.append(str(g))
             elif "question" in g.get('class'):
                 if g.get('category') != None and g.get('category') not in includeQuestions:
+                    continue
+                # Kaarten met een niveau-kenmerk (havo/vwo) alleen de vragen van
+                # dat niveau. Vormen zonder kenmerk horen bij allebei.
+                if niveau and g.get('niveau') and niveau not in g.get('niveau').split():
                     continue
                 answers = []
                 for awnser in g.find_all('awnser'):
@@ -206,7 +357,9 @@ class mapSession():
         elif sessionMode == 'ClickTheCountry':
             sessionMode = 3 #SessionGamemode.CLICKTHECOUNTRY
 
-        return mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
+        newSession = mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
+        newSession.mapName = os.path.splitext(os.path.basename(file))[0]
+        return newSession
     
 class mapQuestion():
     def __init__(self, id:str, answers:list, svg:str, category:str=None):
@@ -219,4 +372,13 @@ class mapQuestion():
 
     @property
     def allAnswers(self):
-        return self.answers + [self.id]
+        # Staan er <awnser>-regels in de kaart, dan gelden alleen die. Het id is
+        # dan puur een naam om de vorm mee aan te wijzen, zodat twee vormen
+        # dezelfde naam mogen hebben (Sao Paulo is een stad en een deelstaat).
+        return self.answers if self.answers else [self.id]
+
+    @property
+    def displayName(self) -> str:
+        """De naam die de leerling te zien krijgt: de eerste <awnser> uit de
+        kaart, en anders het id."""
+        return self.answers[0] if self.answers else self.id

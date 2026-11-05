@@ -6,7 +6,12 @@ Flask-Login
 PyMySQL
 python-dotenv
 psycopg2-binary
+# SQLAlchemy 2.1 gebruikt voor postgresql:// standaard psycopg (versie 3) in
+# plaats van psycopg2. Zonder dit pakket start de app niet na een nieuwe build.
+psycopg[binary]
 werkzeug
 beautifulsoup4
 lxml
 gunicorn
+tzdata
+maxminddb
