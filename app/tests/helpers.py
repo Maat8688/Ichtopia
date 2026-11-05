@@ -69,3 +69,15 @@ class Checks:
         print('\n' + ('ALLES GOED' if not self.failed
                       else 'MISLUKT: ' + ', '.join(self.failed)))
         return 1 if self.failed else 0
+
+
+def docentLogin(client, code: str):
+    """Log in met de docentcode, zoals een docent dat op /host/login doet.
+
+    Het token gaat rechtstreeks in de sessie in plaats van via een GET van het
+    formulier, zodat het inloggen zelf niet als bezoek in /statistieken telt.
+    """
+    from src.security import CSRF_SESSION_KEY
+    with client.session_transaction() as sessie:
+        token = sessie.setdefault(CSRF_SESSION_KEY, 'test-csrf-token')
+    return client.post('/host/login', data={'code': code, 'csrfToken': token})

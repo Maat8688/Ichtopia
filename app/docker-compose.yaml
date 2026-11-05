@@ -40,6 +40,10 @@ services:
       - COOKIE_SECURE=1
       # Het echte IP van bezoekers komt van Caddy (X-Forwarded-For).
       - TRUST_PROXY=1
+      # Het IP-adres (of de reeks) van het schoolnetwerk, voor /statistieken:
+      # wie op school zit telt dan apart en niet mee voor een provincie.
+      # Leeg laten mag. Voorbeeld in .env: SCHOOL_NETWERK=145.97.12.34
+      - SCHOOL_NETWERK=${SCHOOL_NETWERK:-}
     restart: always
     # Een worker met threads: alle quizzen en duels staan in het geheugen van
     # dit ene proces. Niet meer workers zetten, dan raken spelers elkaar kwijt.
@@ -48,6 +52,7 @@ services:
       --worker-class gthread --workers 1 --threads 100
       --bind 0.0.0.0:8000
       --timeout 120
+      --access-logfile -
 
   db:
     image: postgres:17

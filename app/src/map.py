@@ -51,6 +51,18 @@ class SessionGamemode(Enum):
     FILLINTHEBLANK = 2
     CLICKTHECOUNTRY = 3
 
+# Een oefensessie blijft in het geheugen staan zolang iemand ermee bezig is.
+# Zonder opruimen groeit dat tot de server omvalt: een sessie op de wereldkaart
+# kost ongeveer 1,6 MB, en op een machine van 1 GB is het na een paar honderd
+# sessies op. Een les duurt een lesuur, dus drie uur stilte is ruim genoeg om
+# een sessie als verlaten te beschouwen.
+MAX_SESSIE_LEEFTIJD = 3 * 60 * 60   # seconden zonder iets te doen
+# 250 sessies x ~1,6 MB is ongeveer 400 MB in het ergste geval. Dat past op een
+# server van 1 GB met Postgres en Caddy ernaast. Staat de site op een grotere
+# machine, dan mag dit getal omhoog.
+MAX_SESSIES = 250                   # harde bovengrens, wat er ook gebeurt
+
+
 class SessionManager():
     """Houdt de oefensessies bij, in het geheugen van dit proces.
 
@@ -65,8 +77,8 @@ class SessionManager():
     """
 
     def __init__(self, maxSessions: int | None = None, maxIdle: int | None = None):
-        self.maxSessions = maxSessions or int(os.getenv('MAX_PRACTICE_SESSIONS', '400'))
-        self.maxIdle = maxIdle or int(os.getenv('PRACTICE_SESSION_IDLE_SECONDS', str(60 * 60)))
+        self.maxSessions = maxSessions or int(os.getenv('MAX_PRACTICE_SESSIONS', str(MAX_SESSIES)))
+        self.maxIdle = maxIdle or int(os.getenv('PRACTICE_SESSION_IDLE_SECONDS', str(MAX_SESSIE_LEEFTIJD)))
         # Op volgorde van laatst gebruikt: vooraan het oudste.
         self.sessions: OrderedDict[str, mapSession] = OrderedDict()
         self._lastUsed: dict[str, float] = {}
@@ -119,6 +131,28 @@ class SessionManager():
             self.sessions.pop(id, None)
             self._lastUsed.pop(id, None)
 
+    def stats(self, window:int=300) -> dict:
+        """Wie is er nu bezig? Actief = in de laatste `window` seconden iets gedaan.
+
+        De teller kijkt naar oefensessies, niet naar browservensters. Wie de
+        kaart openzet en een kwartier niets doet, telt niet meer mee.
+        """
+        now = datetime.now()
+        perMap = {}
+        active = 0
+        for session in list(self.sessions.values()):
+            if (now - session.lastSeen).total_seconds() > window:
+                continue
+            active += 1
+            name = session.mapName or 'onbekend'
+            perMap[name] = perMap.get(name, 0) + 1
+        return {
+            'active': active,
+            'perMap': dict(sorted(perMap.items(), key=lambda kv: -kv[1])),
+            'started': len(self.sessions),
+            'window': window,
+        }
+
 class mapSession():
     def __init__(self, questions:list[mapQuestion], backgroundElements:list, foregroundElements:list, viewBox:tuple=(0, 0, 1000, 1000), sessionMode:SessionGamemode=SessionGamemode.MULTIPLECHOICE):
         self.questions = questions
@@ -130,8 +164,20 @@ class mapSession():
         self.finished = False
         self.antiCheat = True
         self.startTimestamp = datetime.now()
+        self.lastSeen = self.startTimestamp
+        self.mapName = None
         self.sessionMode = sessionMode
         self.correctThreshold = 0.5
+        # Toetsmodus (zie startToets): elke vraag een keer, zonder te zeggen of
+        # het goed was, en aan het eind een cijfer.
+        self.toets = False
+        self.toetsVolgorde: list[int] = []
+        self.toetsPositie = 0
+        self.toetsAntwoorden: list[dict] = []
+
+    def touch(self):
+        """Onthoud dat er zojuist nog iemand met deze sessie bezig was."""
+        self.lastSeen = datetime.now()
 
     def getViewBox(self):
         return ' '.join(map(str, self.viewBox))
@@ -213,6 +259,72 @@ class mapSession():
             "questionBreakdown": questionBreakdown
         }
 
+
+    # ------------------------------------------------------------------
+    # Toetsmodus
+    # ------------------------------------------------------------------
+    def startToets(self, aantal: int | None = None):
+        """Maak er een toets van: `aantal` vragen (of alle) in een vaste,
+        willekeurige volgorde. Elke vraag komt precies een keer."""
+        self.toets = True
+        volgorde = list(range(len(self.questions)))
+        random.shuffle(volgorde)
+        if aantal:
+            volgorde = volgorde[:max(1, min(aantal, len(volgorde)))]
+        self.toetsVolgorde = volgorde
+        self.toetsPositie = 0
+        self.toetsAntwoorden = []
+        self.currentQuestionIndex = volgorde[0] if volgorde else -1
+
+    @property
+    def toetsTotaal(self) -> int:
+        return len(self.toetsVolgorde)
+
+    def beantwoordToets(self, awnser, hashed: bool) -> bool:
+        """Kijk het antwoord na en onthoud het. Geeft niets terug aan de
+        leerling: dat komt pas bij de uitslag."""
+        vraag = self.currentQuestion
+        goed = self.awnserQuestion(awnser, hashed)
+        if hashed:
+            # Bij aanwijzen komt het (gehashte) id van het aangeklikte gebied
+            # binnen; zoek op welke plek dat was.
+            namen = {self.hash(q.id): q.displayName for q in self.questions}
+            gegeven = namen.get(str(awnser), 'een andere plek')
+        else:
+            gegeven = str(awnser).strip()[:60]
+        self.toetsAntwoorden.append({
+            'id': vraag.id, 'vraag': vraag.displayName, 'onderdeel': vraag.category,
+            'gegeven': gegeven, 'goed': goed,
+        })
+        return goed
+
+    def volgendeToetsvraag(self) -> bool:
+        """Naar de volgende vraag. True als de toets klaar is."""
+        self.toetsPositie += 1
+        if self.toetsPositie >= len(self.toetsVolgorde):
+            self.finished = True
+            return True
+        self.currentQuestionIndex = self.toetsVolgorde[self.toetsPositie]
+        return False
+
+    def toetsVoortgang(self) -> dict:
+        return {'beantwoord': len(self.toetsAntwoorden), 'totaal': self.toetsTotaal}
+
+    def toetsUitslag(self) -> dict:
+        """Het cijfer en wat er fout ging. Cijfer zoals op school gebruikelijk:
+        1 + 9 x (goed / totaal), op een decimaal."""
+        totaal = self.toetsTotaal
+        goed = sum(1 for a in self.toetsAntwoorden if a['goed'])
+        cijfer = round(1 + 9 * goed / totaal, 1) if totaal else 1.0
+        return {
+            'goed': goed,
+            'totaal': totaal,
+            'cijfer': cijfer,
+            'voldoende': cijfer >= 5.5,
+            'tijd': (datetime.now() - self.startTimestamp).seconds,
+            'fouten': [{'vraag': a['vraag'], 'gegeven': a['gegeven'], 'onderdeel': a['onderdeel']}
+                       for a in self.toetsAntwoorden if not a['goed']],
+        }
 
     def hash(self, awnser:str):
         if self.antiCheat:
@@ -308,7 +420,9 @@ class mapSession():
         elif sessionMode == 'ClickTheCountry':
             sessionMode = 3 #SessionGamemode.CLICKTHECOUNTRY
 
-        return mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
+        newSession = mapSession(questions, backgroundElements, foregroundElements, viewBox, sessionMode)
+        newSession.mapName = os.path.splitext(os.path.basename(file))[0]
+        return newSession
     
 class mapQuestion():
     def __init__(self, id:str, answers:list, svg:str, category:str=None):

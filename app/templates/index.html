@@ -78,13 +78,35 @@
             <div class="chips" id="niveauSelect"></div>
           </div>
 
+          <p class="section-label">Oefenen of toets?</p>
+          <div class="vormen twee" id="SoortSelect">
+            <label class="vorm">
+              <input class="visually-hidden" type="radio" name="soort" value="oefenen" checked />
+              <svg viewBox="0 0 40 26" aria-hidden="true"><path d="M8 13a12 12 0 0 1 21-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M30 1v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 13a12 12 0 0 1-21 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 25v-5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <b>Oefenen</b><small>wat je fout hebt, komt terug tot je het weet</small>
+            </label>
+            <label class="vorm">
+              <input class="visually-hidden" type="radio" name="soort" value="toets" />
+              <svg viewBox="0 0 40 26" aria-hidden="true"><rect x="9" y="1" width="22" height="24" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13 8h14M13 13h14M13 18h8" stroke="currentColor" stroke-width="1.5"/><path d="M27 17l-1 6 4-3z" fill="currentColor"/></svg>
+              <b>Toets</b><small>elke vraag één keer, aan het eind een cijfer</small>
+            </label>
+          </div>
+          <div class="toets-aantal" id="toetsBlok" hidden>
+            <p class="section-label">Hoeveel vragen?</p>
+            <div class="chips" id="toetsVragen">
+              {% for waarde in ['10', '20', '30', 'alle'] %}
+              <label class="chip"><input class="visually-hidden" type="radio" name="toetsVragen" value="{{ waarde }}"{% if waarde == '20' %} checked{% endif %} />{{ waarde }}</label>
+              {% endfor %}
+            </div>
+          </div>
+
           <p class="section-label">Onderdelen</p>
           <div class="chips" id="questionsSelect"></div>
           <p class="feedback" id="formError" hidden>Kies minstens één onderdeel.</p>
 
           <div class="startbalk">
             <p id="totalCount"></p>
-            <button type="submit" class="btn btn-primary">Beginnen</button>
+            <button type="submit" class="btn btn-primary" id="startKnop">Beginnen</button>
           </div>
         </section>
       </form>
@@ -203,15 +225,31 @@
           total += Number(box.dataset.aantal || 0);
         });
         var mode = document.querySelector('input[name="mode"]:checked');
+        var toets = document.querySelector('input[name="soort"]:checked').value === "toets";
+        var keuze = document.querySelector('input[name="toetsVragen"]:checked').value;
+        document.getElementById("toetsBlok").hidden = !toets;
+        document.getElementById("startKnop").textContent = toets ? "Toets maken" : "Beginnen";
         totalCount.textContent = "";
         if (!gekozenKaart) return;
         var naam = document.createElement("b");
         naam.textContent = gekozenKaart;
         totalCount.appendChild(naam);
         var rest = ", " + modeNames[mode ? mode.value : "MultipleChoise"];
-        rest += total === 0 ? ", nog geen onderdeel gekozen" : ", " + total + " vragen";
+        if (total === 0) {
+          rest += ", nog geen onderdeel gekozen";
+        } else if (toets) {
+          var inToets = keuze === "alle" ? total : Math.min(Number(keuze), total);
+          rest += ", toets van " + inToets + " vragen";
+        } else {
+          rest += ", " + total + " vragen";
+        }
         totalCount.appendChild(document.createTextNode(rest));
       }
+
+      document.querySelectorAll('input[name="soort"]').forEach(function (knop) {
+        knop.addEventListener("change", updateTotal);
+      });
+      document.getElementById("toetsVragen").addEventListener("change", updateTotal);
 
       function validateForm() {
         const map = document.querySelector('input[name="KaartInput"]:checked');
@@ -227,6 +265,7 @@
         try {
           sessionStorage.setItem("topo.map", map.value);
           localStorage.setItem("topo.lastMap", map.value);
+          sessionStorage.setItem("topo.soort", document.querySelector('input[name="soort"]:checked').value);
         } catch (e) {}
         return true;
       }

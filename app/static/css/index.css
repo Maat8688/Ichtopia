@@ -59,6 +59,15 @@
   gap: 8px;
 }
 
+.vormen.twee {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Aantal vragen bij een toets */
+.toets-aantal[hidden] {
+  display: none;
+}
+
 .vorm {
   border: 1.5px solid var(--rule);
   border-radius: var(--radius);
@@ -372,5 +381,11 @@
 
   .kaartrij .row-note {
     display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .vormen.twee {
+    grid-template-columns: 1fr;
   }
 }

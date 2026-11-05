@@ -1,0 +1,653 @@
+/* Statistieken. Bouwt voort op design-tokens.css en main.css.
+   Grafieken: één kleur (atlas) voor één reeks; bij gestapelde kolommen is het
+   tweede deel grijs, zodat het eerste deel het verhaal vertelt. De
+   warmtekaart gebruikt één kleur van licht naar donker. */
+
+.stat {
+  --reeks: var(--atlas);
+  --reeks-grijs: #c4bcad;
+  --raster: #e2dacb;
+  --w0: var(--paper-2);
+  --w1: #7fb2b0;
+  --w2: #56979a;
+  --w3: #377b7e;
+  --w4: #1f6063;
+  --w5: #0f3c3f;
+}
+
+.stat h2 {
+  font-size: 19px;
+  margin: 0 0 4px;
+}
+
+.stat h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.stat section + section,
+.stat section + .twee,
+.stat .twee + section,
+.stat .twee + .drie,
+.stat .drie + section,
+.stat .twee + .twee {
+  margin-top: 22px;
+}
+
+.uitleg,
+.voetnoot,
+.leeg,
+.privacy {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
+.voetnoot {
+  margin-top: 10px;
+}
+
+.melding {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  background: var(--paper-2);
+  font-size: 15px;
+}
+
+/* Nu bezig */
+.nu {
+  margin-top: 6px;
+  padding-bottom: 22px;
+  border-bottom: 0.5px solid var(--rule);
+}
+
+.nu h2 {
+  margin-bottom: 12px;
+}
+
+/* Tegels met een getal */
+.tegels {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.tegel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--paper-2);
+  padding: 14px 16px 13px;
+  border-radius: 6px;
+}
+
+.tegel.breed {
+  grid-column: span 2;
+}
+
+.tegel-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tegel-waarde {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.tegel-lijst {
+  font-size: 15px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.tegel-bij {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.tegels.kern {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.tegels.klein .tegel-waarde {
+  font-size: 26px;
+}
+
+.tegels.klein {
+  margin-bottom: 18px;
+}
+
+/* Periode */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 22px 0 16px;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-right: 6px;
+}
+
+.filter {
+  padding: 5px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: 14px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.filter:hover {
+  border-color: var(--ink);
+}
+
+.filter.aan {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.filter-bereik {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.filter-tweede {
+  margin-left: 14px;
+}
+
+.bot-regel {
+  margin: -8px 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.uitleg-lijst {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.uitleg-lijst li + li {
+  margin-top: 6px;
+}
+
+@media (max-width: 560px) {
+  .filter-tweede {
+    margin-left: 0;
+  }
+}
+
+/* Vakken met een grafiek */
+.kaart-vak {
+  background: #fffdf8;
+  border: 0.5px solid var(--rule);
+  border-radius: 6px;
+  padding: 18px 20px 14px;
+  min-width: 0;
+}
+
+.twee {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 22px;
+}
+
+.twee.binnen {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+}
+
+.twee.gelijk {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.drie {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* Kolomgrafiek (svg) */
+.grafiek {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 6px 0 4px;
+  overflow: visible;
+}
+
+.grafiek .raster {
+  stroke: var(--raster);
+  stroke-width: 1;
+}
+
+.grafiek .basis {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.grafiek .as {
+  fill: var(--muted);
+  font: 11px var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.grafiek .kolom.r1 {
+  fill: var(--reeks);
+}
+
+.grafiek .kolom.r2 {
+  fill: var(--reeks-grijs);
+}
+
+.grafiek .raak {
+  fill: transparent;
+  cursor: default;
+  outline: none;
+}
+
+.grafiek .raak:hover,
+.grafiek .raak:focus-visible {
+  fill: rgba(30, 42, 46, 0.05);
+}
+
+.legenda {
+  display: flex;
+  gap: 16px;
+  margin: 2px 0 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.legenda i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.legenda .r1 { background: var(--reeks); }
+.legenda .r2 { background: var(--reeks-grijs); }
+
+/* Liggende balken */
+.balken {
+  list-style: none;
+  margin: 8px 0 4px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.balken li {
+  display: grid;
+  grid-template-columns: minmax(90px, 38%) minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  padding: 3px 0;
+  outline: none;
+}
+
+.balken li:hover .balk,
+.balken li:focus-visible .balk {
+  opacity: 0.82;
+}
+
+.balk-naam {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.balk-spoor {
+  height: 12px;
+}
+
+.balk {
+  display: block;
+  height: 12px;
+  min-width: 2px;
+  background: var(--reeks);
+  border-radius: 0 4px 4px 0;
+}
+
+.balk-waarde {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Warmtekaart: 7 rijen, 24 uren */
+.warmte {
+  display: grid;
+  grid-template-columns: 28px repeat(24, minmax(0, 1fr));
+  gap: 2px;
+  margin: 8px 0 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.warmte-uur {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 2px;
+}
+
+.warmte-dag {
+  align-self: center;
+}
+
+.cel {
+  aspect-ratio: 1.6 / 1;
+  border-radius: 3px;
+  background: var(--w0);
+  outline: none;
+}
+
+.warmte .cel:hover,
+.warmte .cel:focus-visible {
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.cel.s0 { background: var(--w0); }
+.cel.s1 { background: var(--w1); }
+.cel.s2 { background: var(--w2); }
+.cel.s3 { background: var(--w3); }
+.cel.s4 { background: var(--w4); }
+.cel.s5 { background: var(--w5); }
+
+.schaal {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.schaal .cel {
+  width: 18px;
+  aspect-ratio: auto;
+  height: 11px;
+}
+
+.schaal span:first-child {
+  margin-right: 4px;
+}
+
+.schaal span:last-child {
+  margin-left: 4px;
+}
+
+/* Provincies */
+.plek {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.nl {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin-bottom: 6px;
+}
+
+.nl .prov path {
+  stroke: #fffdf8;
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.nl .prov {
+  outline: none;
+}
+
+.nl .prov.s0 path { fill: var(--w0); }
+.nl .prov.s1 path { fill: var(--w1); }
+.nl .prov.s2 path { fill: var(--w2); }
+.nl .prov.s3 path { fill: var(--w3); }
+.nl .prov.s4 path { fill: var(--w4); }
+.nl .prov.s5 path { fill: var(--w5); }
+
+.nl .prov:hover path,
+.nl .prov:focus-visible path {
+  stroke: var(--ink);
+  stroke-width: 2px;
+}
+
+table.provtabel th,
+table.provtabel td {
+  padding-right: 10px;
+}
+
+tr.stil td {
+  color: var(--muted);
+}
+
+.nieuw {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 11px;
+  line-height: 18px;
+  vertical-align: 1px;
+}
+
+.stat code {
+  font-size: 12px;
+  background: var(--paper-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+@media (max-width: 899px) {
+  .plek {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Tabellen */
+.tabel-scroll {
+  overflow-x: auto;
+}
+
+.stat table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.stat th,
+.stat td {
+  text-align: left;
+  padding: 7px 12px 7px 0;
+  border-bottom: 0.5px solid var(--rule);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.stat th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.stat .getal {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+table.kaarten td:nth-child(2),
+table.kaarten td:nth-child(3) {
+  min-width: 160px;
+}
+
+.mini-balk {
+  display: inline-block;
+  width: calc(100% - 44px);
+  max-width: 220px;
+  height: 8px;
+  vertical-align: middle;
+}
+
+.mini-balk > span {
+  display: block;
+  height: 8px;
+  min-width: 2px;
+  background: var(--reeks);
+  border-radius: 0 4px 4px 0;
+}
+
+.mini-getal {
+  display: inline-block;
+  width: 40px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+
+details.tabel {
+  margin-top: 4px;
+}
+
+details.tabel summary {
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  width: fit-content;
+}
+
+details.tabel summary:hover {
+  color: var(--ink);
+}
+
+details.tabel table {
+  max-width: 520px;
+}
+
+.privacy {
+  margin-top: 28px;
+  max-width: 720px;
+}
+
+/* Tooltip */
+.tip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 7px 10px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 260px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.tip[hidden] {
+  display: none;
+}
+
+.tip-titel {
+  display: block;
+  opacity: 0.75;
+  font-size: 12px;
+}
+
+.tip-regel {
+  display: block;
+  font-weight: 500;
+}
+
+@media (max-width: 899px) {
+  .tegels.kern {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .twee,
+  .twee.binnen,
+  .twee.gelijk,
+  .drie {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .twee.gelijk {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filter-bereik {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .kaart-vak {
+    padding: 14px 14px 10px;
+  }
+
+  .tegels.kern {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Op een telefoon zou de grafiek zo klein worden dat de letters onleesbaar
+     zijn. Dan liever een vaste breedte en opzij schuiven. */
+  .grafiek-schuif {
+    overflow-x: auto;
+    margin: 0 -14px;
+    padding: 0 14px;
+  }
+
+  .grafiek-schuif .grafiek.breed {
+    min-width: 620px;
+  }
+
+  .grafiek-schuif .grafiek.smal {
+    min-width: 320px;
+  }
+
+  .tegel.breed {
+    grid-column: auto;
+  }
+
+  .tegel-waarde {
+    font-size: 26px;
+  }
+
+  .warmte {
+    grid-template-columns: 22px repeat(24, minmax(0, 1fr));
+    gap: 1px;
+  }
+
+  .cel {
+    aspect-ratio: 1 / 1.4;
+    border-radius: 2px;
+  }
+
+  .warmte-uur {
+    font-size: 9px;
+  }
+}

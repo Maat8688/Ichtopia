@@ -31,6 +31,8 @@
   <body>
     <script>
       var sessionMode = {{ map.sessionMode }};
+      var isToets = {{ 'true' if map.toets else 'false' }};
+      var toetsStand = null;
       var lastAnswer = "";
       var currentQuestionName = "";
     </script>
@@ -84,6 +86,25 @@
         </div>
         <p class="feedback" id="feedback" hidden></p>
 
+        {% if map.toets %}
+        <div class="vraag" id="toetsUitslag" hidden>
+          <p class="panel-label">Uitslag van je toets</p>
+          <p class="cijfer" id="toetsCijfer">?</p>
+          <p class="cijfer-onder" id="toetsGoed"></p>
+          <div id="toetsXpBlok" hidden>
+            <p class="feedback ok" id="toetsXpTekst"></p>
+            <div class="level-bar"><span id="toetsXpBalk" style="width: 0%"></span></div>
+          </div>
+          <p class="section-label">Wat er fout ging</p>
+          <div class="overzicht toets-fouten" id="toetsFouten"></div>
+          <p class="muted toets-kaart-uitleg">Op de kaart zie je nu wat je goed en fout had.</p>
+          <div class="actions">
+            <a href="/" class="link">Naar start</a>
+            <a href="/" class="btn btn-primary" id="toetsOpnieuw">Nog een toets</a>
+          </div>
+        </div>
+        {% endif %}
+
         <div class="vraag" id="finished" hidden>
           <h2>Klaar!</h2>
           <div class="uitslag">
@@ -106,7 +127,7 @@
         </div>
 
         <div class="voortgang">
-          <p><span>Gekend</span><span id="progressText"></span></p>
+          <p><span>{{ 'Beantwoord' if map.toets else 'Gekend' }}</span><span id="progressText"></span></p>
           <div class="progress" id="progressBar">
             <span id="questionsCorrect"></span>
           </div>
@@ -172,7 +193,9 @@
 
       socket.on("question", function (data) {
         questionCount += 1;
-        document.getElementById("questionCounter").textContent = "Vraag " + questionCount;
+        document.getElementById("questionCounter").textContent = isToets && toetsStand
+          ? "Vraag " + (toetsStand.beantwoord + 1) + " van " + toetsStand.totaal
+          : "Vraag " + questionCount;
 
         if (sessionMode === 3) {
           currentQuestionName = displayName(data.question);
@@ -230,6 +253,21 @@
         showFeedback(text, false);
       });
 
+      // XP onder de uitslag; alleen als je ingelogd bent (anders is xp null).
+      function toonXp(xp, prefix) {
+        if (!xp || !(xp["earned"] > 0)) return;
+        var tekst = "+" + xp["earned"] + " XP · level " + xp["level"];
+        if (!xp["levelProgress"]["max"]) {
+          tekst += " · nog " + xp["levelProgress"]["toNext"] + " XP tot level " + (xp["level"] + 1);
+        }
+        if (xp["capped"]) {
+          tekst += " (je hebt vandaag het maximum aan XP gehaald)";
+        }
+        document.getElementById(prefix + "Tekst").textContent = tekst;
+        document.getElementById(prefix + "Balk").style.width = xp["levelProgress"]["percent"] + "%";
+        document.getElementById(prefix + "Blok").hidden = false;
+      }
+
       socket.on("finished", function (data) {
         var overview = data["Overvieuw"];
         document.getElementById("T-Score").textContent = overview["score"];
@@ -264,22 +302,69 @@
           marker.setAttribute("visibility", "hidden");
         }
 
-        var xp = data["xp"];
-        if (xp && xp["earned"] > 0) {
-          var tekst = "+" + xp["earned"] + " XP · level " + xp["level"];
-          if (!xp["levelProgress"]["max"]) {
-            tekst += " · nog " + xp["levelProgress"]["toNext"] + " XP tot level " + (xp["level"] + 1);
-          }
-          if (xp["capped"]) {
-            tekst += " (je hebt vandaag het maximum aan XP gehaald)";
-          }
-          document.getElementById("xpTekst").textContent = tekst;
-          document.getElementById("xpBalk").style.width = xp["levelProgress"]["percent"] + "%";
-          document.getElementById("xpBlok").hidden = false;
-        }
+        toonXp(data["xp"], "xp");
 
         document.getElementById("questionArea").hidden = true;
         document.getElementById("finished").hidden = false;
+      });
+
+      // ---- Toetsmodus: geen goed of fout tussendoor, alleen hoe ver je bent.
+      if (isToets) {
+        document.getElementById("sessionTitle").textContent = (mapName || "Topografie") + " · toets";
+        document.title = (mapName || "Topografie") + " · toets · Ichtopia";
+        document.getElementById("progressBar").classList.add("toets");
+      }
+
+      socket.on("toetsVoortgang", function (data) {
+        toetsStand = data;
+        document.getElementById("questionsCorrect").style.width =
+          (data.totaal ? (data.beantwoord * 100) / data.totaal : 0) + "%";
+        document.getElementById("progressText").textContent = data.beantwoord + " van " + data.totaal + " beantwoord";
+        document.getElementById("questionCounter").textContent =
+          "Vraag " + Math.min(data.beantwoord + 1, data.totaal) + " van " + data.totaal;
+      });
+
+      socket.on("toetsKlaar", function (data) {
+        var cijfer = document.getElementById("toetsCijfer");
+        cijfer.textContent = String(data.cijfer.toFixed(1)).replace(".", ",");
+        cijfer.classList.toggle("onvoldoende", !data.voldoende);
+        document.getElementById("toetsGoed").textContent =
+          data.goed + " van de " + data.totaal + " goed · " + formatTime(data.tijd);
+
+        var lijst = document.getElementById("toetsFouten");
+        lijst.innerHTML = "";
+        if (data.fouten.length === 0) {
+          var alles = document.createElement("div");
+          alles.className = "regel";
+          alles.textContent = "Niets, alles goed!";
+          lijst.appendChild(alles);
+        }
+        data.fouten.forEach(function (fout) {
+          var rij = document.createElement("div");
+          rij.className = "regel";
+          var goed = document.createElement("span");
+          goed.className = "goede-naam";
+          goed.textContent = displayName(fout.vraag);
+          var gegeven = document.createElement("span");
+          gegeven.className = "muted";
+          gegeven.textContent = "jij: " + (fout.gegeven || "–");
+          rij.appendChild(goed);
+          rij.appendChild(gegeven);
+          lijst.appendChild(rij);
+        });
+
+        var questionElements = document.getElementById("questions").getElementsByTagName("g");
+        Array.from(questionElements).forEach(function (element) {
+          element.classList.remove("active");
+        });
+        var marker = document.getElementById("marker");
+        if (marker) {
+          marker.setAttribute("visibility", "hidden");
+        }
+        toonXp(data["xp"], "toetsXp");
+        document.getElementById("feedback").hidden = true;
+        document.getElementById("questionArea").hidden = true;
+        document.getElementById("toetsUitslag").hidden = false;
       });
 
       function showBreakdown() {

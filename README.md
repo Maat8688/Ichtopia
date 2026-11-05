@@ -61,8 +61,9 @@ COOKIE_SECURE=1   # cookies alleen over https; lokaal zonder https: 0
 TRUST_PROXY=1     # echte IP van bezoekers uit X-Forwarded-For van Caddy halen.
                   # Alleen aanzetten als er echt een proxy voor zit, anders kan
                   # iedereen zijn IP verzinnen en om de inlogrem heen.
-MAX_PRACTICE_SESSIONS=400            # oefensessies tegelijk in het geheugen
-PRACTICE_SESSION_IDLE_SECONDS=3600   # daarna verloopt een ongebruikte sessie
+MAX_PRACTICE_SESSIONS=250            # oefensessies tegelijk in het geheugen
+PRACTICE_SESSION_IDLE_SECONDS=10800  # daarna (3 uur) verloopt een ongebruikte sessie
+SCHOOL_NETWERK=                      # IP van de school, voor /statistieken (zie daar)
 ```
 
 Een oefensessie met de wereldkaart kost een paar MB geheugen en iedereen kan er
@@ -72,6 +73,88 @@ achter een schoolnetwerk.
 
 `src/monitor.py` leest `log/access.log` en stuurt alerts via ntfy of Discord.
 Zet daarvoor `NTFY_TOPIC` en/of `DISCORD_WEBHOOK_URL` in `.env`; leeg is uit.
+
+## Toetsmodus
+
+Op de startpagina kies je onder de vraagvorm **Oefenen** of **Toets**. Bij een
+toets kies je het aantal vragen (10, 20, 30 of alle). Dan:
+
+- komt elke vraag precies een keer, in willekeurige volgorde;
+- hoor je tussendoor niet of het goed was, en kleurt de kaart niet in;
+- krijg je aan het eind een cijfer: 1 + 9 × (goed / totaal), op een decimaal,
+  met een lijst van wat je fout had (het goede antwoord en wat jij gaf). Pas
+  dan kleurt de kaart in;
+- krijg je XP als je ingelogd bent, net als bij oefenen.
+
+Werkt met alle drie de vraagvormen. Op `/statistieken` staan toetsen apart:
+aantal, gemiddeld cijfer en hoeveel er voldoende waren. Ze tellen niet mee bij
+het gewone oefenen.
+
+## Statistieken
+
+`/statistieken` (alleen met de docentcode) laat zien wie er nu bezig is, en
+daaronder hoe de site de afgelopen 7, 30 of 90 dagen of sinds het begin is
+gebruikt: bezoekers per dag, per dag van de week en per uur, een
+warmtekaart van de week, welke kaarten, vraagvormen, onderdelen en niveaus,
+hoeveel er meteen goed was, hoe lang een sessie duurt, de moeilijkste
+plekken, de klassikale quizzen en welke apparaten. Elke grafiek is ook als
+tabel te openen. Dezelfde cijfers staan in `/statistieken.json`.
+
+Wat er wordt bijgehouden staat in de tabel `gebruik` (`src/models.py`,
+vastgelegd en opgeteld in `src/gebruik.py`). Er gaan geen namen,
+e-mailadressen of IP-adressen in. Om verschillende bezoekers op een dag te
+kunnen tellen krijgt iedereen per dag een code, gemaakt met een geheim dat
+elke dag nieuw is en alleen in het geheugen staat; morgen, en na een
+herstart, is dezelfde leerling niet meer te herkennen. De tabel wordt bij het
+opstarten vanzelf aangemaakt, en het tellen begint vanaf dat moment: van de
+tijd daarvoor is niets bewaard.
+
+### Provincies
+
+Op `/statistieken` staat ook een kaart met de provincies waar bezoekers
+vandaan komen, met per provincie de datum van het eerste bezoek. Zo zie je
+wanneer er leerlingen uit een nieuwe provincie bij komen.
+
+De provincie wordt bij elk bezoek opgezocht in een database die op de server
+zelf staat (DB-IP 'IP to City Lite', gratis, CC BY 4.0). Het IP-adres wordt
+daarna weggegooid; in de tabel komen alleen land en provincie. Aantallen onder
+de 5 staan op de pagina als '< 5'.
+
+De database ophalen, en daarna elke maand opnieuw (herstarten hoeft niet):
+
+```
+docker compose exec web python geo_bijwerken.py
+```
+
+Iedereen op het schoolnetwerk komt uit op één provincie. Zet daarom het
+IP-adres van de school in `.env`, dan tellen die bezoeken apart:
+
+```
+SCHOOL_NETWERK=145.97.12.34
+```
+
+Meerdere adressen of reeksen mogen, met komma's: `145.97.12.0/24,2001:db8::/48`.
+Het adres van de school vind je door op school naar bijvoorbeeld
+https://ifconfig.me te gaan.
+
+### Bots
+
+Bovenaan `/statistieken` staat een knop **Bots: Weglaten / Meenemen**.
+Standaard worden bots weggelaten. Als bot telt (`botReden()` in
+`src/gebruik.py`):
+
+- een bezoeker die zichzelf een bot noemt in de browsernaam: zoekmachines,
+  AI-crawlers, linkvoorbeelden (WhatsApp, Discord), SEO-crawlers,
+  monitoringdiensten, headless browsers en scripts (curl, Python);
+- een browser die geen taal meestuurt (echte browsers doen dat altijd);
+- meer dan 40 pagina's in één minuut van dezelfde bezoeker. Het
+  schoolnetwerk telt daarvoor niet mee.
+
+De reden staat bij elk bezoek in de kolom `bot`; onderaan de pagina staat
+per reden hoeveel pagina's er werden weggelaten. Bezoeken van voor deze
+versie zijn alleen aan de snelheid te herkennen.
+
+`test_locatie.py` heeft `pip install mmdb-writer` nodig.
 
 ## Punten, levels en duels
 
@@ -154,4 +237,8 @@ python tests/test_ranking.py     # XP, levels, elo, ranglijst en een heel duel
 python tests/test_migraties.py   # upgrade op een oude en op een verse database
 python tests/test_security.py    # sessiegrenzen, rem, csrf, X-Forwarded-For
 python tests/test_kaart.py       # kaarten inlezen: land blijft land
+python tests/test_toets.py       # de toetsmodus en het cijfer
+python tests/test_statistieken.py  # /statistieken en wat er geteld wordt
+python tests/test_bots.py        # bots herkennen
+python tests/test_locatie.py     # provincie bij een IP (heeft mmdb-writer nodig)
 ```

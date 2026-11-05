@@ -63,6 +63,26 @@ app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 app.config['REMEMBER_COOKIE_SAMESITE'] = 'Lax'
 app.config['REMEMBER_COOKIE_SECURE'] = app.config['SESSION_COOKIE_SECURE']
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=30)
+
+# Statische bestanden een uur laten bewaren door de browser. Zonder dit vraagt
+# hij elke pagina opnieuw of het plaatje nog klopt: geen extra bytes, wel een
+# extra rondje naar de server per bestand. Een uur, zodat een nieuwe versie na
+# een update vanzelf wordt opgepikt.
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
+
+
+# Elke link naar een statisch bestand krijgt ?v=<tijd van de laatste wijziging>.
+# Verandert een css- of js-bestand na een update, dan verandert de link mee en
+# haalt de browser meteen de nieuwe versie op, in plaats van nog een uur de
+# oude te gebruiken.
+@app.url_defaults
+def statischeVersie(endpoint, values):
+    if endpoint == 'static' and 'filename' in values and 'v' not in values:
+        try:
+            values['v'] = int(os.stat(os.path.join(app.static_folder, values['filename'])).st_mtime)
+        except OSError:
+            pass
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -127,9 +147,17 @@ with app.app_context():
     from .errors import registerErrorHandlers
     registerErrorHandlers(app)
 
+    # Elke bekeken pagina tellen voor /statistieken (zie gebruik.py).
+    from .gebruik import registreerBezoeken
+    registreerBezoeken(app)
+
     from .models import db, User
     db.init_app(app)
     db.create_all()
+    # create_all voegt geen kolommen toe aan een tabel die al bestaat; dat
+    # doen we voor de tabel gebruik zelf (zie gebruik.py).
+    from .gebruik import zorgVoorKolommen
+    zorgVoorKolommen()
     migrate.init_app(app, db)
 
     # Vangnet voor als 'flask db upgrade' vergeten is (zie de migratie

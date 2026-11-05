@@ -571,7 +571,9 @@ main.error > * {
   font-size: 64px;
   font-weight: 600;
   line-height: 1;
-  color: var(--rule);
+  /* Een tint donkerder dan de lijnkleur: het cijfer is versiering, maar zo is
+     het ook leesbaar op een scherm in een licht lokaal. */
+  color: var(--grens);
   margin-bottom: 10px;
 }
 

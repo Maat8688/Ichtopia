@@ -144,3 +144,42 @@ class DuelMatch(db.Model):
     def scoreFor(self, userId: int) -> tuple[int, int]:
         return ((self.one_score, self.two_score) if self.one_id == userId
                 else (self.two_score, self.one_score))
+class Gebruik(db.Model):
+    """Eén gebeurtenis op de site, voor de pagina /statistieken.
+
+    Bewust zonder namen, e-mailadressen of IP-adressen: de site wordt door
+    leerlingen gebruikt. `bezoeker` is een code die elke dag opnieuw wordt
+    gemaakt (zie gebruik.py), zodat je wel kunt tellen hoeveel verschillende
+    mensen er op een dag waren, maar niet wie dat waren of wie er gisteren
+    terugkwam.
+    """
+    __tablename__ = 'gebruik'
+
+    id = db.Column(db.Integer, primary_key=True)
+    tijd = db.Column(db.DateTime, nullable=False, index=True)   # UTC
+    soort = db.Column(db.String(24), nullable=False, index=True)
+    pagina = db.Column(db.String(40))
+    bezoeker = db.Column(db.String(16))
+    apparaat = db.Column(db.String(12))
+    kaart = db.Column(db.String(40))
+    vorm = db.Column(db.String(20))
+    onderdelen = db.Column(db.String(200))       # met komma's ertussen
+    niveau = db.Column(db.String(8))
+    vragen = db.Column(db.Integer)
+    pogingen = db.Column(db.Integer)
+    duur = db.Column(db.Integer)                 # seconden
+    spelers = db.Column(db.Integer)
+    fout = db.Column(db.Text)                    # JSON: {plek: extra pogingen}
+    # Waar vandaan, opgezocht bij het bezoek (locatie.py). Het IP-adres zelf
+    # wordt niet bewaard.
+    land = db.Column(db.String(2))
+    provincie = db.Column(db.String(20))
+    school = db.Column(db.Boolean)               # op het schoolnetwerk (als SCHOOL_NETWERK is ingesteld)
+    # Leeg = waarschijnlijk een mens. Anders waarom het op een bot lijkt
+    # ('zoekmachine', 'script', 'geen taal', ...); zie gebruik.botReden().
+    bot = db.Column(db.String(24))
+    toets = db.Column(db.Boolean)                # True: een toets in plaats van oefenen
+    cijfer = db.Column(db.Integer)               # cijfer van de toets x 10 (75 = 7,5)
+
+    def __repr__(self):
+        return f'<Gebruik {self.soort} {self.tijd}>'

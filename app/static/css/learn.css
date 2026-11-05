@@ -248,3 +248,47 @@
     display: none;
   }
 }
+
+/* Toetsmodus */
+.progress.toets > span {
+  background: var(--ink);
+}
+
+#toetsUitslag[hidden] {
+  display: none;
+}
+
+.cijfer {
+  font-family: var(--serif);
+  font-size: 72px;
+  line-height: 1;
+  margin: 8px 0 6px;
+  color: var(--atlas);
+}
+
+.cijfer.onvoldoende {
+  color: var(--pen);
+}
+
+.cijfer-onder {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.toets-fouten {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.toets-fouten > * {
+  font-size: 15px;
+}
+
+.toets-fouten .goede-naam {
+  font-weight: 500;
+}
+
+.toets-kaart-uitleg {
+  margin-top: 14px;
+}
