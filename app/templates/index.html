@@ -124,8 +124,7 @@
             <p class="code">{{ openDuel.code }}</p>
             <a class="btn btn-donker" href="{{ url_for('duel.play', code=openDuel.code) }}">Meedoen</a>
             {% else %}
-            <p>Eén tegen één, dezelfde vragen tegelijk. Er wacht nu niemand: maak er zelf een en stuur de code naar een klasgenoot.</p>
-            <a class="btn btn-donker" href="{{ url_for('duel.lobby') }}">{% if current_user.is_authenticated %}Duel maken{% else %}Inloggen en duelleren{% endif %}</a>
+            <a class="btn btn-donker" href="{{ url_for('duel.lobby') }}">{% if current_user.is_authenticated %}Duel maken{% else %}Log eerst in{% endif %}</a>
             {% endif %}
           </div>
 
@@ -141,8 +140,6 @@
               <li class="ik">{{ myEloRank }}. {{ current_user.username }} <span>{{ current_user.rating }}</span></li>
               {% endif %}
             </ol>
-            {% else %}
-            <p class="zacht" style="margin:8px 0 10px">Nog niemand heeft een duel gespeeld. Wie wordt de eerste?</p>
             {% endif %}
             <a href="{{ url_for('ranking.board', lijst='elo') }}">Hele lijst</a>
           </div>
