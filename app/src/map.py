@@ -362,7 +362,7 @@ class mapSession():
 
         goed = awnser in possibleAwnsers
         self.vorigeVraag = {'vraag': vraag.displayName, 'onderdeel': vraag.category,
-                            'gegeven': gegeven, 'goed': goed}
+                            'gegeven': gegeven, 'goed': goed, 'id': self.hash(vraag.id)}
         if goed:
             self.score += 1
             self.currentQuestion.timesCorrect += 1

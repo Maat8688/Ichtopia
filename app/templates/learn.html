@@ -330,15 +330,36 @@
         }
       });
 
-      socket.on("questionIncorrect", function () {
+      socket.on("questionIncorrect", function (data) {
+        data = data || {};
+        var goed = data.goed ? displayName(data.goed) : "";
         var text = "Je krijgt hem straks nog een keer.";
         if (sessionMode === 3) {
-          text = "Dat was niet " + currentQuestionName + ". " + text;
+          // Aanwijzen: de naam stond er al; laat zien waar het wel ligt.
+          var geklikt = data.gegeven && data.gegeven !== "een andere plek" ? displayName(data.gegeven) : "";
+          text = (geklikt ? "Je klikte op " + geklikt + ". " : "Dat was niet " + currentQuestionName + ". ")
+            + currentQuestionName + " licht nu groen op. " + text;
+          toonGoedePlek(data.goedId);
+        } else if (goed) {
+          text = (lastAnswer ? "Dit is niet " + lastAnswer + ", maar " : "Dit is ") + goed + ". " + text;
         } else if (lastAnswer) {
           text = "Dit is niet " + lastAnswer + ". " + text;
         }
         showFeedback(text, false);
       });
+
+      // Bij aanwijzen de goede plek even laten oplichten.
+      var goedTimer = null;
+      function toonGoedePlek(id) {
+        document.querySelectorAll("#questions > g.toon-goed").forEach(function (g) {
+          g.classList.remove("toon-goed");
+        });
+        var plek = id ? document.getElementById(id) : null;
+        if (!plek) return;
+        plek.classList.add("toon-goed");
+        clearTimeout(goedTimer);
+        goedTimer = setTimeout(function () { plek.classList.remove("toon-goed"); }, 2500);
+      }
 
       // XP onder de uitslag; alleen als je ingelogd bent (anders is xp null).
       function toonXp(xp, prefix) {

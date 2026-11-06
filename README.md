@@ -309,6 +309,7 @@ python tests/test_beheer.py      # /beheer: hernoemen, verwijderen, woorden blok
 python tests/test_privacy.py     # privacypagina, eigen account weg, niets van buiten
 python tests/test_meldingen.py   # "Klopt dit niet?", het meldformulier en /beheer/meldingen
 python tests/test_voortgang.py   # "x van y gekend" op de startpagina
+python tests/test_goede_antwoord.py  # na een fout: het goede antwoord
 python tests/test_migraties.py   # upgrade op een oude en op een verse database
 python tests/test_security.py    # sessiegrenzen, rem, csrf, X-Forwarded-For
 python tests/test_kaart.py       # kaarten inlezen: land blijft land

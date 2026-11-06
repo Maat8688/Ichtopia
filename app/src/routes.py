@@ -185,8 +185,12 @@ def setupSockets(socketio: SocketIO):
             # emit('updateMap', {'questionId': questionId, 'status': 'correct'})
             emit('setMapState', session.getMapState())
         else:
-            emit('questionIncorrect')
-            # emit('updateMap', {'questionId': questionId, 'status': 'incorrect'})
+            # Het goede antwoord meteen laten zien: zonder dat dachten leerlingen
+            # vaak dat het aan hun spelling lag, terwijl ze een andere plek noemden.
+            vorige = session.vorigeVraag or {}
+            emit('questionIncorrect', {'goed': vorige.get('vraag'),
+                                       'gegeven': vorige.get('gegeven'),
+                                       'goedId': vorige.get('id')})
             emit('setMapState', session.getMapState())
 
         emit('setProgressBar', session.getProgresBar())

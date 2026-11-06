@@ -461,6 +461,19 @@
     stroke: var(--pen);
   }
 
+  /* Na een fout bij aanwijzen: hier lag het wel. Gaat vanzelf weer uit. */
+  #questions > g.toon-goed,
+  #questions > g.toon-goed[state] {
+    fill: var(--bol);
+    fill-opacity: 1;
+    stroke: var(--bol-donker);
+    stroke-width: 1.4;
+  }
+
+  #questions > g.toon-goed > path {
+    vector-effect: non-scaling-stroke;
+  }
+
   /* Met het toetsenbord aanwijzen: laat zien waar je bent. */
   #questions > g:focus {
     outline: none;
