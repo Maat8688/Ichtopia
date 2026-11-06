@@ -279,7 +279,7 @@ meldingen per IP-adres per tien minuten (alleen in het geheugen).
 
 `/privacy` legt in gewone taal uit wat de site bewaart; elke pagina linkt
 ernaar in de voet. Iedereen kan zijn eigen account verwijderen onderaan
-Mijn account (met het wachtwoord ter controle). Het lettertype (Lexend, SIL
+Mijn account (met het wachtwoord ter controle). Het lettertype (Nunito, SIL
 Open Font License) en socket.io staan in `static/`, zodat browsers van
 leerlingen niets bij Google of een CDN ophalen. Pas de privacypagina aan als
 er iets verandert in wat de site bijhoudt.

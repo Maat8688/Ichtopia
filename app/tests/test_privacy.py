@@ -36,7 +36,7 @@ for pad in glob.glob('templates/**/*.html', recursive=True) + glob.glob('static/
             continue
         extern.append(f'{pad}: {url}')
 check('geen lettertypes of scripts van andere sites', not extern, extern[:5])
-check('het lettertype staat er zelf', gast.get('/static/fonts/lexend-latin.woff2').status_code == 200)
+check('het lettertype staat er zelf', gast.get('/static/fonts/nunito-latin.woff2').status_code == 200)
 check('socket.io staat er zelf', gast.get('/static/js/vendor/socket.io-4.0.0.min.js').status_code == 200)
 
 # --- Je eigen account verwijderen -----------------------------------------
